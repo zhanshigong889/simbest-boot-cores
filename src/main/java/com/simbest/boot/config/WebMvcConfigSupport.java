@@ -53,6 +53,41 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
         registry.addConverter(new StringToDateConverter());
     }
 
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        VersionResourceResolver versionResourceResolver = new VersionResourceResolver()
+//                .addVersionStrategy(new ContentVersionStrategy(), "/**");
+//
+//        registry.addResourceHandler("swagger-ui.html")
+//                .addResourceLocations("classpath:/META-INF/resources/");
+//        registry.addResourceHandler("/webjars*")
+//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+//
+//        registry.addResourceHandler(
+//                "/webjars/**",
+//                "/img/**",
+//                "/images/**",
+//                "/css/**",
+//                "/js/**",
+//                "/fonts/**",
+//                "/html/**",
+//                "/favicon.ico")
+//                .addResourceLocations(
+//                        "classpath:/META-INF/resources/webjars/",
+//                        "classpath:/static/img/",
+//                        "classpath:/static/images/",
+//                        "classpath:/static/css/",
+//                        "classpath:/static/js/",
+//                        "classpath:/static/fonts/",
+//                        "classpath:/static/html/",
+//                        "classpath:/static/**")
+//                .setCachePeriod(-1) /* no cache */
+//                .resourceChain(true)
+//                .addResolver(versionResourceResolver);
+//
+//        super.addResourceHandlers(registry);
+//    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         VersionResourceResolver versionResourceResolver = new VersionResourceResolver()
@@ -60,30 +95,28 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
 
         registry.addResourceHandler("swagger-ui.html")
                 .addResourceLocations("classpath:/META-INF/resources/");
+
         registry.addResourceHandler("/webjars*")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
 
-        registry.addResourceHandler(
-                "/webjars/**",
-                "/img/**",
-                "/images/**",
-                "/css/**",
-                "/js/**",
-                "/fonts/**",
-                "/html/**",
-                "/favicon.ico")
-                .addResourceLocations(
-                        "classpath:/META-INF/resources/webjars/",
-                        "classpath:/static/img/",
-                        "classpath:/static/images/",
-                        "classpath:/static/css/",
-                        "classpath:/static/js/",
-                        "classpath:/static/fonts/",
-                        "classpath:/static/html/",
-                        "classpath:/static/**")
-                .setCachePeriod(-1) /* no cache */
-                .resourceChain(true)
-                .addResolver(versionResourceResolver);
+        registry.addResourceHandler("/css/**").addResourceLocations("classpath:/static/css/")
+                .setCachePeriod(-1).resourceChain(true).addResolver(versionResourceResolver);
+
+        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/")
+                .setCachePeriod(-1).resourceChain(true).addResolver(versionResourceResolver);
+
+        registry.addResourceHandler("/html/**").addResourceLocations("classpath:/static/html/")
+                .setCachePeriod(-1).resourceChain(true).addResolver(versionResourceResolver);
+
+        registry.addResourceHandler("/fonts/**").addResourceLocations("classpath:/static/fonts/")
+                .setCachePeriod(-1).resourceChain(true).addResolver(versionResourceResolver);
+
+        registry.addResourceHandler("/img/**", "/images/**", "/favicon.ico")
+                .addResourceLocations("classpath:/static/img/", "classpath:/static/images/")
+                .setCachePeriod(-1).resourceChain(true).addResolver(versionResourceResolver);
+
+        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/", "classpath:/public/")
+                .setCachePeriod(-1).resourceChain(true).addResolver(versionResourceResolver);
 
         super.addResourceHandlers(registry);
     }

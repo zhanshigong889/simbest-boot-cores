@@ -23,9 +23,12 @@ public class ApplicationConstants {
     public static final String Windows = "Windows";
 
     public static final String PACKAGE_NAME = "com.simbest.boot";
-    public static final String HOME_PAGE = "/";
+    public static final String ROOT_PAGE = "/";
+    public static final String WELCOME_PAGE = "/welcome";
     public static final String LOGIN_PAGE = "/login";
     public static final String LOGOUT_PAGE = "/logout";
+    public static final String ERROR_PAGE = "/error";
+    public static final String HOME_PAGE = "/home"; //自动跳转至index，需要session
     public static final String UUMS_LOGIN_PAGE = "/uumslogin";
     public static final String CAS_LOGIN_PAGE = "/caslogin/cas";
     public static final String CAS_LOGOUT_PAGE = "/logout/cas";

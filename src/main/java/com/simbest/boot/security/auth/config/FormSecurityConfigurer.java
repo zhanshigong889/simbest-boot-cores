@@ -104,12 +104,14 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 "/webjars/**",
                 "/favicon.ico",
                 "/**/*.html",
+                "/**/*.htm",
                 "/**/*.css",
+                "/**/*.js",
+                "/**/*.txt",
                 "/**/*.eot",
                 "/**/*.svg",
                 "/**/*.ttf",
-                "/**/*.woff",
-                "/**/*.js"
+                "/**/*.woff"
         );
     }
 
@@ -128,7 +130,8 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(ssoAuthenticationFilter(), UumsAuthenticationFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .antMatchers("/error", "/login", "/logout").permitAll()  // 都可以访问
+                .antMatchers(ApplicationConstants.ROOT_PAGE, ApplicationConstants.WELCOME_PAGE, ApplicationConstants.ERROR_PAGE,
+                        ApplicationConstants.LOGIN_PAGE, ApplicationConstants.LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
                 .antMatchers("/h2-console/**", "/html/**").permitAll()  // 都可以访问
                 .antMatchers("/httpauth/**", "/**/anonymous/**", "/services/**", "/wx/**").permitAll()  // 都可以访问
                 .antMatchers("/action/**").hasRole("USER")   // 需要相应的角色才能访问
@@ -208,10 +211,6 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-//
-//    @Bean
-//    public SessionRegistry getSessionRegistry() {
-//        return new SessionRegistryImpl();
-//    }
+
 
 }

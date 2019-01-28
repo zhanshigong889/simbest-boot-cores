@@ -1,12 +1,15 @@
 package com.simbest.boot.security.auth.controller;
 
 import com.simbest.boot.base.web.response.JsonResponse;
+import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.security.SecurityUtils;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,46 +28,39 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class IndexController {
 
-    /**
-     * @return /
-     */
-    @RequestMapping(value = {"/", "/sso"}, method = {RequestMethod.POST, RequestMethod.GET})
+    @ApiOperation(value = "匿名访问首页", notes = "互联网应用为主站点页面，企业应用为登录页面，调整以下welcome模板页面")
+    @RequestMapping(value = {"/"}, method = {RequestMethod.POST, RequestMethod.GET})
     public String root(HttpServletRequest request) {
+        return "redirect:/welcome";
+    }
+
+    @ApiOperation(value = "匿名访问首页", notes = "互联网应用welcome为主站点页面，企业应用welcome为登录页面")
+    @GetMapping("/welcome")
+    public String welcome() {
+        return ApplicationConstants.WELCOME_PAGE;
+    }
+
+    @ApiOperation(value = "需要SESSION信息的后台首页", notes = "支持SSO单点登录")
+    @RequestMapping(value = {"/home", "/sso"}, method = {RequestMethod.POST, RequestMethod.GET})
+    public String home(HttpServletRequest request) {
         return "redirect:/index";
     }
 
+    @ApiOperation(value = "需要SESSION信息的后台首页")
     @RequestMapping(value = "/index", method = {RequestMethod.POST, RequestMethod.GET})
     public ModelAndView index(Model indexModel) {
         IUser iuser = SecurityUtils.getCurrentUser();
         indexModel.addAttribute("iuser", iuser);
-        //String json = JacksonUtils.obj2json(iuser);
         return new ModelAndView("index", "indexModel", indexModel);
     }
 
+    @ApiOperation(value = "获取当前登陆人信息")
     @PostMapping("/getCurrentUser")
     @ResponseBody
     public JsonResponse getCurrentUser() {
         IUser iuser = SecurityUtils.getCurrentUser();
         return JsonResponse.success(iuser);
     }
-
-//    /**
-//     * @return 403
-//     */
-//    @RequestMapping(value = "/403", method = {RequestMethod.POST, RequestMethod.GET})
-//    public String accesssDenied(HttpServletRequest request, HttpServletResponse response) {
-//        log.error(request.getRequestURL().toString());
-//        return "403";
-//    }
-
-//    /**
-//     * @return error
-//     */
-//    @RequestMapping(value = "/error", method = {RequestMethod.POST, RequestMethod.GET})
-//    public String error(HttpServletRequest request, HttpServletResponse response) {
-//        log.error(request.getRequestURL().toString());
-//        return "err";
-//    }
 
 
 }
