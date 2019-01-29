@@ -8,6 +8,7 @@ import com.simbest.boot.security.IUser;
 import com.simbest.boot.sys.model.SysLogLogin;
 import com.simbest.boot.sys.service.ISysLogLoginService;
 import com.simbest.boot.util.DateUtil;
+import com.simbest.boot.util.server.HostUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +52,12 @@ public class SuccessLoginHandler implements AuthenticationSuccessHandler {
                     .loginType(0)  //用户名登录方式
                     .loginTime(DateUtil.getCurrent())
                     .isSuccess(true)
+                    .ip(HostUtil.getClientIpAddress(request))
                     .trueName(iUser.getTruename())
                     .belongOrgName(iUser.getBelongOrgName())
                     .build();
             if(authentication.getDetails() instanceof WebAuthenticationDetails){
                 WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
-                logLogin.setIp(details.getRemoteAddress());
                 logLogin.setSessionid(details.getSessionId());
             }
             service.insert(logLogin);
