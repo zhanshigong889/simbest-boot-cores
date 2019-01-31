@@ -9,13 +9,10 @@ import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.model.SysDict;
 import com.simbest.boot.sys.model.SysDictValue;
-import com.simbest.boot.sys.model.SysLogLogin;
 import com.simbest.boot.sys.service.ISysDictService;
 import com.simbest.boot.sys.service.ISysDictValueService;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
-import com.simbest.boot.util.security.LoginUtils;
-import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -36,9 +33,6 @@ import java.util.Date;
 public class RedisIdGenerator {
 
     public static int DEFAULT_FORMAT_ADD_LENGTH = 3;
-
-    @Autowired
-    private LoginUtils loginUtils;
 
     @Autowired
     private ISysDictService dictService;
@@ -82,8 +76,6 @@ public class RedisIdGenerator {
     private Long incrId(String cacheName, String prefix, int length) {
         String orderId = null;
         String rediskey = cacheName.concat(ApplicationConstants.COLON).concat(prefix);
-        //使用后台管理员进行自动登录
-        loginUtils.adminLogin();
         Specification<SysDict> dictCondition = Specifications.<SysDict>and()
                 .eq("dictType", "genCode")
                 .build();

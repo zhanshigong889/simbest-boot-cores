@@ -94,6 +94,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/resources/**");
         web.ignoring().antMatchers("/h2-console/**");
         web.ignoring().antMatchers("/captcha/**");
+        web.ignoring().antMatchers("/wssocket/**","/wstopic/**","/wsqueue/**","/wsclient/**");
         //allow Swagger URL to be accessed without authentication
         web.ignoring().antMatchers("/v2/api-docs", //swagger api json
                 "/swagger-resources/configuration/ui", //用来获取支持的动作

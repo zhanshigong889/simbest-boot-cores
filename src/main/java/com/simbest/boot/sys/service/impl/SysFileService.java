@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用途：统一系统文件管理逻辑层
@@ -74,7 +75,6 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    @Transactional
     public <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName) {
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
         if (sysFile != null) {
@@ -85,6 +85,26 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 List<T> listData = importUtil.importExcel(sheetName, new FileInputStream(tempFile));
                 UploadFileResponse<T> uploadFileResponse = new UploadFileResponse<>();
                 uploadFileResponse.setListData(listData);
+                uploadFileResponse.setSysFiles(Arrays.asList(sysFile));
+                return uploadFileResponse;
+            } catch (IOException e) {
+                Exceptions.printException(e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz) {
+        SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
+        if (sysFile != null) {
+            ExcelUtil<T> importUtil = new ExcelUtil<>(clazz);
+            File tempFile = AppFileUtil.createTempFile();
+            try {
+                multipartFile.transferTo(tempFile);
+                Map<String, List<T>> mapData = importUtil.importExcel(new FileInputStream(tempFile));
+                UploadFileResponse<T> uploadFileResponse = new UploadFileResponse<>();
+                uploadFileResponse.setMapData(mapData);
                 uploadFileResponse.setSysFiles(Arrays.asList(sysFile));
                 return uploadFileResponse;
             } catch (IOException e) {

@@ -178,30 +178,29 @@ public class SysFileController extends LogicController<SysFile, String> {
         return JsonResponse.defaultSuccessResponse();
     }
 
-    /**
-     * 涉及到具体对象的操作，所以不直接暴露接口
-     *
-     * @param uploadfile
-     * @param pmInsType
-     * @param pmInsId
-     * @param pmInsTypePart
-     * @param clazz
-     * @param sheetName
-     * @param <T>
-     * @throws IOException
-     * @rn
-     */
-    private <T> JsonResponse importExcel(MultipartFile uploadfile,
-                                         String pmInsType,
-                                         String pmInsId, //起草阶段上传文件，可不填写业务单据ID
-                                         String pmInsTypePart,
-                                         Class<T> clazz, String sheetName) throws IOException {
-        UploadFileResponse uploadFileResponse = fileService.importExcel(uploadfile, pmInsType, pmInsId, pmInsTypePart, clazz, sheetName);
-        if (null != uploadFileResponse) {
-            return JsonResponse.success(uploadFileResponse);
-        } else {
-            return JsonResponse.defaultErrorResponse();
-        }
-    }
+//    /**
+//     * 涉及到具体对象的操作，所以不直接暴露接口
+//     *
+//     * @param uploadfile
+//     * @param pmInsType
+//     * @param pmInsId
+//     * @param pmInsTypePart
+//     * @param clazz
+//     * @param <T>
+//     * @throws IOException
+//     * @rn
+//     */
+//    private <T> JsonResponse importExcel(MultipartFile uploadfile,
+//                                         String pmInsType,
+//                                         String pmInsId, //起草阶段上传文件，可不填写业务单据ID
+//                                         String pmInsTypePart,
+//                                         Class<T> clazz) throws IOException {
+//        UploadFileResponse uploadFileResponse = fileService.importExcel(uploadfile, pmInsType, pmInsId, pmInsTypePart, clazz);
+//        if (null != uploadFileResponse) {
+//            return JsonResponse.success(uploadFileResponse);
+//        } else {
+//            return JsonResponse.defaultErrorResponse();
+//        }
+//    }
 
 }

@@ -4,6 +4,7 @@
 package com.simbest.boot.util.office;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.simbest.boot.base.annotations.ExcelVOAttribute;
 import com.simbest.boot.base.exception.Exceptions;
 
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -38,6 +40,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.google.common.collect.Lists;
+import org.springframework.util.Assert;
 
 /**
  * 用途：Excel导入导出工具类
@@ -158,21 +161,50 @@ public class ExcelUtil<T> {
         return list;
     }
 
-    /*excel2003*/
+    // 导入Excel文件，支持多个sheet页
+    public Map<String,List<T>> importExcel(InputStream input) {
+        Assert.notNull(input, "导入的Excel文件InputStream不能为空！");
+        Map<String,List<T>> retMap = Maps.newHashMap();
+        try {
+            HSSFWorkbook workbook = new HSSFWorkbook(input);
+            int sheetNumber = workbook.getNumberOfSheets();
+            for(int i=0; i<sheetNumber; i++){
+                HSSFSheet sheet = workbook.getSheetAt(i);
+                String sheetName = sheet.getSheetName();
+                List<T> list = importExcel(workbook, sheet);
+                retMap.put(sheetName, list);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return retMap;
+    }
+
+    //导入指定sheet页
     public List<T> importExcel(String sheetName, InputStream input) {
+        Assert.notNull(input, "导入的Excel文件InputStream不能为空！");
+        HSSFWorkbook workbook = null;
+        HSSFSheet sheet = null;
+        try {
+            workbook = new HSSFWorkbook(input);
+            sheet = workbook.getSheet(sheetName);
+            if (StringUtils.isEmpty(sheetName)) {
+                sheet = workbook.getSheet(sheetName);// 如果指定sheet名,则取指定sheet中的内容.
+            } else{
+                sheet = workbook.getSheetAt(0); // 如果传入的sheet名不存在则默认指向第1个sheet.
+            }
+        } catch (Exception e) {
+            Exceptions.printException(e);
+        }
+        return importExcel(workbook, sheet);
+    }
+
+    /*excel2003*/
+    private List<T> importExcel(HSSFWorkbook workbook, HSSFSheet sheet) {
         int maxCol = 0;
         List<T> list = Lists.newArrayList();
         try {
-            HSSFWorkbook workbook = new HSSFWorkbook(input);
-            HSSFSheet sheet = workbook.getSheet(sheetName);
-            if (!sheetName.trim().equals("")) {
-                sheet = workbook.getSheet(sheetName);// 如果指定sheet名,则取指定sheet中的内容.
-            }
-            if (sheet == null) {
-                sheet = workbook.getSheetAt(0); // 如果传入的sheet名不存在则默认指向第1个sheet.
-            }
             int rows = sheet.getPhysicalNumberOfRows();
-
             if (rows > 0) {// 有数据时才处理
                 // Field[] allFields = clazz.getDeclaredFields();// 得到类的所有field.
                 Collection<Field> allFields = getMappedFiled(clazz, null, null);
@@ -240,8 +272,6 @@ public class ExcelUtil<T> {
                 }
             }
 
-        } catch (IOException e) {
-            Exceptions.printException(e);;
         } catch (InstantiationException e) {
             Exceptions.printException(e);;
         } catch (IllegalAccessException e) {
@@ -251,6 +281,101 @@ public class ExcelUtil<T> {
         }
         return list;
     }
+
+
+//    /*excel2003*/
+//    public List<T> importExcel(String sheetName, InputStream input) {
+//        int maxCol = 0;
+//        List<T> list = Lists.newArrayList();
+//        try {
+//            HSSFWorkbook workbook = new HSSFWorkbook(input);
+//            HSSFSheet sheet = workbook.getSheet(sheetName);
+//            if (!sheetName.trim().equals("")) {
+//                sheet = workbook.getSheet(sheetName);// 如果指定sheet名,则取指定sheet中的内容.
+//            }
+//            if (sheet == null) {
+//                sheet = workbook.getSheetAt(0); // 如果传入的sheet名不存在则默认指向第1个sheet.
+//            }
+//            int rows = sheet.getPhysicalNumberOfRows();
+//
+//            if (rows > 0) {// 有数据时才处理
+//                // Field[] allFields = clazz.getDeclaredFields();// 得到类的所有field.
+//                Collection<Field> allFields = getMappedFiled(clazz, null, null);
+//
+//                Map<Integer, Field> fieldsMap = new HashMap<Integer, Field>();// 定义一个map用于存放列的序号和field.
+//                for (Field field : allFields) {
+//                    // 将有注解的field存放到map中.
+//                    if (field.isAnnotationPresent(ExcelVOAttribute.class)) {
+//                        ExcelVOAttribute attr = field
+//                                .getAnnotation(ExcelVOAttribute.class);
+//                        int col = getExcelCol(attr.column());// 获得列号
+//                        maxCol = Math.max(col, maxCol);
+//                        // System.out.println(col + "====" + field.getName());
+//                        field.setAccessible(true);// 设置类的私有字段属性可访问.
+//                        fieldsMap.put(col, field);
+//                    }
+//                }
+//                for (int i = 1; i < rows; i++) {// 从第2行开始取数据,默认第一行是表头.
+//                    HSSFRow row = sheet.getRow(i);
+//                    // int cellNum = row.getPhysicalNumberOfCells();
+//                    // int cellNum = row.getLastCellNum();
+//                    int cellNum = maxCol;
+//                    T entity = null;
+//                    for (int j = 0; j <= cellNum; j++) {
+//                        HSSFCell cell = row.getCell(j);
+//                        if (cell == null) {
+//                            continue;
+//                        }
+//                        String c = getExcelCellValue(cell);
+//                        entity = (entity == null ? clazz.newInstance() : entity);// 如果不存在实例则新建.
+//                        Field field = fieldsMap.get(j);// 从map中得到对应列的field.
+//                        if (field == null) {
+//                            continue;
+//                        }
+//                        // 取得类型,并根据对象类型设置值.
+//                        Class fieldType = field.getType();
+//                        if (String.class == fieldType) {
+//                            field.set(entity, String.valueOf(c));
+//                        } else if ((Integer.TYPE == fieldType)
+//                                || (Integer.class == fieldType)) {
+//                            field.set(entity, Integer.parseInt(c));
+//                        } else if ((Long.TYPE == fieldType)
+//                                || (Long.class == fieldType)) {
+//                            field.set(entity, Long.valueOf(c));
+//                        } else if ((Float.TYPE == fieldType)
+//                                || (Float.class == fieldType)) {
+//                            field.set(entity, Float.valueOf(c));
+//                        } else if ((Short.TYPE == fieldType)
+//                                || (Short.class == fieldType)) {
+//                            field.set(entity, Short.valueOf(c));
+//                        } else if ((Double.TYPE == fieldType)
+//                                || (Double.class == fieldType)) {
+//                            field.set(entity, Double.valueOf(c));
+//                        } else if (Character.TYPE == fieldType) {
+//                            if ((c != null) && (c.length() > 0)) {
+//                                field.set(entity,
+//                                        Character.valueOf(c.charAt(0)));
+//                            }
+//                        }
+//
+//                    }
+//                    if (entity != null) {
+//                        list.add(entity);
+//                    }
+//                }
+//            }
+//
+//        } catch (IOException e) {
+//            Exceptions.printException(e);;
+//        } catch (InstantiationException e) {
+//            Exceptions.printException(e);;
+//        } catch (IllegalAccessException e) {
+//            Exceptions.printException(e);;
+//        } catch (IllegalArgumentException e) {
+//            Exceptions.printException(e);;
+//        }
+//        return list;
+//    }
 
     public static String getExcelCellValue(Cell cell) {
         DataFormatter df = new DataFormatter();

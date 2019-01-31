@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用途：返回上传文件响应对象
@@ -19,8 +20,9 @@ import java.util.List;
 @NoArgsConstructor
 public class UploadFileResponse<T> {
 
-    List<SysFile> sysFiles;
+    List<SysFile> sysFiles; //数据库逻辑文件
 
-    List<T> listData;
+    List<T> listData; //导入数据，适合单个sheet页
 
+    Map<String, List<T>> mapData; //导入数据，适合多个sheet页
 }

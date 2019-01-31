@@ -37,17 +37,28 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
     List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart);
 
     /**
-     * 导入Excel文件
+     * 导入Excel文件--指定某个sheet页
      * @param multipartFile 上传文件
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
      * @param clazz 导入对象类
-     * @param sheetName 导入sheet页
      * @param <T>
      * @return
      */
     <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName);
+
+    /**
+     * 导入Excel文件--支持多个sheet页
+     * @param multipartFile
+     * @param pmInsType
+     * @param pmInsId
+     * @param pmInsTypePart
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz);
 
     /**
      * 通过SysFile的ID获取实际文件
