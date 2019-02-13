@@ -15,16 +15,16 @@ import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.security.auth.provider.sso.token.UumsAuthentication;
 import com.simbest.boot.security.auth.provider.sso.token.UumsAuthenticationCredentials;
 import com.simbest.boot.util.json.JacksonUtils;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.stereotype.Component;
 
 
@@ -38,14 +38,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class UumsHttpValidationAuthenticationProvider implements AuthenticationProvider {
 
+    private final static String LOGTAG = "UUMS登录认证器";
+
     private final static String UUMS_URL = "/httpauth/validate";
 
     @Autowired
     private AppConfig config;
 
-    @Setter
-    @Getter
-    protected boolean hideUserNotFoundExceptions = false;
+    private UserDetailsChecker preAuthenticationChecks = new AccountStatusUserDetailsChecker();
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -61,29 +61,32 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                         .param(AuthoritiesConstants.SSO_API_APP_CODE, uumsCredentials.getAppcode())
                         .asBean(JsonResponse.class);
                 if(response.getErrcode().equals(ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP)){
-                    log.error("User {} try to login {} failed, because uums return error with: {}", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
+                    log.error(LOGTAG + "认证失败User {} try to login {} failed, because uums return error with: {}", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
                     throw new
                             AccesssAppDeniedException(ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
                 }else {
                     String userJson = JacksonUtils.obj2json(response.getData());
                     authUser = JacksonUtils.json2obj(userJson, SimpleUser.class);
-                    UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(authUser,
+                    preAuthenticationChecks.check(authUser);
+                    UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(authUser,
                             authUser.getPassword(), authUser.getAuthorities());
-                    return token;
+                    result.setDetails(authentication.getDetails());
+                    log.info(LOGTAG + "认证成功 User {} login {}", principal, uumsCredentials.getAppcode());
+                    return result;
                 }
             }catch (HttpClientException e){
-                log.error("User {} try to login failed, because catch a http exception!", principal);
+                log.error(LOGTAG + "认证失败User {} try to login failed, because catch a http exception!", principal);
                 throw new
-                        BadCredentialsException(principal + " authenticate failed.");
+                        BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }catch (Exception e){
-                log.error("User {} try to login failed, because catch an unknow exception!", principal);
+                log.error(LOGTAG + "认证失败User {} try to login failed, because catch an unknow exception!", principal);
                 throw new
-                        BadCredentialsException(principal + " authenticate failed.");
+                        BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
         } else {
-            log.error("User {} login with {} failed, because principal or credentials is null!", principal, credentials);
+            log.error(LOGTAG + "认证失败User {} login with {} failed, because principal or credentials is null!", principal, credentials);
             throw new
-                    BadCredentialsException(principal + " authenticate failed.");
+                    BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
         }
     }
 

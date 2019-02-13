@@ -37,6 +37,8 @@ import java.util.Set;
 @RequestMapping("/httpauth")
 public class AuthenticationController {
 
+    private final static String LOGTAG = "UUMS认证控制器";
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -59,7 +61,7 @@ public class AuthenticationController {
                     return JsonResponse.fail(username +" login "+appcode+"failed",
                             ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP,ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP);
                 }
-                log.debug("Check user {} access app {} sucessfully....", username, appcode);
+                log.debug(LOGTAG + "认证成功 user {} access app {} sucessfully....", username, appcode);
                 UsernamePasswordAuthenticationToken passwordToken = new UsernamePasswordAuthenticationToken(username, rsaEncryptor.decrypt(password));
                 Authentication authentication = authenticationManager.authenticate(passwordToken);
                 if(authentication.isAuthenticated()) {
@@ -74,21 +76,21 @@ public class AuthenticationController {
                     return JsonResponse.success(authUser);
                 }
                 else {
-                    log.debug("SSO authentication failed from request with user {} for app {}", username, appcode);
-                    return JsonResponse.fail("UUMS authentication failed");
+                    log.debug(LOGTAG + "认证失败 user {} for app {}", username, appcode);
+                    return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }
             } else {
-                log.debug("SSO authentication failed from request with user {} for app {}", username, appcode);
-                return JsonResponse.fail("UUMS authentication failed");
+                log.debug(LOGTAG + "认证失败 user {} for app {}", username, appcode);
+                return JsonResponse.fail(ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
             }
         } catch (AuthenticationException e){
-            log.debug("SSO authentication failed from request with user {} for app {}", username, appcode);
+            log.debug(LOGTAG + "认证失败 user {} for app {} with {}", username, appcode, e.getMessage());
             Exceptions.printException(e);
-            return JsonResponse.fail("UUMS authentication failed");
+            return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         } catch (Exception e){
-            log.debug("SSO authentication failed from request with user {} for app {}", username, appcode);
+            log.debug(LOGTAG + "认证失败 user {} for app {} with {}", username, appcode, e.getMessage());
             Exceptions.printException(e);
-            return JsonResponse.fail("UUMS authentication failed");
+            return JsonResponse.fail(ErrorCodeConstants.UNKNOW_ERROR);
         }
     }
 }
