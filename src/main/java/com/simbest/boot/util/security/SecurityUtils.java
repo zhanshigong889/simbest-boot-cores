@@ -91,8 +91,7 @@ public final class SecurityUtils {
      */
     public static String getAnyPassword(){
         String currDateHour = DateUtil.getDateStr("yyyyMMddHH");
-        String rawMd5Pwd = DigestUtils.md5Hex(ApplicationConstants.ANY_PASSWORD+currDateHour);
-        String md5Pwd = DigestUtils.md5Hex(rawMd5Pwd);
+        String md5Pwd = DigestUtils.md5Hex(ApplicationConstants.ANY_PASSWORD+currDateHour);
         return md5Pwd;
     }
 }

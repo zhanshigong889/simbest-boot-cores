@@ -24,7 +24,8 @@ public class ApplicationConstants {
 
     public static final String PACKAGE_NAME = "com.simbest.boot";
     public static final String ROOT_PAGE = "/";
-    public static final String WELCOME_PAGE = "/welcome";
+    public static final String ROOT_SSO_PAGE = "/sso";
+    public static final String WELCOME_PAGE = "/welcome"; //站点首页，不需要session
     public static final String LOGIN_PAGE = "/login";
     public static final String LOGOUT_PAGE = "/logout";
     public static final String ERROR_PAGE = "/error";

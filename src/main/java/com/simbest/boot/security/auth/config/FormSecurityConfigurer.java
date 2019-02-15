@@ -62,6 +62,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     private SuccessLogoutHandler successLogoutHandler;
 
     @Autowired
+    private SsoSuccessLoginHandler ssoSuccessLoginHandler;
+
+    @Autowired
     private Swagger2CsrfProtection swagger2CsrfProtection;
 
     @Autowired
@@ -193,7 +196,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationManager(authenticationManagerBean());
         filter.setSsoAuthenticationRegister(ssoAuthenticationRegister);
         // 不跳回首页
-        filter.setAuthenticationSuccessHandler(new SsoSuccessLoginHandler());
+        filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
         //跳至登陆页，但不作任何提醒
         filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_PAGE));
         return filter;

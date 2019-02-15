@@ -4,19 +4,16 @@
 package com.simbest.boot.security.auth.handle;
 
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IUser;
-import com.simbest.boot.sys.model.SysLogLogin;
-import com.simbest.boot.sys.service.ISysLogLoginService;
-import com.simbest.boot.util.DateUtil;
-import com.simbest.boot.util.server.HostUtil;
+import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.security.LoginUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
@@ -35,32 +32,22 @@ import java.io.IOException;
 public class SuccessLoginHandler implements AuthenticationSuccessHandler {
 
     @Autowired
-    private ISysLogLoginService service;
+    private LoginUtils loginUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        //MemoryAuthentication: org.springframework.security.core.userdetails.User
-        //UsernamePasswordAuthenticationToken: com.simbest.boot.security.auth.model.SysUserInfo
-        log.debug("Logged In User " + SecurityContextHolder.getContext() .getAuthentication().getPrincipal());
+
+        log.debug("用户【{}】登录成功", SecurityContextHolder.getContext() .getAuthentication().getPrincipal());
 
         if(authentication.getPrincipal() instanceof IUser){
             IUser iUser = (IUser)authentication.getPrincipal();
-            SysLogLogin logLogin = SysLogLogin.builder()
-                    .account(iUser.getUsername())
-                    .loginEntry(0) //PC登录入口
-                    .loginType(0)  //用户名登录方式
-                    .loginTime(DateUtil.getCurrent())
-                    .isSuccess(true)
-                    .ip(HostUtil.getClientIpAddress(request))
-                    .trueName(iUser.getTruename())
-                    .belongOrgName(iUser.getBelongOrgName())
-                    .build();
-            if(authentication.getDetails() instanceof WebAuthenticationDetails){
-                WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
-                logLogin.setSessionid(details.getSessionId());
-            }
-            service.insert(logLogin);
+            //登录成功后，立即清除失败缓存，不再等待错误缓存的到期时间
+            String key = AuthoritiesConstants.LOGIN_FAILED_KEY + iUser.getUsername();
+            Boolean value = RedisUtil.delete(key);
+
+            //记录登录日志
+            loginUtils.recordLoginLog(request, authentication);
         }
 
         response.setStatus(HttpServletResponse.SC_OK);

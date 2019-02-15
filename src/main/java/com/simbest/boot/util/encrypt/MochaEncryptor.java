@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
+
 /**
  * 用途：摩卡加密工具类
  * 作者: lishuyi 
@@ -56,6 +58,10 @@ public class MochaEncryptor extends AbstractEncryptor {
         return result;
     }
 
-
+    public static void main(String[] args) throws ParseException {
+        String code = EncryptorUtil.encode("SIMBEST_SSO", "hadmin3");
+        System.out.println(code);
+        System.out.println(EncryptorUtil.decode("SIMBEST_SSO", code, TIMEOUT));
+    }
 
 }

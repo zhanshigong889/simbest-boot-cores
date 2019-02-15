@@ -83,44 +83,45 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
 
-    /**
-     * 登录发生错误计数，每错误一次，即向后再延时等待5分钟
-     * @param request
-     * @param response
-     * @param failed
-     * @throws IOException
-     * @throws ServletException
-     */
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-                                              HttpServletResponse response, AuthenticationException failed)
-            throws IOException, ServletException {
+//    /**
+//     * 登录发生错误计数，每错误一次，即向后再延时等待5分钟
+//     * @param request
+//     * @param response
+//     * @param failed
+//     * @throws IOException
+//     * @throws ServletException
+//     */
+//    @Override
+//    protected void unsuccessfulAuthentication(HttpServletRequest request,
+//                                              HttpServletResponse response, AuthenticationException failed)
+//            throws IOException, ServletException {
+//
+//        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
+//        Integer failedTimes = RedisUtil.getBean(key, Integer.class);
+//        failedTimes = null == failedTimes ? AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES : failedTimes + AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES;
+//        RedisUtil.setBean(key, failedTimes);
+//        RedisUtil.expire(key, AuthoritiesConstants.ATTEMPT_LOGIN_FAILED_WAIT_SECONDS, TimeUnit.SECONDS);
+//
+//        super.unsuccessfulAuthentication(request, response, failed);
+//    }
 
-        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
-        Integer failedTimes = RedisUtil.getBean(key, Integer.class);
-        failedTimes = null == failedTimes ? AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES : failedTimes + AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES;
-        RedisUtil.setBean(key, failedTimes);
-        RedisUtil.expire(key, AuthoritiesConstants.ATTEMPT_LOGIN_FAILED_WAIT_SECONDS, TimeUnit.SECONDS);
-
-        super.unsuccessfulAuthentication(request, response, failed);
-    }
-
-    /**
-     * 登录成功后，立即清除失败缓存，不再等待上述到期时间
-     * @param request
-     * @param response
-     * @param chain
-     * @param authResult
-     * @throws IOException
-     * @throws ServletException
-     */
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request,
-                                            HttpServletResponse response, FilterChain chain, Authentication authResult)
-            throws IOException, ServletException {
-
-        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
-
-        super.successfulAuthentication(request, response, chain, authResult);
-    }
+//    /**
+//     * 登录成功后，立即清除失败缓存，不再等待上述到期时间
+//     * @param request
+//     * @param response
+//     * @param chain
+//     * @param authResult
+//     * @throws IOException
+//     * @throws ServletException
+//     */
+//    @Override
+//    protected void successfulAuthentication(HttpServletRequest request,
+//                                            HttpServletResponse response, FilterChain chain, Authentication authResult)
+//            throws IOException, ServletException {
+//
+//        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
+//        Boolean value = RedisUtil.delete(key);
+//
+//        super.successfulAuthentication(request, response, chain, authResult);
+//    }
 }

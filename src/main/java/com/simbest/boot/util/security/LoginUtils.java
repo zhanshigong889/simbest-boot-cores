@@ -8,16 +8,23 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.provider.sso.token.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.provider.sso.token.UsernamePrincipal;
+import com.simbest.boot.sys.model.SysLogLogin;
+import com.simbest.boot.sys.service.ISysLogLoginService;
+import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.encrypt.Md5Encryptor;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.server.HostUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 
 /**
@@ -25,6 +32,7 @@ import java.security.Principal;
  * 作者: lishuyi
  * 时间: 2018/9/21  10:43
  */
+@Slf4j
 @Component
 public class LoginUtils {
 
@@ -39,6 +47,9 @@ public class LoginUtils {
 
     @Autowired
     protected IAuthService authService;
+
+    @Autowired
+    private ISysLogLoginService loginService;
 
     /**
      * 根据用户名，自动登录
@@ -77,5 +88,27 @@ public class LoginUtils {
         SsoUsernameAuthentication auth = new SsoUsernameAuthentication(iUser, null, iUser.getAuthorities());
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
+    }
+
+    public void recordLoginLog(HttpServletRequest request, Authentication authentication){
+        if(authentication.getPrincipal() instanceof IUser) {
+            IUser iUser = (IUser)authentication.getPrincipal();
+            SysLogLogin logLogin = SysLogLogin.builder()
+                    .account(iUser.getUsername())
+                    .loginEntry(0) //PC登录入口
+                    .loginType(0)  //用户名登录方式
+                    .loginTime(DateUtil.getCurrent())
+                    .isSuccess(true)
+                    .ip(HostUtil.getClientIpAddress(request))
+                    .trueName(iUser.getTruename())
+                    .belongOrgName(iUser.getBelongOrgName())
+                    .build();
+            if (authentication.getDetails() instanceof WebAuthenticationDetails) {
+                WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
+                logLogin.setSessionid(details.getSessionId());
+            }
+            log.debug("记录登录日志RecordLoginLog【{}】", logLogin.toString());
+            loginService.insert(logLogin);
+        }
     }
 }
