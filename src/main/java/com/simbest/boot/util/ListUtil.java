@@ -24,6 +24,10 @@ public final class ListUtil {
 
     /**
      * 获取src和target中的差集
+     *   测试 src = 100万
+     *        target = 1万
+     *   结果用时：191ms
+     *
      * @param src           大集合
      * @param target        小集合（交集）
      * @return
@@ -42,5 +46,4 @@ public final class ListUtil {
         }
         return result;
     }
-
 }
