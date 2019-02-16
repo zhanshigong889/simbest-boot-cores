@@ -23,7 +23,7 @@ public final class ListUtil {
     private ListUtil() {}
 
     /**
-     * 从src中去除target中的交集
+     * 获取src和target中的差集
      * @param src           大集合
      * @param target        小集合（交集）
      * @return
