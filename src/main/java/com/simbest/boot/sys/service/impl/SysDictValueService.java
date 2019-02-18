@@ -1,17 +1,19 @@
 package com.simbest.boot.sys.service.impl;
 
+import com.mzlion.core.lang.Assert;
+import com.simbest.boot.base.repository.CustomDynamicWhere;
 import com.simbest.boot.base.service.impl.LogicService;
 import com.simbest.boot.sys.model.SysDictValue;
 import com.simbest.boot.sys.repository.SysDictValueRepository;
 import com.simbest.boot.sys.service.ISysDictValueService;
+import com.simbest.boot.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +22,12 @@ import java.util.Map;
 public class SysDictValueService extends LogicService<SysDictValue,String> implements ISysDictValueService{
 
     private SysDictValueRepository dictValueRepository;
+
+    @Autowired
+    private CustomDynamicWhere dynamicRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     public SysDictValueService(SysDictValueRepository dictValueRepository) {
@@ -59,18 +67,44 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
      */
     @Override
     public List<SysDictValue> findDictValue (SysDictValue sysDictValue) {
-        if(sysDictValue==null){
-            log.error( "--传来的参数不正确！--" );
-            return null;
-        }
-        List<SysDictValue> sysDictValueList=new ArrayList<>(  );
+        Assert.notNull(sysDictValue, "查询参数不能为空！");
+        List<SysDictValue> sysDictValueList;
         if(sysDictValue.getParentId()!=null){
             sysDictValueList=dictValueRepository.findDictValue(sysDictValue.getDictType(),sysDictValue.getParentId());
-            sysDictValueList.get(0).setIsDefault(true);
-            return sysDictValueList;
+        } else {
+            String selectSQL = "SELECT dv.* from sys_dict d,sys_dict_value dv ";
+            String whereSQL = "WHERE d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 ";
+            String orderBySQL = " order by dv.display_order asc";
+            Map<String, Object> paramMap = ObjectUtil.getEntityPersistentFieldValueExceptId(sysDictValue);
+            for(String param : paramMap.keySet()){
+                if(param.equals("name")){
+                    whereSQL += "AND dv.name=:name ";
+                }
+                if(param.equals("value")){
+                    whereSQL += "AND dv.value=:value ";
+                }
+                if(param.equals("dictType")){
+                    whereSQL += "AND d.dict_type=:dictType ";
+                }
+            }
+            String querySQL = selectSQL+whereSQL+orderBySQL;
+            Query dataQuery = entityManager.createNativeQuery(querySQL, SysDictValue.class);
+            for(String param : paramMap.keySet()){
+                if(param.equals("name")){
+                    dataQuery.setParameter("name", paramMap.get(param));
+                }
+                if(param.equals("value")){
+                    dataQuery.setParameter("value", paramMap.get(param));
+                }
+                if(param.equals("dictType")){
+                    dataQuery.setParameter("dictType", paramMap.get(param));
+                }
+            }
+            sysDictValueList = dataQuery.getResultList();
         }
-        sysDictValueList=dictValueRepository.findDictValue(sysDictValue.getDictType());
-        sysDictValueList.get(0).setIsDefault(true);
+        if(sysDictValueList.size() > 0) {
+            sysDictValueList.get(0).setIsDefault(true);
+        }
         return sysDictValueList;
     }
 
