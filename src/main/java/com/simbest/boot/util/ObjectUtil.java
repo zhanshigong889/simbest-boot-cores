@@ -238,24 +238,4 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
 
         return classes;
     }
-
-    /**
-     * 获取一个对象中属性值为null的属性名字符串数组
-     * @param obj    带值对象
-     * @return
-     */
-    public static String[] getNullPropertyNames(Object obj){
-        Set<String> emptyNames = Sets.newHashSet();
-        final BeanWrapper beanWrapper = new BeanWrapperImpl( obj );
-        PropertyDescriptor[] propertyDescriptors = beanWrapper.getPropertyDescriptors();
-        for ( PropertyDescriptor propertyDescriptor:propertyDescriptors ){
-            Object objValue = beanWrapper.getPropertyValue( propertyDescriptor.getName() );
-            if ( objValue == null ){
-                emptyNames.add( propertyDescriptor.getName() );
-            }
-        }
-        String[] result = new String[emptyNames.size()];
-        return emptyNames.toArray(result);
-
-    }
 }
