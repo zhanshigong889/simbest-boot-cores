@@ -6,7 +6,6 @@ package com.simbest.boot.util;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.simbest.boot.base.annotations.EntityIdPrefix;
-import com.simbest.boot.base.annotations.ExcelVOAttribute;
 import com.simbest.boot.base.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -20,11 +19,7 @@ import javax.persistence.Transient;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 用途： 对象工具类
@@ -242,5 +237,25 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
         }
 
         return classes;
+    }
+
+    /**
+     * 获取一个对象中属性值为null的属性名字符串数组
+     * @param obj    带值对象
+     * @return
+     */
+    public static String[] getNullPropertyNames(Object obj){
+        Set<String> emptyNames = Sets.newHashSet();
+        final BeanWrapper beanWrapper = new BeanWrapperImpl( obj );
+        PropertyDescriptor[] propertyDescriptors = beanWrapper.getPropertyDescriptors();
+        for ( PropertyDescriptor propertyDescriptor:propertyDescriptors ){
+            Object objValue = beanWrapper.getPropertyValue( propertyDescriptor.getName() );
+            if ( objValue == null ){
+                emptyNames.add( propertyDescriptor.getName() );
+            }
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
+
     }
 }
