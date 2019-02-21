@@ -219,8 +219,8 @@ public enum MessageEnum {
      * @param stateNum
      * @return
      */
-    public static String getMessageByName(String preffix,String stateNum){
-	    String stateNumStr = preffix + stateNum;
+    public static String getMessageByName(String prefix,String stateNum){
+	    String stateNumStr = prefix + stateNum;
         for (MessageEnum messageEnum:MessageEnum.values()) {
             if(messageEnum.name().equals( stateNumStr )){
                 return messageEnum.getMessage();
