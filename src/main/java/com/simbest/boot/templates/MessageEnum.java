@@ -219,8 +219,8 @@ public enum MessageEnum {
      * @param stateNum
      * @return
      */
-    public static String getMessageByName(String stateNum){
-	    String stateNumStr = "MT" + stateNum;
+    public static String getMessageByName(String preffix,String stateNum){
+	    String stateNumStr = preffix + stateNum;
         for (MessageEnum messageEnum:MessageEnum.values()) {
             if(messageEnum.name().equals( stateNumStr )){
                 return messageEnum.getMessage();
@@ -252,6 +252,6 @@ public enum MessageEnum {
         System.out.println(MessageEnum.MT000001.getMessage(paramMap));
 		System.out.println(getObjStrForJS());
         System.out.println(MessageEnum.MT000001.getMessage("111"));
-        System.out.println( "000001>>>" + MessageEnum.getMessageByName( "000001" ) );
+        System.out.println( "000001>>>" + MessageEnum.getMessageByName( "W","000001" ) );
     }
 }
