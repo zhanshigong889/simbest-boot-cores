@@ -214,11 +214,25 @@ public enum MessageEnum {
 		return this.getMessage();
 	}
 
+    /**
+     * 根据name获取消息
+     * @param stateNum
+     * @return
+     */
+    public static String getMessageByName(String stateNum){
+	    String stateNumStr = "MT" + stateNum;
+        for (MessageEnum messageEnum:MessageEnum.values()) {
+            if(messageEnum.name().equals( stateNumStr )){
+                return messageEnum.getMessage();
+            }
+        }
+        return null;
+    }
+
 	@Override
 	public String toString() {
 		return this.message;
 	}
-	
 
 	public static void main( String... s) {
 		System.out.println(MessageEnum.MS000000.getMessage());
@@ -237,5 +251,7 @@ public enum MessageEnum {
         paramMap.put("itemSubject", "关于台前分公司拆除楼顶消防水箱的请示");
         System.out.println(MessageEnum.MT000001.getMessage(paramMap));
 		System.out.println(getObjStrForJS());
+        System.out.println(MessageEnum.MT000001.getMessage("111"));
+        System.out.println( "000001>>>" + MessageEnum.getMessageByName( "000001" ) );
     }
 }
