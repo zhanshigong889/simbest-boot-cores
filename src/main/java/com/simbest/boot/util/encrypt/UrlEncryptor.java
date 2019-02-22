@@ -4,6 +4,7 @@
 package com.simbest.boot.util.encrypt;
 
 import com.simbest.boot.base.exception.Exceptions;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -15,8 +16,15 @@ import java.net.URLEncoder;
  * 作者: lishuyi 
  * 时间: 2017/12/29  17:16 
  */
+@Slf4j
 @Component
 public class UrlEncryptor extends AbstractEncryptor {
+
+    public static void main(String[] args) {
+        UrlEncryptor encryptor = new UrlEncryptor();
+        log.debug(encryptor.encrypt("a291c2hhb2d1bw=="));
+        log.debug(encryptor.decrypt(encryptor.encrypt("a291c2hhb2d1bw==")));
+    }
 
     /**
      * 加密，编码默认为UTF-8

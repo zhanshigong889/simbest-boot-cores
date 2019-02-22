@@ -38,7 +38,7 @@ public class BootAppFileReader {
             }
         }
         if(bufferedReader == null){
-            log.error("######################Load classpath file {} error.", filepath);
+            log.error("严重错误：请注意读取配置文件【{}】失败！", filepath);
         }
         return bufferedReader;
     }

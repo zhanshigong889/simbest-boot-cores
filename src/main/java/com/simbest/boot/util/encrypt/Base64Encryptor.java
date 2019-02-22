@@ -17,11 +17,11 @@ import org.apache.commons.codec.binary.Base64;
  * 作者: lishuyi 
  * 时间: 2017/12/28  22:11 
  */
-@Component
 @Slf4j
+@Component
 public class Base64Encryptor extends AbstractEncryptor {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Base64Encryptor encryptor = new Base64Encryptor();
         log.debug(encryptor.encrypt("koushaoguo"));
         log.debug(encryptor.decrypt(encryptor.encrypt("koushaoguo")));

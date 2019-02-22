@@ -4,6 +4,7 @@
 package com.simbest.boot.util.server;
 
 import com.simbest.boot.config.EmbeddedServletConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.annotation.DependsOn;
@@ -11,8 +12,11 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
@@ -21,6 +25,7 @@ import java.util.Enumeration;
  * 作者: lishuyi
  * 时间: 2018/5/12  15:53
  */
+@Slf4j
 @Component
 @DependsOn(value = {"embeddedServletConfiguration"})
 public class HostUtil {
@@ -127,5 +132,31 @@ public class HostUtil {
             ip = request.getRemoteAddr();
         }
         return ip;
+    }
+
+    public static boolean checkTelnet(String ip, int port) {
+        boolean result = false;
+        Socket server = null;
+        try {
+            server = new Socket();
+            InetSocketAddress address = new InetSocketAddress(ip, port);
+            server.connect(address, 5000);
+            result = true;
+        } catch (UnknownHostException e) {
+            log.warn("Telnet 测试主机IP地址无法失败【{}】", ip);
+        } catch (IOException e) {
+            log.warn("Telnet 测试失败IP地址【{}】 端口【{}】", ip, port);
+        } finally {
+            if (server != null)
+                try {
+                    server.close();
+                } catch (IOException e) {
+                }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(checkTelnet("10.87.13.228", 1389));
     }
 }

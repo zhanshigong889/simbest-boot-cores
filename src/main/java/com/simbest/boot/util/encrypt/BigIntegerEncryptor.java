@@ -18,14 +18,14 @@ import java.util.Map;
  */
 @Slf4j
 public class BigIntegerEncryptor {
-//
-//    public static void main(String[] args) {
-//        BigInteger base = new BigInteger("20151231");
-//        String aaa = encryptor(base, DICTIONARY_62);
-//        log.debug(aaa);
-//        log.debug(decryptor(aaa, DICTIONARY_62).toString());
-//        log.debug("-----------------------------------------");
-//    }
+
+    public static void main(String[] args) {
+        BigInteger base = new BigInteger("20151231");
+        String aaa = encryptor(base, DICTIONARY_62);
+        log.debug(aaa);
+        log.debug(decryptor(aaa, DICTIONARY_62).toString());
+        log.debug("-----------------------------------------");
+    }
 
     /**
      * contains hexadecimals 0-F only.

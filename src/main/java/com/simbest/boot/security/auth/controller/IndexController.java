@@ -36,8 +36,8 @@ public class IndexController {
 
     @ApiOperation(value = "匿名访问首页", notes = "互联网应用welcome为主站点页面，企业应用welcome为登录页面")
     @GetMapping("/welcome")
-    public String welcome() {
-        return ApplicationConstants.WELCOME_PAGE;
+    public ModelAndView welcome() {
+        return new ModelAndView("welcome");
     }
 
     @ApiOperation(value = "需要SESSION信息的后台首页", notes = "支持SSO单点登录")
