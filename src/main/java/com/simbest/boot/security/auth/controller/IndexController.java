@@ -1,7 +1,6 @@
 package com.simbest.boot.security.auth.controller;
 
 import com.simbest.boot.base.web.response.JsonResponse;
-import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.security.SecurityUtils;
 import io.swagger.annotations.Api;
@@ -9,11 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +50,7 @@ public class IndexController {
     }
 
     @ApiOperation(value = "获取当前登陆人信息")
-    @PostMapping("/getCurrentUser")
+    @PostMapping(value={"/getCurrentUser","/getCurrentUser/sso"})
     @ResponseBody
     public JsonResponse getCurrentUser() {
         IUser iuser = SecurityUtils.getCurrentUser();

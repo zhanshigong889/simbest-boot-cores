@@ -605,7 +605,8 @@ public class UumsSysUserinfoApi {
      * @return
      */
     public Set<SimplePermission> findPermissionByAppUserNoSession( String username, String appcode) {
-        return findPermissionByAppUserNormal(username, username, appcode);
+        String usernameNew = encryptor.decrypt(username);
+        return findPermissionByAppUserNormal(usernameNew, usernameNew, appcode);
     }
 
     private Set<SimplePermission> findPermissionByAppUserNormal(String loginUser, String username, String appcode){

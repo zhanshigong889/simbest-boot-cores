@@ -321,7 +321,7 @@ public class RsaEncryptor extends AbstractEncryptor {
         rsaEncryptor.loadPublicKey(public_key);
         rsaEncryptor.loadPrivateKey(private_key);
 
-        String source = "hanhailing";
+        String source = "hadmin";
         String code = rsaEncryptor.encrypt(source);
         System.out.println("###########################");
         System.out.println(code);

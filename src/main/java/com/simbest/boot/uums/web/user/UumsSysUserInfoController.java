@@ -340,21 +340,21 @@ public class UumsSysUserInfoController {
     /**
      * 查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal
      * 门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用
-     * @param username
+     * @param loginuser
      * @param appcode
      * @return
      */
     @ApiOperation(value = "查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用。", notes = "查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用。")
     @ApiImplicitParams ({ //
-            @ApiImplicitParam(name = "username", value = "用户名", dataType = "String", //
+            @ApiImplicitParam(name = "loginuser", value = "rsa加密后的用户名", dataType = "String", //
                     paramType = "query"),
             @ApiImplicitParam(name = "appcode", value = "应用编码", dataType = "String", //
                     paramType = "query")
     })
-    @PostMapping("/findPermissionByAppUserNoSession")
-    public JsonResponse findPermissionByAppUserNoSession(@RequestParam(required = false) String username
+    @PostMapping(value = {"/findPermissionByAppUserNoSession","/findPermissionByAppUserNoSession/sso"})
+    public JsonResponse findPermissionByAppUserNoSession(@RequestParam(required = false) String loginuser
             ,@RequestParam(required = false) String appcode ){
-        return JsonResponse.success( uumsSysUserinfoApi.findPermissionByAppUserNoSession(username,appcode));
+        return JsonResponse.success( uumsSysUserinfoApi.findPermissionByAppUserNoSession(loginuser,appcode));
     }
 
     /**
