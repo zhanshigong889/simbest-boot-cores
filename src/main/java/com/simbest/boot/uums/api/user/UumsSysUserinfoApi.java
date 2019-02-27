@@ -17,6 +17,7 @@ import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -605,7 +606,15 @@ public class UumsSysUserinfoApi {
      * @return
      */
     public Set<SimplePermission> findPermissionByAppUserNoSession( String username, String appcode) {
-        String usernameNew = encryptor.decrypt(username);
+        String usernameNew = "";
+        if( !StringUtils.isEmpty( username ) ){
+            int strNumber = username.length();
+            if(strNumber>50){
+                usernameNew = encryptor.decrypt(username);
+            }else{
+                usernameNew = username;
+            }
+        }
         return findPermissionByAppUserNormal(usernameNew, usernameNew, appcode);
     }
 
