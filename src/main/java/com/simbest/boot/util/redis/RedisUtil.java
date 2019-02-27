@@ -448,7 +448,7 @@ public class RedisUtil {
     }
     
 	/**
-	 * 增加(自增长), 负数则为自减
+	 * 增加(自增长)
 	 * 
 	 * @param key
 	 * @param value
@@ -458,15 +458,26 @@ public class RedisUtil {
 		return cacheUtils.redisTemplate.opsForValue().increment(prefix+key, increment);
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public static Double incrByFloat(String key, double increment) {
-		return cacheUtils.redisTemplate.opsForValue().increment(prefix+key, increment);
-	}
+    /**
+     * 减少(自减少)
+     * @param key
+     * @return
+     */
+    public static Long decrBy(String key) {
+        return cacheUtils.cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection ->
+                connection.decr((prefix + key).getBytes()));
+    }
+
+    /**
+     * 减少(自减少)
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public static Long decrBy(String key, long increment) {
+        return cacheUtils.redisTemplate.opsForValue().increment(prefix+key, increment*-1);
+    }
 
 	/**
 	 * 追加到末尾

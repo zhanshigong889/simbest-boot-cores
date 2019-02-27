@@ -9,9 +9,10 @@ import org.redisson.api.RedissonClient;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 用途：Single Instance mode 分布式锁模板
+ * 用途：分布式锁回调接口
+ * 参考：https://layznet.iteye.com/blog/2307179
  * 作者: lishuyi
- * 时间: 2018/6/22  15:07
+ * 时间: 2018/6/22  15:05
  */
 public class SingleDistributedLockTemplate implements DistributedLockTemplate {
 

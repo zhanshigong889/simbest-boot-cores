@@ -6,9 +6,10 @@ package com.simbest.boot.component.distributed.lock;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 用途： 分布式锁操作模板
+ * 用途：分布式锁回调接口
+ * 参考：https://layznet.iteye.com/blog/2307179
  * 作者: lishuyi
- * 时间: 2018/6/22  15:06
+ * 时间: 2018/6/22  15:05
  */
 public interface DistributedLockTemplate {
     /**

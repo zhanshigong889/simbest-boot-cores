@@ -68,7 +68,7 @@ public class AppRuntimeMaster {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void becameMasertIfNotExist() {
         //获取锁
-        DistributedRedisLock.tryLock(ApplicationConstants.MASTER_LOCK);
+        DistributedRedisLock.lock(ApplicationConstants.MASTER_LOCK);
 
         //提取应用主机端口信息
         masterHost = RedisUtil.get(ApplicationConstants.MASTER_HOST);

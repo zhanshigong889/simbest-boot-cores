@@ -9,9 +9,10 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 用途： 创建分布式锁模板实例的工厂Bean
+ * 用途：分布式锁回调接口
+ * 参考：https://layznet.iteye.com/blog/2307179
  * 作者: lishuyi
- * 时间: 2018/6/22  15:09
+ * 时间: 2018/6/22  15:05
  */
 @Slf4j
 public class DistributedLockFactoryBean implements FactoryBean<DistributedLockTemplate> {

@@ -5,6 +5,7 @@ package com.simbest.boot.component.distributed.lock;
 
 /**
  * 用途：分布式锁回调接口
+ * 参考：https://layznet.iteye.com/blog/2307179
  * 作者: lishuyi
  * 时间: 2018/6/22  15:05
  */

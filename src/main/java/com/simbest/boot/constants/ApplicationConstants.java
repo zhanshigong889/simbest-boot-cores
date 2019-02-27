@@ -77,7 +77,8 @@ public class ApplicationConstants {
     public final static String RSA_PUBLIC_KEY_PATH = "certificate/rsa/rsa_public_key.pem";
     public final static String RSA_PRIVATE_KEY_PATH = "certificate/rsa/pkcs8_private_key.pem";
 
-    public final static int REDIS_LOCK_DEFAULT_TIMEOUT   = 60;
+    public final static int REDIS_LOCK_WAIT_TIMEOUT   = 10;
+    public final static int REDIS_LOCK_RELEASE_TIMEOUT   = 60;
     public final static TimeUnit REDIS_LOCK_DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
     public final static String  MASTER_HOST = "master_ip";
     public final static String  MASTER_PORT = "master_port";
