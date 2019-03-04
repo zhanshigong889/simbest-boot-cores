@@ -52,4 +52,13 @@ public class SysDictValue extends LogicModel {
 
     @Column
     private Boolean isDefault;
+
+    @Column(length = 50)
+    private String flag;
+
+    @Column(length = 200)
+    private String spare1;
+
+    @Column(length = 200)
+    private String spare2;
 }

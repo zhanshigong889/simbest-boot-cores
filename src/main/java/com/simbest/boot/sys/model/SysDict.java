@@ -47,4 +47,13 @@ public class SysDict extends LogicModel {
 
     @Column
     private String parentId;
+
+    @Column(length = 50)
+    private String flag;
+
+    @Column(length = 200)
+    private String spare1;
+
+    @Column(length = 200)
+    private String spare2;
 }
