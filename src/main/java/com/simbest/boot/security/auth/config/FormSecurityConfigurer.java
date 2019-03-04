@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -134,6 +135,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(ssoAuthenticationFilter(), UumsAuthenticationFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()//跨域请求会先进行一次options请求
                 .antMatchers(ApplicationConstants.ROOT_PAGE, ApplicationConstants.WELCOME_PAGE, ApplicationConstants.ERROR_PAGE,
                         ApplicationConstants.LOGIN_PAGE, ApplicationConstants.LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
                 .antMatchers("/h2-console/**", "/html/**").permitAll()  // 都可以访问

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.resource.ContentVersionStrategy;
@@ -50,43 +51,21 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
      */
     @Override
     protected void addFormatters(FormatterRegistry registry) {
+        //表单参数转换日期类型
         registry.addConverter(new StringToDateConverter());
     }
 
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        VersionResourceResolver versionResourceResolver = new VersionResourceResolver()
-//                .addVersionStrategy(new ContentVersionStrategy(), "/**");
-//
-//        registry.addResourceHandler("swagger-ui.html")
-//                .addResourceLocations("classpath:/META-INF/resources/");
-//        registry.addResourceHandler("/webjars*")
-//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
-//
-//        registry.addResourceHandler(
-//                "/webjars/**",
-//                "/img/**",
-//                "/images/**",
-//                "/css/**",
-//                "/js/**",
-//                "/fonts/**",
-//                "/html/**",
-//                "/favicon.ico")
-//                .addResourceLocations(
-//                        "classpath:/META-INF/resources/webjars/",
-//                        "classpath:/static/img/",
-//                        "classpath:/static/images/",
-//                        "classpath:/static/css/",
-//                        "classpath:/static/js/",
-//                        "classpath:/static/fonts/",
-//                        "classpath:/static/html/",
-//                        "classpath:/static/**")
-//                .setCachePeriod(-1) /* no cache */
-//                .resourceChain(true)
-//                .addResolver(versionResourceResolver);
-//
-//        super.addResourceHandlers(registry);
-//    }
+    /**
+     * SpringBoot 实现前后端分离的跨域访问（CORS）
+     * http://www.spring4all.com/article/177
+     * @param registry
+     */
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedOrigins("*")
+                .allowedMethods("GET", "HEAD", "POST","PUT", "DELETE", "OPTIONS")
+                .allowCredentials(false).maxAge(3600);
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
