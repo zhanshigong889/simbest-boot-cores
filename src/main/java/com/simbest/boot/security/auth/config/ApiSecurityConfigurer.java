@@ -37,7 +37,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  * 获取token请求（/oauth/token），请求所需参数：client_id、client_secret、grant_type
  * client模式：http://localhost:8080/uums/oauth/token?grant_type=client_credentials&scope=all&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e
  * password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e&username=hadmin&password=d93df540143f68cf337deabc13a055f5
- * 注意：password的添值有两种方式：1、BCrypt加密前的MD5值  2、SecurityUtils万能密码的两次MD5值
+ * 注意：password的添值有两种方式：1、BCrypt加密前的MD5值  2、SecurityUtils万能密码的MD5值
  *
  * http://andaily.com/blog/?p=528 返回格式
  *

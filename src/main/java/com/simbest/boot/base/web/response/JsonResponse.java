@@ -145,4 +145,12 @@ public class JsonResponse {
                 .error(HttpStatus.UNAUTHORIZED.name())
                 .build();
     }
+
+    public static JsonResponse authorized() {
+        return JsonResponse.builder().
+                errcode(HttpStatus.OK.value())
+                .status(HttpStatus.OK.value())
+                .error(HttpStatus.OK.name())
+                .build();
+    }
 }

@@ -3,9 +3,10 @@
  */
 package com.simbest.boot.security.auth.handle;
 
-import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.util.security.LoginUtils;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ import java.io.IOException;
 @Slf4j
 @NoArgsConstructor
 @Component
-public class SuccessLoginHandler implements AuthenticationSuccessHandler {
+public class RestSuccessLoginHandler implements AuthenticationSuccessHandler {
 
     @Autowired
     private LoginUtils loginUtils;
@@ -48,7 +49,8 @@ public class SuccessLoginHandler implements AuthenticationSuccessHandler {
             loginUtils.recordLoginLog(request, authentication);
         }
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        request.getRequestDispatcher(ApplicationConstants.HOME_PAGE).forward(request, response);
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("text/javascript;charset=utf-8");
+        response.getWriter().print(JacksonUtils.obj2json(JsonResponse.authorized()));
     }
 }

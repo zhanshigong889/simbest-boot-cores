@@ -73,8 +73,9 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throws AuthenticationException {
         Principal principal = obtainPrincipal(request);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
-        log.debug("Client will sso access {} with appcode {} and user {}  ", request.getRequestURI(), appcode, principal.getName());
+        log.debug("SSO 启动认证【{}】 访问【{}】 资源【{}】", principal.getName(), appcode, request.getRequestURI());
         if (null == principal || StringUtils.isEmpty(appcode)) {
+            log.error("SSO 认证失败， 令牌、应用标识不能为空！");
             throw new BadCredentialsException(
                     "Authentication principal can not be invalidate loginuser: " + principal.getName() + " and appcode: " + appcode);
         }

@@ -8,12 +8,14 @@ import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.auth.entryPoint.AccessDeniedEntryPoint;
 import com.simbest.boot.security.auth.filter.CaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.CustomAbstractAuthenticationProcessingFilter;
+import com.simbest.boot.security.auth.filter.RestUumsAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RsaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.SsoAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.SsoAuthenticationRegister;
 import com.simbest.boot.security.auth.filter.UumsAuthenticationFilter;
 import com.simbest.boot.security.auth.handle.FailedAccessDeniedHandler;
 import com.simbest.boot.security.auth.handle.FailedLoginHandler;
+import com.simbest.boot.security.auth.handle.RestSuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SsoSuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SuccessLogoutHandler;
@@ -57,7 +59,13 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     private SuccessLoginHandler successLoginHandler;
 
     @Autowired
+    private RestSuccessLoginHandler restSuccessLoginHandler;
+
+    @Autowired
     private FailedLoginHandler failedLoginHandler;
+
+    @Autowired
+    private FailedAccessDeniedHandler failedAccessDeniedHandler;
 
     @Autowired
     private SuccessLogoutHandler successLogoutHandler;
@@ -131,6 +139,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         http
                 .addFilterBefore(captchaUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(uumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(restUumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(rsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(ssoAuthenticationFilter(), UumsAuthenticationFilter.class)
                 .authorizeRequests()
@@ -149,9 +158,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .failureHandler(failedLoginHandler) //记录登录错误日志，并自定义登录错误提示信息
                 .and().logout().logoutSuccessHandler(successLogoutHandler) // 成功登出后，重定向到登陆页
                 .and().exceptionHandling().authenticationEntryPoint(new AccessDeniedEntryPoint()) //无权限返回JSON数据
-                .accessDeniedHandler(new FailedAccessDeniedHandler()) //无权限返回JSON数据
+                .accessDeniedHandler(failedAccessDeniedHandler) //无权限返回JSON数据
                 .and().headers().frameOptions().sameOrigin()
-                .and().csrf().disable()
+                .and().csrf().disable().cors().and()
 
                 .sessionManagement().invalidSessionUrl(ApplicationConstants.LOGIN_PAGE).maximumSessions(5)
                 .maxSessionsPreventsLogin(true)
@@ -189,6 +198,17 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationSuccessHandler(successLoginHandler);
         //记录失败登录日志
         filter.setAuthenticationFailureHandler(failedLoginHandler);
+        return filter;
+    }
+
+    @Bean
+    public RestUumsAuthenticationFilter restUumsAuthenticationFilter() throws Exception {
+        RestUumsAuthenticationFilter filter = new RestUumsAuthenticationFilter(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //记录成功登录日志
+        filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
+        //记录失败登录日志
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
     }
 

@@ -19,6 +19,8 @@ import org.springframework.web.servlet.resource.VersionResourceResolver;
 
 import java.util.List;
 
+import static org.springframework.web.cors.CorsConfiguration.ALL;
+
 /**
  * 用途：Web MVC 配置
  * 作者: lishuyi
@@ -62,9 +64,12 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedOrigins("*")
-                .allowedMethods("GET", "HEAD", "POST","PUT", "DELETE", "OPTIONS")
-                .allowCredentials(false).maxAge(3600);
+        registry.addMapping("/**")
+                .allowedOrigins(ALL)
+                .allowedMethods(ALL)
+                .allowedHeaders(ALL)
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     @Override

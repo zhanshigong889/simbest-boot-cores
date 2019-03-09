@@ -22,13 +22,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,11 +40,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -55,14 +54,16 @@ import java.util.Map;
 @Api(description = "SysFileController", tags = {"系统管理-文件管理"})
 @Slf4j
 @Controller
+@RequestMapping("/sys/file")
 public class SysFileController extends LogicController<SysFile, String> {
 
-    public final static String UPLOAD_PROCESS_FILES_URL = "/sys/file/uploadProcessFiles";
-    public final static String UPLOAD_PROCESS_FILES_URL_SSO = "/sys/file/uploadProcessFiles/sso";
-    public final static String DOWNLOAD_URL = "/sys/file/download";
-    public final static String DOWNLOAD_URL_SSO = "/sys/file/download";
-    public final static String OPEN_URL = "/sys/file/open";
-    public final static String OPEN_URL_SSO = "/sys/file/open";
+    public final static String UPLOAD_PROCESS_FILES_URL = "/uploadProcessFiles";
+    public final static String UPLOAD_PROCESS_FILES_URL_SSO = "/uploadProcessFiles/sso";
+    public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest";
+    public final static String DOWNLOAD_URL = "/download";
+    public final static String DOWNLOAD_URL_SSO = "/download/sso";
+    public final static String OPEN_URL = "/open";
+    public final static String OPEN_URL_SSO = "/open/sso";
 
     @Autowired
     private ISysFileService fileService;
@@ -88,12 +89,49 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @param response
      * @throws Exception
      */
+//    @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
+//    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO})
+//    public void uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
+//        response.setContentType("text/html; charset=UTF-8");
+//        response.setCharacterEncoding("UTF-8");
+//        PrintWriter out = response.getWriter();
+//        MultipartHttpServletRequest mureq = (MultipartHttpServletRequest) request;
+//        Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
+//        List<SysFile> sysFiles = fileService.uploadProcessFiles(multipartFiles.values(), request.getParameter("pmInsType"), request.getParameter("pmInsId"),
+//                request.getParameter("pmInsTypePart"));
+//        JsonResponse jsonResponse;
+//        if(!sysFiles.isEmpty()) {
+//            UploadFileResponse uploadFileResponse = new UploadFileResponse();
+//            uploadFileResponse.setSysFiles(sysFiles);
+//            jsonResponse = JsonResponse.success(uploadFileResponse);
+//        } else {
+//            jsonResponse = JsonResponse.defaultErrorResponse();
+//        }
+//        String result = "<script type=\"text/javascript\">parent.result="+JacksonUtils.obj2json(jsonResponse)+"</script>";
+//        out.println(result);
+//        out.close();
+//    }
+
     @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
     @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO})
     public void uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        JsonResponse jsonResponse = doUploadFile(request, response);
+        String result = "<script type=\"text/javascript\">parent.result="+JacksonUtils.obj2json(jsonResponse)+"</script>";
         response.setContentType("text/html; charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
+        out.println(result);
+        out.close();
+    }
+
+    @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
+    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL_REST})
+    public ResponseEntity<?> uploadFileRest(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        JsonResponse jsonResponse = doUploadFile(request, response);
+        return new ResponseEntity(jsonResponse, HttpStatus.OK);
+    }
+
+    private JsonResponse doUploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
         MultipartHttpServletRequest mureq = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
         List<SysFile> sysFiles = fileService.uploadProcessFiles(multipartFiles.values(), request.getParameter("pmInsType"), request.getParameter("pmInsId"),
@@ -106,9 +144,7 @@ public class SysFileController extends LogicController<SysFile, String> {
         } else {
             jsonResponse = JsonResponse.defaultErrorResponse();
         }
-        String result = "<script type=\"text/javascript\">parent.result="+JacksonUtils.obj2json(jsonResponse)+"</script>";
-        out.println(result);
-        out.close();
+        return jsonResponse;
     }
 
     /**
@@ -127,13 +163,6 @@ public class SysFileController extends LogicController<SysFile, String> {
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
-
-        //设置文件名称
-//        ContentDisposition cd = ContentDisposition.builder("attachment")
-//                .filename(sysFile.getFileName(), StandardCharsets.UTF_8) // 防止文件名乱码，需指定文件名编码
-//                .size(sysFile.getFileSize())
-//                .build();
-//        headers.setContentDisposition(cd);
         boolean isMSIE = BrowserUtil.isMSBrowser(request);
         String fileName = null;
         if (isMSIE) {
@@ -171,7 +200,7 @@ public class SysFileController extends LogicController<SysFile, String> {
         return "redirect:"+redirectUrl;
     }
 
-    @PostMapping(value = "/sys/file/deleteById")
+    @PostMapping(value = "/deleteById")
     @ResponseBody
     public JsonResponse deleteById(@RequestParam("id") String id){
         fileService.deleteById(id);

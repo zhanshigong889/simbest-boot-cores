@@ -1,7 +1,6 @@
 package com.simbest.boot.security.auth.controller;
 
 
-import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.security.IAuthService;
@@ -57,11 +56,12 @@ public class AuthenticationController {
     public JsonResponse validate(@RequestParam String username, @RequestParam String password, @RequestParam String appcode) {
         try {
             if(StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password) && StringUtils.isNotEmpty(appcode)) {
-                if(!authService.checkUserAccessApp(username,appcode )){
-                    return JsonResponse.fail(username +" login "+appcode+"failed",
-                            ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP,ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP);
+                if(!authService.checkUserAccessApp(username, appcode)) {
+                    log.error(LOGTAG + "认证用户【{}】访问【{}】失败", username, appcode);
+                    return JsonResponse.fail("用户"+username +"访问"+appcode+"失败",
+                            ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP, ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP);
                 }
-                log.debug(LOGTAG + "认证成功 user {} access app {} sucessfully....", username, appcode);
+                log.debug(LOGTAG + "认证用户【{}】访问【{}】成功", username, appcode);
                 UsernamePasswordAuthenticationToken passwordToken = new UsernamePasswordAuthenticationToken(username, rsaEncryptor.decrypt(password));
                 Authentication authentication = authenticationManager.authenticate(passwordToken);
                 if(authentication.isAuthenticated()) {
@@ -69,27 +69,25 @@ public class AuthenticationController {
                     //追加权限
                     Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(username, appcode);
                     if(null != appPermission && !appPermission.isEmpty()) {
-                        log.debug("Will add {} permissions to user {} for app {}", appPermission.size(), username, appcode);
+                        log.debug(LOGTAG + "即将为用户【{}】在应用【{}】追加【{}】项权限", username, appcode, appPermission.size());
                         authUser.addAppPermissions(appPermission);
                         authUser.addAppAuthorities(appPermission);
                     }
                     return JsonResponse.success(authUser);
                 }
                 else {
-                    log.debug(LOGTAG + "认证失败 user {} for app {}", username, appcode);
+                    log.error(LOGTAG + "认证用户【{}】认证【{}】失败", username, appcode);
                     return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }
             } else {
-                log.debug(LOGTAG + "认证失败 user {} for app {}", username, appcode);
+                log.error(LOGTAG + "认证用户【{}】访问【{}】失败", username, appcode);
                 return JsonResponse.fail(ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
             }
         } catch (AuthenticationException e){
-            log.debug(LOGTAG + "认证失败 user {} for app {} with {}", username, appcode, e.getMessage());
-            Exceptions.printException(e);
+            log.error(LOGTAG + "认证用户【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         } catch (Exception e){
-            log.debug(LOGTAG + "认证失败 user {} for app {} with {}", username, appcode, e.getMessage());
-            Exceptions.printException(e);
+            log.error(LOGTAG + "认证用户【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.UNKNOW_ERROR);
         }
     }

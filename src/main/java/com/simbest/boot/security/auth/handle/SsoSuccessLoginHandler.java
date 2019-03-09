@@ -4,6 +4,7 @@
 package com.simbest.boot.security.auth.handle;
 
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.security.LoginUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,10 @@ public class SsoSuccessLoginHandler extends SimpleUrlAuthenticationSuccessHandle
                                         HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
         String ssoPath = getRequestPath(request);
-        log.debug("用户【{}】单点登录成功, 即将访问【{}】", SecurityContextHolder.getContext() .getAuthentication().getPrincipal(), ssoPath);
+        if(authentication.getPrincipal() instanceof IUser) {
+            IUser iUser = (IUser) authentication.getPrincipal();
+            log.debug("用户【{}】登录成功，即将访问【{}】, 用户身份详细信息为【{}】", iUser.getUsername(), ssoPath, iUser);
+        }
 
         //单点登录首页，记录登录日志
         if(ApplicationConstants.ROOT_SSO_PAGE.equals(ssoPath)) {

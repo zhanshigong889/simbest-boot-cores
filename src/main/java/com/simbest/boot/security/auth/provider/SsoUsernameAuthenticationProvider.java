@@ -3,19 +3,19 @@
  */
 package com.simbest.boot.security.auth.provider;
 
-import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
-import com.simbest.boot.security.auth.provider.sso.token.KeyTypePrincipal;
-import com.simbest.boot.security.auth.provider.sso.token.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.filter.SsoAuthenticationRegister;
+import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
+import com.simbest.boot.security.auth.provider.sso.token.SsoUsernameAuthentication;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -35,26 +35,31 @@ public class SsoUsernameAuthenticationProvider implements AuthenticationProvider
     @Autowired
     private SsoAuthenticationRegister ssoAuthenticationRegister;
 
+    protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Collection<SsoAuthenticationService> ssoAuthenticationServices = ssoAuthenticationRegister.getSsoAuthenticationService();
         SsoUsernameAuthentication successToken = null;
         for(SsoAuthenticationService authService : ssoAuthenticationServices) {
-            log.info("SsoAuthenticationService {} attempt authentication with authentication {}",authService.getClass().getName(), authentication.toString());
+            log.info("SSO 认证器 【{}】 准备尝试认证 【{}】",authService.getClass().getName(), authentication.toString());
             successToken = authService.attemptAuthentication((SsoUsernameAuthentication) authentication);
             if(null != successToken) {
-                log.warn("-_- SsoAuthenticationService {} attempt authentication with authentication {} successfully......, get successToken {}",
-                        authService.getClass().getName(), authentication.toString(), successToken.toString());
+                log.warn("SUCCESS SSO 认证器 【{}】 成功认证 【{}】",
+                        authService.getClass().getName(), authentication.toString());
                 break;
+            } else {
+                log.warn("FAILED SSO 认证器 【{}】 尝试认证失败",
+                        authService.getClass().getName());
             }
-            log.warn("-_- SsoAuthenticationService {} attempt authentication with authentication {} failed......",authService.getClass().getName(), authentication.toString());
         }
         if (null != successToken) {
             return successToken;
         } else {
-            log.error(">_< SSO authentication failed, with sso token {}", authentication.toString());
-            throw new
-                    BadCredentialsException("SSO authentication failed, with sso token " + authentication.toString());
+            log.error("FATAL SSO 遍历所有认证器后，最终认证失败 【{}】", authentication.toString());
+            throw new BadCredentialsException(messages.getMessage(
+                    "AbstractUserDetailsAuthenticationProvider.badCredentials",
+                    "错误的密码----Bad credentials"));
         }
     }
 

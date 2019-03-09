@@ -31,6 +31,7 @@ public class ApplicationConstants {
     public static final String ERROR_PAGE = "/error";
     public static final String HOME_PAGE = "/home"; //自动跳转至index，需要session
     public static final String UUMS_LOGIN_PAGE = "/uumslogin";
+    public static final String REST_UUMS_LOGIN_PAGE = "/restuumslogin";
     public static final String CAS_LOGIN_PAGE = "/caslogin/cas";
     public static final String CAS_LOGOUT_PAGE = "/logout/cas";
     public static final String LOGIN_ERROR_PAGE = "/login?loginError";

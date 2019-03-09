@@ -51,6 +51,7 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
             throw new AttempMaxLoginFaildException(ErrorCodeConstants.LOGIN_ERROR_EXCEED_MAX_TIMES);
         } else {
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password) || StringUtils.isEmpty(appcode)) {
+                log.error("UUMS 认证失败， 令牌、密码、应用标识不能为空！");
                 throw new BadCredentialsException(
                         "Authentication principal can not be null: " + username);
             }

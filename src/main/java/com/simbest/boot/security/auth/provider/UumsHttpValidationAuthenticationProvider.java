@@ -60,8 +60,8 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                         .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, uumsCredentials.getPassword())
                         .param(AuthoritiesConstants.SSO_API_APP_CODE, uumsCredentials.getAppcode())
                         .asBean(JsonResponse.class);
-                if(response.getErrcode().equals(ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP)){
-                    log.error(LOGTAG + "认证失败User {} try to login {} failed, because uums return error with: {}", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
+                if(response.getErrcode().equals(ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP)) {
+                    log.error(LOGTAG + "UUMS认证 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
                     throw new
                             AccesssAppDeniedException(ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
                 }else {
@@ -71,20 +71,20 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                     UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(authUser,
                             authUser.getPassword(), authUser.getAuthorities());
                     result.setDetails(authentication.getDetails());
-                    log.info(LOGTAG + "认证成功 User {} login {}", principal, uumsCredentials.getAppcode());
+                    log.info(LOGTAG + "UUMS认证 【{}】 访问 【{}】 成功", principal, uumsCredentials.getAppcode());
                     return result;
                 }
             }catch (HttpClientException e){
-                log.error(LOGTAG + "认证失败User {} try to login failed, because catch a http exception!", principal);
+                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }catch (Exception e){
-                log.error(LOGTAG + "认证失败User {} try to login failed, because catch an unknow exception!", principal);
+                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
         } else {
-            log.error(LOGTAG + "认证失败User {} login with {} failed, because principal or credentials is null!", principal, credentials);
+            log.error(LOGTAG + "UUMS认证 【{}】 失败， 令牌或凭证不能为空!", principal);
             throw new
                     BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
         }

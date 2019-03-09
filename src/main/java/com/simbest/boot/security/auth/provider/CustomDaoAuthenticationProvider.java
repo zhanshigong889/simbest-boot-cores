@@ -21,11 +21,11 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
                                                   UsernamePasswordAuthenticationToken authentication)
             throws AuthenticationException {
         if (authentication.getCredentials() == null) {
-            logger.debug("Authentication failed: no credentials provided");
+            logger.error("Authentication failed: 密码不能为空");
 
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                    "Bad credentials"));
+                    "密码不能为空----Bad credentials"));
         }
 
         //比对万能密码
@@ -33,10 +33,10 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
             //不是万能密码，则比对输入的密码和数据库中密码
             String presentedPassword = authentication.getCredentials().toString();
             if (!getPasswordEncoder().matches(presentedPassword, userDetails.getPassword())) {
-                logger.debug("Authentication failed: password does not match stored value");
+                logger.error("CustomDaoAuthenticationProvider认证时密码不匹配："+presentedPassword);
                 throw new BadCredentialsException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                        "Bad credentials"));
+                        "错误的密码："+presentedPassword));
             }
 
         }
