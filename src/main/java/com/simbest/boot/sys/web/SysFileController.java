@@ -59,11 +59,13 @@ public class SysFileController extends LogicController<SysFile, String> {
 
     public final static String UPLOAD_PROCESS_FILES_URL = "/uploadProcessFiles";
     public final static String UPLOAD_PROCESS_FILES_URL_SSO = "/uploadProcessFiles/sso";
-    public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest";
+    public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest/sso";
     public final static String DOWNLOAD_URL = "/download";
     public final static String DOWNLOAD_URL_SSO = "/download/sso";
+    public final static String DOWNLOAD_URL_DATABASE = "/sys/file/download";
     public final static String OPEN_URL = "/open";
     public final static String OPEN_URL_SSO = "/open/sso";
+    public final static String DELETE_URL = "/deleteById";
 
     @Autowired
     private ISysFileService fileService;
@@ -200,7 +202,7 @@ public class SysFileController extends LogicController<SysFile, String> {
         return "redirect:"+redirectUrl;
     }
 
-    @PostMapping(value = "/deleteById")
+    @PostMapping(value = DELETE_URL)
     @ResponseBody
     public JsonResponse deleteById(@RequestParam("id") String id){
         fileService.deleteById(id);

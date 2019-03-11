@@ -183,7 +183,7 @@ public class AppFileUtil {
                         break;
                 }
                 SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename))
-                        .filePath(filePath).fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL).
+                        .filePath(filePath).fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
                                 build();
                 log.debug("Upload save file is {}", sysFile.toString());
                 fileModels.add(sysFile);
