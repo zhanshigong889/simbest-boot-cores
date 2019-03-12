@@ -100,6 +100,15 @@ public class UumsSysOrgController {
     public JsonResponse findCityDeapartmentAndCountyCompany( @RequestParam(required = false)  String appcode, @RequestBody(required = false) Map userMap) {
         return JsonResponse.success(uumsSysOrgApi.findOrgByUserMap(appcode,userMap));
     }
+
+    @ApiOperation(value = "根据corpId查询企业根节点", notes = "根据corpId查询企业根节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "corpId", value = "企业id", dataType = "String", paramType = "query")
+    })
+    @PostMapping(value = "/findRootByCorpId")
+    public JsonResponse findRootByCorpId(@RequestParam(required = false)  String appcode,@RequestParam String corpId) {
+        return JsonResponse.success(uumsSysOrgApi.findRootByCorpId(appcode,corpId));
+    }
 }
 
 

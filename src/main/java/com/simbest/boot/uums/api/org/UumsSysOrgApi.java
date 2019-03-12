@@ -345,4 +345,36 @@ public class UumsSysOrgApi {
         List<SimpleOrg> orgList = JacksonUtils.json2Type(json, new TypeReference<List<SimpleOrg>>(){});
         return orgList;
     }
+
+    /**
+     * 根据corpId查询企业根节点
+     * @param appcode
+     * @param corpId 企业id
+     * @return
+     */
+    public List<SimpleOrg> findRootByCorpId(String appcode,String corpId) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findRootByCorpId"+SSO)
+                .param( AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param( AuthoritiesConstants.SSO_API_APP_CODE,appcode )
+                .param( "corpId",corpId )
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.debug("--response对象为空!--");
+            return null;
+        }
+        if(response.getData() == null ){
+            log.debug(response.getMessage());
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList )){
+            log.debug("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<SimpleOrg> orgList = JacksonUtils.json2Type(json, new TypeReference<List<SimpleOrg>>(){});
+        return orgList;
+    }
+
 }
