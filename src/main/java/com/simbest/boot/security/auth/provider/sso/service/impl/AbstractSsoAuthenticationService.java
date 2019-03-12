@@ -38,18 +38,17 @@ public abstract class AbstractSsoAuthenticationService implements SsoAuthenticat
      */
     @Override
     public SsoUsernameAuthentication attemptAuthentication(SsoUsernameAuthentication authentication) {
-        log.debug("尝试从请求中获取用户【{}】 及 应用【{}】", authentication.getPrincipal(), authentication.getCredentials());
+        log.debug("SSO认证服务【{}】尝试从主体【{}】和令牌【{}】获取用户",this.getClass().getSimpleName(), authentication.getPrincipal(), authentication.getCredentials());
         if(null != authentication.getPrincipal() && null != authentication.getCredentials()){
             String keyword = decryptUsername(((Principal)authentication.getPrincipal()).getName());
-            log.debug("实际从请求中获取用户【{}】 及 应用【{}】", keyword, authentication.getCredentials().toString());
             if(StringUtils.isNotEmpty(keyword)) {
                 return attemptAuthentication(keyword, authentication);
             } else{
-                log.warn("解密器【{}】 解密【{}】失败！", this.getClass().getSimpleName(), authentication.toString());
+                log.warn("SSO认证服务【{}】认证【{}】失败！", this.getClass().getSimpleName(), authentication.toString());
                 return null;
             }
         }else{
-            log.error("令牌和密钥二者均不能为空！");
+            log.error("主体和令牌二者均不能为空！");
             return null;
         }
     }
@@ -61,7 +60,6 @@ public abstract class AbstractSsoAuthenticationService implements SsoAuthenticat
      * @return
      */
     public SsoUsernameAuthentication attemptAuthentication(String keyword, SsoUsernameAuthentication authentication) {
-        log.debug("尝试检查用户【{}】 访问 【{}】.", keyword, authentication.getCredentials());
         SsoUsernameAuthentication token = null;
         try {
             IUser authUser = null;
@@ -70,18 +68,18 @@ public abstract class AbstractSsoAuthenticationService implements SsoAuthenticat
             } else if (authentication.getPrincipal() instanceof KeyTypePrincipal){
                 authUser = authService.findByKey(keyword, ((KeyTypePrincipal)authentication.getPrincipal()).getKeyType());
             }
-            log.debug("访问用户为【{}】", authUser);
+            log.debug("SSO认证服务进行认证，认证后用户为【{}】", authUser);
             if(null != authUser) {
                 String username = authUser.getUsername();
                 String appcode = authentication.getCredentials().toString();
                 boolean flag =  authService.checkUserAccessApp(username, appcode);
-                log.debug( "检查用户【{}】访问【{}】状态为【{}】", username, appcode, flag );
+                log.debug( "SSO认证服务检查用户【{}】访问【{}】权限状态为【{}】", username, appcode, flag );
                 if(flag) {
-                    log.debug("用户【{}】访问【{}】SSO SUCCESS认证成功", username, appcode);
+                    log.debug("SSO认证服务检查用户【{}】访问【{}】权限状态认证成功", username, appcode);
                     //追加权限
                     Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(username, appcode);
                     if(null != appPermission && !appPermission.isEmpty()) {
-                        log.debug("即将为用户【{}】在应用【{}】追加【{}】项权限", username, appcode, appPermission.size());
+                        log.debug("SSO认证服务即将为用户【{}】在应用【{}】追加【{}】项权限", username, appcode, appPermission.size());
                         authUser.addAppPermissions(appPermission);
                         authUser.addAppAuthorities(appPermission);
                     }
@@ -89,7 +87,7 @@ public abstract class AbstractSsoAuthenticationService implements SsoAuthenticat
                 }
             }
         } catch (Exception e){
-            log.debug("SSO FAIL认证失败，用户【{}】访问应用【{}】发生【{}】异常", keyword, authentication.getCredentials(),e.getMessage());
+            log.debug("SSO认证服务认证失败，用户【{}】访问应用【{}】发生【{}】异常", keyword, authentication.getCredentials(),e.getMessage());
             Exceptions.printException(e);
         }
         return token;

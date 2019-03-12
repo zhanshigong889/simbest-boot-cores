@@ -42,21 +42,21 @@ public class SsoUsernameAuthenticationProvider implements AuthenticationProvider
         Collection<SsoAuthenticationService> ssoAuthenticationServices = ssoAuthenticationRegister.getSsoAuthenticationService();
         SsoUsernameAuthentication successToken = null;
         for(SsoAuthenticationService authService : ssoAuthenticationServices) {
-            log.info("SSO 认证器 【{}】 准备尝试认证 【{}】",authService.getClass().getName(), authentication.toString());
+            log.info("SSO 认证器 【{}】 准备尝试认证 【{}】",authService.getClass().getSimpleName(), authentication.toString());
             successToken = authService.attemptAuthentication((SsoUsernameAuthentication) authentication);
             if(null != successToken) {
-                log.warn("SUCCESS SSO 认证器 【{}】 成功认证 【{}】",
-                        authService.getClass().getName(), authentication.toString());
+                log.warn("SSO SUCCESS 认证器【{}】成功认证【{}】",
+                        authService.getClass().getSimpleName(), authentication.toString());
                 break;
             } else {
-                log.warn("FAILED SSO 认证器 【{}】 尝试认证失败",
-                        authService.getClass().getName());
+                log.warn("SSO FAILED 认证器【{}】尝试认证失败", authService.getClass().getSimpleName());
             }
         }
         if (null != successToken) {
+            log.info("SSO SUCCESS 成功认证【{}】，即将返回Token令牌", authentication.toString());
             return successToken;
         } else {
-            log.error("FATAL SSO 遍历所有认证器后，最终认证失败 【{}】", authentication.toString());
+            log.error("SSO FATAL FAILED 遍历所有认证器后，最终认证失败 【{}】", authentication.toString());
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
                     "错误的密码----Bad credentials"));

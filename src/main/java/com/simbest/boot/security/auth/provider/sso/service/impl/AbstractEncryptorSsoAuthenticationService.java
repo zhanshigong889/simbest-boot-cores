@@ -27,8 +27,9 @@ public class AbstractEncryptorSsoAuthenticationService extends AbstractSsoAuthen
         if(StringUtils.isNotEmpty(username)){
             try {
                 decryptUsername = this.getEncryptor().decrypt(username);
+                log.debug("SSO解密服务【{}】解密后用户名为【{}】", this.getClass().getSimpleName(), username);
             } catch (Exception e) {
-                log.warn("认证器【{}】 认证用户【{}】 失败， 密钥为【{}】, 发生【{}】异常", this.getClass().getSimpleName(), username, decryptUsername, e.getMessage());
+                log.warn("SSO解密服务【{}】解密密钥【{}】， 解密后用户名为【{}】, 发生【{}】异常", this.getClass().getSimpleName(), username, decryptUsername, e.getMessage());
             }
         }
 

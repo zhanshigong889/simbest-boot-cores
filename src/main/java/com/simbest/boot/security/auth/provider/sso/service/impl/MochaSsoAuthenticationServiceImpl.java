@@ -34,10 +34,9 @@ public class MochaSsoAuthenticationServiceImpl extends AbstractSsoAuthentication
             try {
                 decryptUsername = EncryptorUtil.decode(config.getMochaPortalToken(), username, TIMEOUT);
             } catch (Exception e) {
-                log.error(">_< Use {} decrypt username {} from {} faied......", this.getClass().getSimpleName(), decryptUsername, username);
+                log.warn("SSO解密服务【{}】解密密钥【{}】， 解密后用户名为【{}】, 发生【{}】异常", this.getClass().getSimpleName(), username, decryptUsername, e.getMessage());
             }
         }
-        log.debug("{} Decrypt username {} to {}", this.getClass().getSimpleName(), username, decryptUsername);
         return decryptUsername;
     }
 
