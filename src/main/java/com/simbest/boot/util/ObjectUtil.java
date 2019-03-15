@@ -158,15 +158,17 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
         Set<String> propertyNames = new HashSet<String>();
         for (PropertyDescriptor pd : pds) {
             Field f = getIndicateField(obj, pd.getName());
-            Object value = src.getPropertyValue(pd.getName());
-            if(persistentFields.contains(f) && value != null) {
-                if(value instanceof String){
-                    String str = (String)value;
-                    if(StringUtils.isNotEmpty(str)){
+            if(persistentFields.contains(f)) {
+                Object value = src.getPropertyValue(pd.getName());
+                if(value != null){
+                    if(value instanceof String){
+                        String str = (String)value;
+                        if(StringUtils.isNotEmpty(str)){
+                            persistentFieldValues.put(pd.getName(), value);
+                        }
+                    } else {
                         persistentFieldValues.put(pd.getName(), value);
                     }
-                } else {
-                    persistentFieldValues.put(pd.getName(), value);
                 }
             }
         }
