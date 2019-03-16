@@ -105,20 +105,8 @@ public class CodeGenerator {
      * @return
      */
     public static String addRightZeroForNum(int num, int value) {
-        String str = String.valueOf(value);
-        int strLen = str.length();
-        if (strLen < num) {
-            while (strLen < num) {
-                StringBuffer sb = new StringBuffer();
-                //sb.append("0").append(str);// 左补0
-                sb.append(str).append("0");//右补0
-                str = sb.toString();
-                strLen = str.length();
-            }
-        }
-        return str;
+        return String.format("%-" + num + "d", value).replace(" ", "0");
     }
-
 
     /**
      * 返回一个定长的随机字符串(只包含大小写字母、数字)
