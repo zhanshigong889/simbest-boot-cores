@@ -76,7 +76,18 @@ public final class DateUtil {
             System.out.println( matcher.group() );
         }
         System.out.println( getDateStrNumByGroups("2017年9月20日 09:30"));
-	}
+
+        System.out.println(getDate(removeDate(new Date())));
+
+        Date nowTime1 = parseTimestamp("2014-01-02 11:32:55");
+        Date nowTime2 = parseTimestamp("2014-01-02 15:32:55");
+        Date nowTime3 = parseTimestamp("2014-01-02 19:32:55");
+        Date beginTime = parseTimestamp("2019-01-02 14:32:55");
+        Date endTime = parseTimestamp("2011-11-05 18:32:55");
+        System.out.println(belongTimeZone(nowTime1, beginTime, endTime));
+        System.out.println(belongTimeZone(nowTime2, beginTime, endTime));
+        System.out.println(belongTimeZone(nowTime3, beginTime, endTime));
+    }
 
     /**
      *
@@ -204,6 +215,29 @@ public final class DateUtil {
 		String str2 = getTime(desc);
 		return str1.compareTo(str2);
 	}
+
+    /**
+     * 比较时间区间(只关心时间，不区分年月日)
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public static boolean belongTimeZone(Date nowTime, Date beginTime, Date endTime) {
+        nowTime = removeDate(nowTime);
+        beginTime = removeDate(beginTime);
+        endTime = removeDate(endTime);
+        Calendar date = Calendar.getInstance();
+        date.setTime(nowTime);
+        Calendar begin = Calendar.getInstance();
+        begin.setTime(beginTime);
+        Calendar end = Calendar.getInstance();
+        end.setTime(endTime);
+        if (date.after(begin) && date.before(end)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 	public static int compareTime(String src, String desc) {
 		return src.compareTo(desc);
@@ -441,6 +475,22 @@ public final class DateUtil {
 		return DateUtil.parseDate(DateUtil.getDate(date));
 	}
 
+    /**
+     * 日期置零
+     * @param date
+     * @return
+     */
+    public static Date removeDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        Calendar target = Calendar.getInstance();
+        target.setTime(new Date(0));
+        target.set(Calendar.HOUR_OF_DAY, cal.get(Calendar.HOUR_OF_DAY));
+        target.set(Calendar.MINUTE, cal.get(Calendar.MINUTE));
+        target.set(Calendar.SECOND, cal.get(Calendar.SECOND));
+        return target.getTime();
+    }
+
 	/**
 	 * 获取今天的开始时间：比如：2014-06-19 00:00:00
 	 * @param date
@@ -474,10 +524,8 @@ public final class DateUtil {
 	/**
 	 * 得到两个日期之间相差的天数
 	 *
-	 * @param startDate
-	 *            2006-03-01
-	 * @param endDate
-	 *            2006-05-01
+	 * @param startDate 2006-03-01
+	 * @param endDate 2006-05-01
 	 * @return n 61
 	 */
 	public static int daysBetweenDates(Date startDate, Date endDate) {
@@ -493,9 +541,19 @@ public final class DateUtil {
 	 * @return
 	 */
 	public static long minuteBetweenDates(Date startDate, Date endDate) {
-		  long seconds = (endDate.getTime() - startDate.getTime()) / 1000;
-          return seconds / 60;
+	    long seconds = (endDate.getTime() - startDate.getTime()) / 1000;
+        return seconds / 60;
 	}
+
+    /**
+     * 计算两个时间相差的秒数
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public static long secondBetweenDates(Date startDate, Date endDate) {
+        return (endDate.getTime() - startDate.getTime()) / 1000L;
+    }
 
 	/**
 	 * 计算两个时间相差的天数、小时数、分数
