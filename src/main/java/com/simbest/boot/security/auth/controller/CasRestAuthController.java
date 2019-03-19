@@ -70,7 +70,7 @@ public class CasRestAuthController {
             IUser dbUser = this.authService.findByKey(userWeb.getUsername(), IAuthService.KeyType.username);
             if (dbUser != null) {
                 String rawPassword = des3Encryptor.decrypt(userWeb.getPassword());
-                rawPassword = md5Encryptor.encrypt(rawPassword);
+//                rawPassword = md5Encryptor.encrypt(rawPassword);
                 if(!myBCryptPasswordEncoder.matches(rawPassword, dbUser.getPassword())) {
                     //密码不匹配
                     result = new ResponseEntity<CasUser>(HttpStatus.BAD_REQUEST);
