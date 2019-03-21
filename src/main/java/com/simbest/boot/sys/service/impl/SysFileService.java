@@ -3,6 +3,7 @@ package com.simbest.boot.sys.service.impl;
 import com.google.common.collect.Lists;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.service.impl.LogicService;
+import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.model.SysFile;
 import com.simbest.boot.sys.model.UploadFileResponse;
@@ -42,6 +43,9 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     private AppFileUtil appFileUtil;
 
     @Autowired
+    private AppConfig config;
+
+    @Autowired
     public SysFileService(SysFileRepository repository) {
         super(repository);
         this.repository = repository;
@@ -60,6 +64,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
+                sysFile.setMobileFilePath( config.getAppHostPort() + sysFile.getFilePath());
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
                 sysFile.setPmInsType(pmInsType);

@@ -77,6 +77,6 @@ public class SysFile extends LogicModel {
     private String backupPath;
 
     //手机端使用
-    @Transient
+    @Column(length = 500)
     private String mobileFilePath;
 }
