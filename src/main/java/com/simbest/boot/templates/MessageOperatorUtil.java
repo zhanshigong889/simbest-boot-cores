@@ -23,7 +23,7 @@ public class MessageOperatorUtil {
      * @param messageCode   消息模板编码
      * @return
      */
-    public String queryWorkFlowMessage(int messageCode){
+    public String queryWorkFlowMessage(Long messageCode){
         String messageCodeStr = String.valueOf(Math.abs( messageCode ));
         String wfMessage = MessageEnum.getMessageByName( "W",messageCodeStr );
         return wfMessage;

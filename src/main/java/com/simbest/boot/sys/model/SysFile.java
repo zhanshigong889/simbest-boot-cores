@@ -75,4 +75,8 @@ public class SysFile extends LogicModel {
     @Column(length = 500)
     @JsonIgnore //隐藏不对外暴露内部备份路径
     private String backupPath;
+
+    //手机端使用
+    @Transient
+    private String mobileFilePath;
 }
