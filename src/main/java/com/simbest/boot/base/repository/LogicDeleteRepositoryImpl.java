@@ -6,7 +6,6 @@ package com.simbest.boot.base.repository;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.simbest.boot.constants.ApplicationConstants;
-import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.ObjectUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -28,13 +27,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -44,14 +37,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -192,9 +178,11 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
                         Map<String, Object> data = new HashMap<>();
 
                         for (String name : uniqueConstraint.columnNames()) {
-                            if (name.endsWith("_id"))
-                                name = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
-                                        name.substring(0, name.length() - 3));
+                            /*if (name.endsWith("_id")) {
+                                name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name.substring( 0, name.length( ) - 3 ) );
+                            }*/
+                            //修改为约束app_id不用截取
+                            name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name );
 
                             PropertyDescriptor pd = new PropertyDescriptor(name, entityClass);
                             Object value = pd.getReadMethod().invoke(entity);
@@ -241,6 +229,7 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
         }
         return super.save(entity);
     }
+
 
     @Override
     @Transactional
@@ -440,5 +429,9 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
 
     private static final <T> Specification<T> notDeleted() {
         return Specifications.where(new DeletedIsNull<T>()).or(new DeletedTimeGreatherThanNow<T>());
+    }
+
+    public static void main ( String[] args ) {
+        System.out.println(  CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,"permission_code") );
     }
 }
