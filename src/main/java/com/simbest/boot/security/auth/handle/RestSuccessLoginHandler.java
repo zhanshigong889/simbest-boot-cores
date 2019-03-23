@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 用途：记录登录日志
+ * 用途：REST方式登录成功，记录登录日志
  * 作者: lishuyi
  * 时间: 2018/2/25  18:36
  */

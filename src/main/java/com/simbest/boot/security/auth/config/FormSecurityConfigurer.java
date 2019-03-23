@@ -13,9 +13,11 @@ import com.simbest.boot.security.auth.filter.RsaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.SsoAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.SsoAuthenticationRegister;
 import com.simbest.boot.security.auth.filter.UumsAuthenticationFilter;
+import com.simbest.boot.security.auth.handle.DefaultLogoutHandler;
 import com.simbest.boot.security.auth.handle.FailedAccessDeniedHandler;
 import com.simbest.boot.security.auth.handle.FailedLoginHandler;
 import com.simbest.boot.security.auth.handle.RestSuccessLoginHandler;
+import com.simbest.boot.security.auth.handle.RestSuccessLogoutHandler;
 import com.simbest.boot.security.auth.handle.SsoSuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SuccessLogoutHandler;
@@ -35,6 +37,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
@@ -56,19 +59,25 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     private ApplicationContext appContext;
 
     @Autowired
+    private FailedAccessDeniedHandler failedAccessDeniedHandler;
+
+    @Autowired
     private SuccessLoginHandler successLoginHandler;
 
     @Autowired
-    private RestSuccessLoginHandler restSuccessLoginHandler;
+    private SuccessLogoutHandler successLogoutHandler;
 
     @Autowired
     private FailedLoginHandler failedLoginHandler;
 
     @Autowired
-    private FailedAccessDeniedHandler failedAccessDeniedHandler;
+    private RestSuccessLoginHandler restSuccessLoginHandler;
 
     @Autowired
-    private SuccessLogoutHandler successLogoutHandler;
+    private  RestSuccessLogoutHandler restSuccessLogoutHandler;
+
+    @Autowired
+    private DefaultLogoutHandler defaultLogoutHandler;
 
     @Autowired
     private SsoSuccessLoginHandler ssoSuccessLoginHandler;
@@ -213,6 +222,13 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    public LogoutFilter restUumsLogoutFilter() throws Exception {
+        LogoutFilter filter = new LogoutFilter(restSuccessLogoutHandler, defaultLogoutHandler);
+        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
+        return filter;
+    }
+
+    @Bean
     public SsoAuthenticationFilter ssoAuthenticationFilter() throws Exception {
         SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
         filter.setAuthenticationManager(authenticationManagerBean());
@@ -238,6 +254,4 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-
-
 }

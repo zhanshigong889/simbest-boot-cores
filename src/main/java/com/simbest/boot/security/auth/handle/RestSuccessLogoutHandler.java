@@ -3,12 +3,11 @@
  */
 package com.simbest.boot.security.auth.handle;
 
-import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.base.web.response.JsonResponse;
+import com.simbest.boot.util.json.JacksonUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -19,17 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 用途：记录登出日志
+ * 用途：REST方式登出
  * 作者: lishuyi
  * 时间: 2018/2/25  18:49
  */
 @Slf4j
 @NoArgsConstructor
 @Component
-public class SuccessLogoutHandler implements LogoutSuccessHandler {
-
-    @Autowired
-    private Environment env;
+public class RestSuccessLogoutHandler implements LogoutSuccessHandler {
 
     @Autowired
     private DefaultLogoutHandler defaultLogoutHandler;
@@ -41,15 +37,8 @@ public class SuccessLogoutHandler implements LogoutSuccessHandler {
         request.logout();
         defaultLogoutHandler.logout(request, response, authentication);
         response.setStatus(HttpServletResponse.SC_OK);
-        if(StringUtils.isNotEmpty(env.getProperty("app.cas.server.address"))){
-            if(StringUtils.isNotEmpty(env.getProperty("server.servlet.context-path"))) {
-                response.sendRedirect(env.getProperty("server.servlet.context-path") + ApplicationConstants.CAS_LOGOUT_PAGE);
-            } else {
-                response.sendRedirect(request.getContextPath() + ApplicationConstants.CAS_LOGOUT_PAGE);
-            }
-        } else {
-            response.setStatus(HttpServletResponse.SC_OK);
-            request.getRequestDispatcher(ApplicationConstants.LOGIN_PAGE).forward(request, response);
-        }
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("text/javascript;charset=utf-8");
+        response.getWriter().print(JacksonUtils.obj2json(JsonResponse.defaultSuccessResponse()));
     }
 }
