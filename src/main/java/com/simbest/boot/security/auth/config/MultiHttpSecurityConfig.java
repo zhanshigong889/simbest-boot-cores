@@ -86,7 +86,7 @@ public class MultiHttpSecurityConfig {
 
         Map<String, CustomAbstractAuthenticationProvider> auths = appContext.getBeansOfType(CustomAbstractAuthenticationProvider.class);
         for(CustomAbstractAuthenticationProvider provider : auths.values()){
-            log.debug("System will registe custom provider {}", provider.getClass());
+            log.debug("系统将自动注册自定义认证提供器: {}", provider.getClass());
             auth.authenticationProvider(provider);
         }
     }

@@ -68,18 +68,18 @@ public abstract class AbstractSsoAuthenticationService implements SsoAuthenticat
             } else if (authentication.getPrincipal() instanceof KeyTypePrincipal){
                 authUser = authService.findByKey(keyword, ((KeyTypePrincipal)authentication.getPrincipal()).getKeyType());
             }
-            log.debug("SSO认证服务进行认证，认证后用户为【{}】", authUser);
             if(null != authUser) {
                 String username = authUser.getUsername();
                 String appcode = authentication.getCredentials().toString();
+                log.debug("SSO认证服务【{}】认证后用户为【{}】", this.getClass().getSimpleName(), authUser);
                 boolean flag =  authService.checkUserAccessApp(username, appcode);
-                log.debug( "SSO认证服务检查用户【{}】访问【{}】权限状态为【{}】", username, appcode, flag );
+                log.debug( "SSO认证服务【{}】检查用户【{}】访问【{}】权限状态为【{}】", this.getClass().getSimpleName(), username, appcode, flag );
                 if(flag) {
-                    log.debug("SSO认证服务检查用户【{}】访问【{}】权限状态认证成功", username, appcode);
+                    log.debug("SSO认证服务【{}】检查用户【{}】访问【{}】权限状态成功！", this.getClass().getSimpleName(), username, appcode);
                     //追加权限
                     Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(username, appcode);
                     if(null != appPermission && !appPermission.isEmpty()) {
-                        log.debug("SSO认证服务即将为用户【{}】在应用【{}】追加【{}】项权限", username, appcode, appPermission.size());
+                        log.debug("SSO认证服务【{}】即将为用户【{}】在应用【{}】追加【{}】项权限", this.getClass().getSimpleName(), username, appcode, appPermission.size());
                         authUser.addAppPermissions(appPermission);
                         authUser.addAppAuthorities(appPermission);
                     }
@@ -87,7 +87,7 @@ public abstract class AbstractSsoAuthenticationService implements SsoAuthenticat
                 }
             }
         } catch (Exception e){
-            log.debug("SSO认证服务认证失败，用户【{}】访问应用【{}】发生【{}】异常", keyword, authentication.getCredentials(),e.getMessage());
+            log.debug("SSO认证服务【{}】认证失败，用户【{}】访问应用【{}】发生【{}】异常", this.getClass().getSimpleName(), keyword, authentication.getCredentials(), e.getMessage());
             Exceptions.printException(e);
         }
         return token;

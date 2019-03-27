@@ -59,7 +59,7 @@ public class SsoUsernameAuthenticationProvider implements AuthenticationProvider
             log.error("SSO FATAL FAILED 遍历所有认证器后，最终认证失败 【{}】", authentication.toString());
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                    "错误的密码----Bad credentials"));
+                    "BadCredentialsException: 坏的凭证"));
         }
     }
 

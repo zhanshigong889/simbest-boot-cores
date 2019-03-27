@@ -59,11 +59,15 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
         Principal principal = null;
         if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME))){
             principal = UsernamePrincipal.builder().username(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME)).build();
+            log.debug("SSO 单点认证过滤器从【{}】提取到Principal【{}】", AuthoritiesConstants.SSO_API_USERNAME, principal.getName());
         } else if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_UID))){
             principal = UsernamePrincipal.builder().username(request.getParameter(AuthoritiesConstants.SSO_API_UID)).build();
+            log.debug("SSO 单点认证过滤器从【{}】提取到Principal【{}】", AuthoritiesConstants.SSO_API_UID, principal.getName());
         } else if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD))){
             principal = KeyTypePrincipal.builder().keyword(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD))
                     .keyType(IAuthService.KeyType.valueOf(request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE))).build();
+            log.debug("SSO 单点认证过滤器从【{}】和【{}】提取到Principal【{}】", AuthoritiesConstants.SSO_API_KEYWORD, request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE),
+                    principal.getName());
         }
         return principal;
     }
@@ -73,11 +77,11 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throws AuthenticationException {
         Principal principal = obtainPrincipal(request);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
-        log.debug("SSO 启动认证【{}】 访问【{}】 资源【{}】", principal.getName(), appcode, request.getRequestURI());
+        log.debug("SSO 单点认证过滤器Principal【{}】尝试访问【{}】的URL资源为【{}】", principal.getName(), appcode, request.getRequestURI());
         if (null == principal || StringUtils.isEmpty(appcode)) {
-            log.error("SSO 认证失败， 令牌、应用标识不能为空！");
+            log.error("SSO 认证主体Principal【{}】和访问应用【{}】不能为空！", principal, appcode);
             throw new BadCredentialsException(
-                    "Authentication principal can not be invalidate loginuser: " + principal.getName() + " and appcode: " + appcode);
+                    "SSO 认证主体Principal【"+principal+"】和访问应用【"+appcode+"】不能为空！");
         }
 
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
@@ -101,6 +105,11 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             if(StringUtils.isNotEmpty(decryptName)) {
                 break;
             }
+        }
+        if(StringUtils.isEmpty(decryptName)){
+            log.error("SSO 认证主体Principal【{}】无法解密！", principal.getName());
+            throw new BadCredentialsException(
+                    "SSO 认证主体Principal【"+principal.getName()+"】无法解密！");
         }
 
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
