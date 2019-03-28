@@ -28,7 +28,7 @@ import java.util.Map;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "系统职位操作相关接口" )
+@Api (description = "系统职位操作相关接口",tags={"职位api"}  )
 @RestController
 @RequestMapping(value = {"/uums/sys/position", "/sys/uums/position"})
 public class UumsSysPositionController {

@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "应用配置相关接口" )
+@Api (description = "应用配置相关接口",tags={"应用配置api"} )
 @RestController
 @RequestMapping("/uums/sys/config")
 public class UumsSysAppConfigController {

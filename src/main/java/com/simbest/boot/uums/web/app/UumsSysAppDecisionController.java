@@ -28,7 +28,7 @@ import java.util.Map;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "应用决策群组相关接口" )
+@Api (description = "应用决策群组相关接口",tags={"决策项api"} )
 @RestController
 @RequestMapping(value = {"/uums/sys/appDecision", "/sys/uums/sys/appDecision"})
 public class UumsSysAppDecisionController {
@@ -41,7 +41,7 @@ public class UumsSysAppDecisionController {
      * @param id
      * @return
      */
-    @ApiOperation(value = "根据id查看应用决策群组信息", notes = "根据id查看应用决策群组信息")
+    @ApiOperation(value = "根据id查看应用决策项信息", notes = "根据id查看应用决策项信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "权限ID", dataType = "Long", paramType = "query"),
             @ApiImplicitParam(name = "appcode", value = "应用code", dataType = "String", paramType = "query")
@@ -52,7 +52,7 @@ public class UumsSysAppDecisionController {
     }
 
     /**
-     *获取权限信息列表并分页
+     *获取决策项信息列表并分页
      * @param page
      * @param size
      * @param direction
@@ -60,7 +60,7 @@ public class UumsSysAppDecisionController {
      * @param map
      * @return
      */
-    @ApiOperation(value = "获取权限列表", notes = "通过此接口来获取权限列表")
+    @ApiOperation(value = "获取决策项列表", notes = "通过此接口来获取决策项列表")
     @ApiImplicitParams({ //
             @ApiImplicitParam(name = "page", value = "当前页码", dataType = "int", paramType = "query", //
                     required = true, example = "1"), //

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 作者: lishuyi
  * 时间: 2019/3/14  18:11
  */
-@Api (description = "公司企业信息控制器" )
+@Api (description = "公司企业信息控制器",tags={"企业信息api"} )
 @RestController
 @RequestMapping(value = {"/uums/sys/corp", "/sys/uums/corp"})
 public class UumsSysCorpController {

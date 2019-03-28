@@ -15,6 +15,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Transient;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -139,6 +140,9 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
         Set<Field> fields = Sets.newHashSet();
         for (Field field : getAllFields(obj.getClass())) {
             if (field.isAnnotationPresent(Column.class)) {
+                fields.add(field);
+            }
+            if (field.isAnnotationPresent(JoinColumn.class)) {
                 fields.add(field);
             }
         }

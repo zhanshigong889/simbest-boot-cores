@@ -28,7 +28,7 @@ import java.util.Map;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "应用决策群组相关接口" )
+@Api (description = "应用决策群组相关接口",tags={"应用群组关系api"} )
 @RestController
 @RequestMapping(value = {"/uums/sys/appGroup", "/sys/uums/sys/appGroup"})
 public class UumsSysAppGroupController {

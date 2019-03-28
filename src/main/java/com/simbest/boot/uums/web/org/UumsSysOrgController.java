@@ -28,7 +28,7 @@ import java.util.Map;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "系统组织操作相关接口" )
+@Api (description = "系统组织操作相关接口",tags={"组织api"}  )
 @RestController
 @RequestMapping(value = {"/uums/sys/org", "/sys/uums/org"})
 public class UumsSysOrgController {

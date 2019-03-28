@@ -28,7 +28,7 @@ import java.util.Map;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "系统权限操作相关接口" )
+@Api (description = "系统权限操作相关接口",tags={"权限api"}  )
 @RestController
 @RequestMapping(value = {"/uums/sys/perimission", "/sys/uums/perimission"})
 public class UumsSysPermissionController {

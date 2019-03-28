@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  *          -------------------------------------------<br>
  */
 
-@Api (description = "群组操作相关接口" )
+@Api (description = "群组操作相关接口",tags={"人员群组关系api"}  )
 @RestController
 @RequestMapping(value = {"/uums/sys/user/group", "/sys/uums/user/group"})
 public class UumsSysUserGroupController {

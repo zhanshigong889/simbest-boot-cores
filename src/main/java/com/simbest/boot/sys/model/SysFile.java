@@ -79,4 +79,5 @@ public class SysFile extends LogicModel {
     //手机端使用
     @Column(length = 500)
     private String mobileFilePath;
+
 }

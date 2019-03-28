@@ -32,7 +32,7 @@ public class UumsSysUserInfoController {
      * @param simpleUser
      * @return
      */
-    @ApiOperation(value = "不登录更新用户信息", notes = "不登录更新用户信息")
+    @ApiOperation(value = "不登录更新用户信息", notes = "不登录更新用户信息",tags={"人员api 不登录更新人员信息"})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "keyword", value = "用户名", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "keyType", value = "用户名", dataType = "String", paramType = "query"),
@@ -47,7 +47,7 @@ public class UumsSysUserInfoController {
     }
 
     /**
-     * 获取角色信息列表并分页
+     * 获取用户信息列表并分页
      * @param page
      * @param size
      * @param direction
@@ -56,7 +56,7 @@ public class UumsSysUserInfoController {
      * @param map
      * @return
      */
-    @ApiOperation(value = "获取角色信息列表并分页", notes = "获取角色信息列表并分页")
+    @ApiOperation(value = "获取用户信息列表并分页", notes = "获取用户信息列表并分页",tags={"人员api findAll"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam (name = "page", value = "当前页码", dataType = "int", paramType = "query", //
                     required = true, example = "1"), //
@@ -78,11 +78,11 @@ public class UumsSysUserInfoController {
     }
 
     /**
-     * 获取角色信息列表不分页
+     * 获取用户信息列表不分页
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "获取角色信息列表不分页", notes = "获取角色信息列表不分页")
+    @ApiOperation(value = "获取用户信息列表不分页", notes = "获取用户信息列表不分页",tags={"人员api findAll"})
     @ApiImplicitParam(name = "appcode", value = "应用代码", dataType = "String", paramType = "query") //
     @PostMapping("/findAllNoPage")
     public JsonResponse findAllNoPage(@RequestParam String appcode, @RequestBody Map simpleUserMap ) {
@@ -94,7 +94,7 @@ public class UumsSysUserInfoController {
      * @param username
      * @return
      */
-    @ApiOperation(value = "根据用户名查询用户信息", notes = "根据用户名查询用户信息")
+    @ApiOperation(value = "根据用户名查询用户信息", notes = "根据用户名查询用户信息",tags={"人员api 根据用户名查"})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "username", value = "用户名", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "appcode", value = "appcode", dataType = "String", paramType = "query")
@@ -112,7 +112,7 @@ public class UumsSysUserInfoController {
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "根据部门以及职位查询所有的人的用户名", notes = "根据部门以及职位查询所有的人的用户名")
+    @ApiOperation(value = "根据部门以及职位查询所有的人的用户名", notes = "根据部门以及职位查询所有的人的用户名",tags={"人员api 根据部门以及职位查"})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "loginUser", value = "要验证的用户", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String", paramType = "query"),
@@ -137,7 +137,7 @@ public class UumsSysUserInfoController {
      * @param orgCode
      * @return
      */
-    @ApiOperation(value = "根据组织orgcode获取用户并分页", notes = "根据组织orgcode获取用户并分页")
+    @ApiOperation(value = "根据组织orgcode获取用户并分页", notes = "根据组织orgcode获取用户并分页",tags={"人员api 根据组织查"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam (name = "page", value = "当前页码", dataType = "int", paramType = "query", //
                     required = true, example = "1"), //
@@ -167,7 +167,7 @@ public class UumsSysUserInfoController {
      * @param roleId
      * @return
      */
-    @ApiOperation(value = "根据角色id获取用户但不分页", notes = "根据角色id获取用户但不分页")
+    @ApiOperation(value = "根据角色id获取用户但不分页", notes = "根据角色id获取用户但不分页",tags={"人员api 根据角色查"})
     @ApiImplicitParams({
             @ApiImplicitParam(name = "roleId", value = "roleId", dataType = "Integer", paramType = "query"),
             @ApiImplicitParam(name = "appcode", value = "appcode", dataType = "String", paramType = "query")
@@ -183,7 +183,7 @@ public class UumsSysUserInfoController {
      * @param sysAppDecisionMap
      * @return
      */
-    @ApiOperation(value = "根据过滤条件获取决策下的用户", notes = "根据过滤条件获取决策下的用户")
+    @ApiOperation(value = "根据过滤条件获取决策下的用户，有session", notes = "根据过滤条件获取决策下的用户，有session",tags={"人员api 决策项出人"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "appcode", value = "当前应用appcode", dataType = "String" ,paramType = "query")
     })
@@ -198,7 +198,7 @@ public class UumsSysUserInfoController {
      * @param sysAppDecisionMap
      * @return
      */
-    @ApiOperation(value = "根据过滤条件获取决策下的用户", notes = "根据过滤条件获取决策下的用户")
+    @ApiOperation(value = "根据过滤条件获取决策下的用户，无session", notes = "根据过滤条件获取决策下的用户，无session",tags={"人员api 决策项出人"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "appcode", value = "当前应用appcode", dataType = "String" ,paramType = "query")
     })
@@ -213,7 +213,7 @@ public class UumsSysUserInfoController {
      * @param username
      * @return
      */
-    @ApiOperation(value = "根据用户返回用户以及用户的的组织树", notes = "根据用户返回用户以及用户的的组织树")
+    @ApiOperation(value = "根据用户返回用户以及用户的的组织树", notes = "根据用户返回用户以及用户的的组织树",tags={"人员api 根据人员查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "appcode", value = "当前应用appcode", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "username", value = "要查询的人的username", dataType = "String" ,paramType = "query")
@@ -229,7 +229,7 @@ public class UumsSysUserInfoController {
      * @param orgCode
      * @return
      */
-    @ApiOperation(value = "一层层去查询全部组织和人", notes = "一层层去查询全部组织和人")
+    @ApiOperation(value = "一层层去查询全部组织和人", notes = "一层层去查询全部组织和人",tags={"人员api 层级查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "appcode", value = "当前应用appcode", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String" ,paramType = "query")
@@ -250,7 +250,7 @@ public class UumsSysUserInfoController {
      * @param preferredMobile
      * @return
      */
-    @ApiOperation(value = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页", notes = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页")
+    @ApiOperation(value = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页", notes = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页",tags={"人员api 根据人员查"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam (name = "page", value = "当前页码", dataType = "int", paramType = "query", //
                     required = true, example = "1"), //
@@ -285,7 +285,7 @@ public class UumsSysUserInfoController {
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "检测用户是否有app的权限,应用向UUMS发送单点请求时使用", notes = "检测用户是否有app的权限,应用向UUMS发送单点请求时使用")
+    @ApiOperation(value = "检测用户是否有app的权限,应用向UUMS发送单点请求时使用", notes = "检测用户是否有app的权限,应用向UUMS发送单点请求时使用",tags={"人员api 检验用户是否有app权限"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam(name = "username", value = "用户名", dataType = "String", //
                     paramType = "query"),
@@ -304,7 +304,7 @@ public class UumsSysUserInfoController {
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "检测用户是否有app的权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用", notes = "检测用户是否有app的权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用")
+    @ApiOperation(value = "检测用户是否有app的权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用", notes = "检测用户是否有app的权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用",tags={"人员api 检验用户是否有app权限"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam(name = "username", value = "用户名", dataType = "String", //
                     paramType = "query"),
@@ -324,7 +324,7 @@ public class UumsSysUserInfoController {
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "查询某个人在某一应用下的全部权限。普通应用使用。应用向UUMS发送单点请求时使用。", notes = "查询某个人在某一应用下的全部权限。普通应用使用。应用向UUMS发送单点请求时使用。")
+    @ApiOperation(value = "查询某个人在某一应用下的全部权限。普通应用使用。应用向UUMS发送单点请求时使用。", notes = "查询某个人在某一应用下的全部权限。普通应用使用。应用向UUMS发送单点请求时使用。",tags={"人员api 查询权限"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam(name = "username", value = "用户名", dataType = "String", //
                     paramType = "query"),
@@ -344,7 +344,7 @@ public class UumsSysUserInfoController {
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用。", notes = "查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用。")
+    @ApiOperation(value = "查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用。", notes = "查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal。门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用。",tags={"人员api 查询权限"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam(name = "loginuser", value = "rsa加密后的用户名", dataType = "String", //
                     paramType = "query"),
@@ -369,7 +369,7 @@ public class UumsSysUserInfoController {
      * @param appcode
      * @return
      */
-    @ApiOperation(value = "根据关键字查询用户身份信息", notes = "根据关键字查询用户身份信息")
+    @ApiOperation(value = "根据关键字查询用户身份信息", notes = "根据关键字查询用户身份信息",tags={"人员api 根据关键字查"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam(name = "keyword", value = "关键字", dataType = "String", //
                     paramType = "query"),
@@ -390,7 +390,7 @@ public class UumsSysUserInfoController {
      * @param groupSid
      * @return
      */
-    @ApiOperation(value = "根据群组sid查询OA账号，真实姓名及该用户的职位id，职位排序和职位名以及所在组织的displayName", notes = "根据群组sid查询OA账号，真实姓名及该用户的职位id，职位排序和职位名以及所在组织的displayName")
+    @ApiOperation(value = "根据群组sid查询OA账号，真实姓名及该用户的职位id，职位排序和职位名以及所在组织的displayName", notes = "根据群组sid查询OA账号，真实姓名及该用户的职位id，职位排序和职位名以及所在组织的displayName",tags={"人员api 根据群组查"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam(name = "appcode", value = "应用编码", dataType = "String", //
                     paramType = "query"),
@@ -409,7 +409,7 @@ public class UumsSysUserInfoController {
      * @param appCode
      * @return
      */
-    @ApiOperation(value = "修改用户密码", notes = "修改用户密码")
+    @ApiOperation(value = "修改用户密码", notes = "修改用户密码",tags={"人员api 修改密码"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "username", value = "用户名", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "rsaPassword", value = "经过RSA加密的密码", dataType = "String" ,paramType = "query"),
@@ -427,7 +427,7 @@ public class UumsSysUserInfoController {
      * @param appCode
      * @return
      */
-    @ApiOperation(value = "修改我的密码", notes = "修改我的密码")
+    @ApiOperation(value = "修改我的密码", notes = "修改我的密码",tags={"人员api 修改密码"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "oldRsaPassword", value = "经过RSA加密的原始密码", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "newRsaPassword", value = "经过RSA加密的新密码", dataType = "String" ,paramType = "query"),
@@ -444,7 +444,7 @@ public class UumsSysUserInfoController {
      * @param appCode
      * @return
      */
-    @ApiOperation(value = "获取一个群组下的所有人，并且对人员进行排序，排序之后获取人员的全部信息", notes = "获取一个群组下的所有人，并且对人员进行排序，排序之后获取人员的全部信息")
+    @ApiOperation(value = "获取一个群组下的所有人，并且对人员进行排序，排序之后获取人员的全部信息", notes = "获取一个群组下的所有人，并且对人员进行排序，排序之后获取人员的全部信息",tags={"人员api 根据群组查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "groupId", value = "群组id", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "appCode", value = "应用编码", dataType = "String", paramType = "query")
@@ -460,7 +460,7 @@ public class UumsSysUserInfoController {
      * @param appCode
      * @return
      */
-    @ApiOperation(value = "获取某一个组织下的组织和人", notes = "获取某一个组织下的组织和人")
+    @ApiOperation(value = "获取某一个组织下的组织和人", notes = "获取某一个组织下的组织和人",tags={"人员api 根据组织查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "appCode", value = "应用编码", dataType = "String", paramType = "query")
@@ -476,7 +476,7 @@ public class UumsSysUserInfoController {
      * @param appCode
      * @return
      */
-    @ApiOperation(value = "获取某一个组织下的全部人，包括下级组织的人", notes = "获取某一个组织下的全部人，包括下级组织的人")
+    @ApiOperation(value = "获取某一个组织下的全部人，包括下级组织的人", notes = "获取某一个组织下的全部人，包括下级组织的人",tags={"人员api 根据组织查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "appCode", value = "应用编码", dataType = "String", paramType = "query")
@@ -492,7 +492,7 @@ public class UumsSysUserInfoController {
      * @param positionId
      * @return
      */
-    @ApiOperation(value = "根据职位名获取用户不分页", notes = "根据职位名获取用户不分页")
+    @ApiOperation(value = "根据职位名获取用户不分页", notes = "根据职位名获取用户不分页",tags={"人员api 根据职位查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "positionId", value = "多个职位id", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "appCode", value = "应用编码", dataType = "String", paramType = "query")
@@ -508,7 +508,7 @@ public class UumsSysUserInfoController {
      * @param appCode
      * @return
      */
-    @ApiOperation(value = "获取某一个组织下的组织和人，合在一起", notes = "获取某一个组织下的组织和人，合在一起")
+    @ApiOperation(value = "获取某一个组织下的组织和人，合在一起", notes = "获取某一个组织下的组织和人，合在一起",tags={"人员api 根据组织查"})
     @ApiImplicitParams ({
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String" ,paramType = "query"),
             @ApiImplicitParam(name = "appCode", value = "应用编码", dataType = "String", paramType = "query")
@@ -517,52 +517,6 @@ public class UumsSysUserInfoController {
     public JsonResponse findAllInfosUnderOrgTogether(@RequestParam String orgCode, @RequestParam String appCode){
         return  uumsSysUserinfoApi.findAllInfosUnderOrgTogether(orgCode,appCode);
     }
-
-    /**
-     * 增加用户的权限
-     * @return
-     */
-   /* @ApiOperation(value = "增加用户的权限", notes = "增加用户的权限")
-    @PostMapping("/addAppAuthorities")
-    public JsonResponse addAppAuthorities(@RequestBody Map authoritiesMap ){
-        IUser authUser = new SimpleUser();
-        Set<? extends IPermission > permissions = new LinkedHashSet<>(  );
-        //TODO 从map中取出，放入其中。
-        return JsonResponse.success( uumsSysUserinfoApi.addAppAuthorities(authUser,permissions));
-    }*/
-
-    /*    @ApiOperation(value = "查询一个应用下参与的全部用户，包含用户所在的组织以及用户的职位信息分页", notes = "查询一个应用下参与的全部用户，包含用户所在的组织以及用户的职位信息分页")
-    @ApiImplicitParams ({ //
-            @ApiImplicitParam (name = "page", value = "当前页码", dataType = "int", paramType = "query", //
-                    required = true, example = "1"), //
-            @ApiImplicitParam(name = "size", value = "每页数量", dataType = "int", paramType = "query", //
-                    required = true, example = "10"), //
-            @ApiImplicitParam(name = "direction", value = "排序规则（asc/desc）", dataType = "String", //
-                    paramType = "query"), //
-            @ApiImplicitParam(name = "properties", value = "排序规则（属性名称）", dataType = "String", //
-                    paramType = "query"), //
-            @ApiImplicitParam(name = "appcode", value = "appcode", dataType = "String", //
-                    paramType = "query"), //
-    })
-    @PostMapping(value ="/findUserByApp")
-    public JsonResponse findUserByApp(@RequestParam(required = false, defaultValue = "1") int page, //
-                                      @RequestParam(required = false, defaultValue = "10") int size, //
-                                      @RequestParam(required = false) String direction, //
-                                      @RequestParam(required = false) String properties,
-                                      @RequestParam String appcode,
-                                      @RequestBody Map map){
-        return JsonResponse.success(uumsSysUserinfoApi.findUserByApp(page,size,direction,properties,appcode,map));
-    }
-
-
-
-
-    @ApiOperation(value = "查询一个应用下参与的全部用户，包含用户所在的组织以及用户的职位信息不分页", notes = "查询一个应用下参与的全部用户，包含用户所在的组织以及用户的职位信息不分页")
-    @ApiImplicitParam(name = "appcode", value = "appcode", dataType = "String" ,paramType = "query")
-    @PostMapping(value ="/findUserByAppNoPage")
-    public JsonResponse findUserByAppNoPage(@RequestParam String appcode,@RequestBody Map map){
-        return JsonResponse.success(uumsSysUserinfoApi.findUserByAppNoPage(appcode,map));
-    }*/
 
 
 }

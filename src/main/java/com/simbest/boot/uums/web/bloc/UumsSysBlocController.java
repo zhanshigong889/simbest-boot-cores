@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 作者: lishuyi
  * 时间: 2019/3/14  18:11
  */
-@Api (description = "集团信息控制器" )
+@Api (description = "集团信息控制器",tags={"集团信息api"} )
 @RestController
 @RequestMapping(value = {"/uums/sys/bloc", "/sys/uums/bloc"})
 public class UumsSysBlocController {
