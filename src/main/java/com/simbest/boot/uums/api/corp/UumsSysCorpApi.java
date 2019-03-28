@@ -42,7 +42,7 @@ public class UumsSysCorpApi {
         JsonResponse response= HttpClient.post(config.getUumsAddress() + CORP_MAPPING + "findById"+SSO)
                 .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(ApplicationConstants.ADMINISTRATOR))
                 .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
-                .param("corpid", corpid)
+                .param("id", corpid)
                 .asBean(JsonResponse.class);
         if(response==null){
             log.error("--response对象为空!--");

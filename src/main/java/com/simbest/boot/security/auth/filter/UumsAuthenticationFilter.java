@@ -19,12 +19,8 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 用途：基于UUMS主数据的单点登录拦截器
@@ -40,7 +36,7 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException, IOException, ServletException {
+            throws AuthenticationException {
         String username = request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
         String password = request.getParameter(AuthoritiesConstants.SSO_UUMS_PASSWORD);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
@@ -53,7 +49,7 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password) || StringUtils.isEmpty(appcode)) {
                 log.error("UUMS 认证失败， 令牌、密码、应用标识不能为空！");
                 throw new BadCredentialsException(
-                        "Authentication principal can not be null: " + username);
+                        "UUMS 认证失败， 令牌、密码、应用标识不能为空: " + username);
             }
 
             Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
@@ -84,45 +80,4 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
 
-//    /**
-//     * 登录发生错误计数，每错误一次，即向后再延时等待5分钟
-//     * @param request
-//     * @param response
-//     * @param failed
-//     * @throws IOException
-//     * @throws ServletException
-//     */
-//    @Override
-//    protected void unsuccessfulAuthentication(HttpServletRequest request,
-//                                              HttpServletResponse response, AuthenticationException failed)
-//            throws IOException, ServletException {
-//
-//        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
-//        Integer failedTimes = RedisUtil.getBean(key, Integer.class);
-//        failedTimes = null == failedTimes ? AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES : failedTimes + AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES;
-//        RedisUtil.setBean(key, failedTimes);
-//        RedisUtil.expire(key, AuthoritiesConstants.ATTEMPT_LOGIN_FAILED_WAIT_SECONDS, TimeUnit.SECONDS);
-//
-//        super.unsuccessfulAuthentication(request, response, failed);
-//    }
-
-//    /**
-//     * 登录成功后，立即清除失败缓存，不再等待上述到期时间
-//     * @param request
-//     * @param response
-//     * @param chain
-//     * @param authResult
-//     * @throws IOException
-//     * @throws ServletException
-//     */
-//    @Override
-//    protected void successfulAuthentication(HttpServletRequest request,
-//                                            HttpServletResponse response, FilterChain chain, Authentication authResult)
-//            throws IOException, ServletException {
-//
-//        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
-//        Boolean value = RedisUtil.delete(key);
-//
-//        super.successfulAuthentication(request, response, chain, authResult);
-//    }
 }

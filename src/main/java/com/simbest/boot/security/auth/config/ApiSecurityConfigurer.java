@@ -8,6 +8,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.authentication.Oauth2RedisTokenStore;
 import com.simbest.boot.security.auth.oauth2.CustomWebResponseExceptionTranslator;
 import com.simbest.boot.security.auth.oauth2.OauthExceptionEntryPoint;
+import com.simbest.boot.security.auth.oauth2.UumsTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +24,14 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.CompositeTokenGranter;
+import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.web.access.AccessDeniedHandler;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 用途：RESTFul 接口安全配置
@@ -38,6 +45,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  * 获取token请求（/oauth/token），请求所需参数：client_id、client_secret、grant_type
  * client模式：http://localhost:8080/uums/oauth/token?grant_type=client_credentials&scope=all&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e
  * password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e&username=hadmin&password=d93df540143f68cf337deabc13a055f5
+ * uums扩展后的password模式：http://localhost:8080/uums/oauth/token?grant_type=uumspassword&scope=all&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=nma&username=koushaoguo&password=ayIFo6LNBSrtcPmjJET9K9UJr+uNSk16siqycnJblTpG3bN1Z7L0m0m4HThAq3CZW7vNL1NEGR6Zt8HT2BtY28mfOesax75Nxu/J++VpR1b4dw4EAce14h5nR0q721Z/Sc3Ao9HI+Sl4eF03TkQRmWu1ipJHFD+JpTITt0xT52w=
  * 注意：password的添值有两种方式：1、BCrypt加密前的MD5值  2、SecurityUtils万能密码的MD5值
  *
  * http://andaily.com/blog/?p=528 返回格式
@@ -130,10 +138,25 @@ public class ApiSecurityConfigurer {
             // 配置tokenStore，保存到redis缓存中
             endpoints.authenticationManager(authenticationManager)
                     .tokenStore(redisTokenStore)
+                    .tokenGranter(tokenGranter(endpoints))
                     // 不添加userDetailsService，刷新access_token时会报错
                     .userDetailsService(authService)
                     .exceptionTranslator(exceptionTranslator);
         }
+
+        /**
+         * 追加uumspassword方式的认证
+         * 参考：https://github.com/spring-projects/spring-security-oauth/issues/564
+         * @param endpoints
+         * @return
+         */
+        private TokenGranter tokenGranter(final AuthorizationServerEndpointsConfigurer endpoints) {
+            List<TokenGranter> granters = new ArrayList<>(Arrays.asList(endpoints.getTokenGranter()));
+            granters.add(new UumsTokenGranter(authenticationManager, endpoints.getTokenServices(),
+                    endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+            return new CompositeTokenGranter(granters);
+        }
+
     }
 
 

@@ -39,6 +39,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -242,7 +243,10 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CaptchaAuthenticationFilter captchaUsernamePasswordAuthenticationFilter() throws Exception {
-        CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(new AntPathRequestMatcher("/*login", RequestMethod.POST.name()));
+        CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
+                new OrRequestMatcher(
+                        new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
+                ));
         filter.setAuthenticationManager(authenticationManagerBean());
         //跳至登陆页，提醒验证码错误
         filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_ERROR_PAGE));
