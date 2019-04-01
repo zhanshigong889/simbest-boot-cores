@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 
-@Api (description = "系统用户操作相关接口")
+@Api (description = "系统用户操作相关接口",tags={"人员api 全部接口"})
 @Slf4j
 @RestController
 @RequestMapping(value = {"/uums/sys/userinfo", "/sys/uums/userinfo"})
