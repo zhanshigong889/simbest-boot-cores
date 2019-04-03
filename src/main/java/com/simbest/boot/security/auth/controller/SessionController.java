@@ -79,7 +79,6 @@ public class SessionController {
                 Long number2 = RedisUtil.mulDelete(member.toString());
                 log.debug("try to remove {} return {}", member.toString(), number2);
             }
-
         }
         return JsonResponse.success(keys);
     }
@@ -94,4 +93,5 @@ public class SessionController {
         delCache.put("cookie", number2);
         return JsonResponse.success(delCache);
     }
+
 }

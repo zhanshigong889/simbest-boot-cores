@@ -46,6 +46,8 @@ public class CsrfProtectFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
         String whiteHosts = appConfig.getWhiteHostList();
         if(StringUtils.isNotEmpty(whiteHosts)){
+            log.info("Csrf 防盗链主机源端白名单为：");
+            log.info(whiteHosts);
             String[] whiteHostss = whiteHosts.split(ApplicationConstants.COMMA);
             for(String s:whiteHostss){
                 whiteHostList.add(s.toLowerCase());
@@ -59,21 +61,20 @@ public class CsrfProtectFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        log.debug(request.getRequestURI());
+        log.debug("访问目录URL地址为【{}】", request.getRequestURI());
         // 链接来源地址，通过获取请求头 referer 得到
         String referer = request.getHeader("referer");
         try {
             if (referer != null) {
                 URI referUri = new URI(referer);
                 String host = referUri.getHost().toLowerCase();
-                log.debug("Check host："+host);
                 if (whiteHostList.size()>0 && !whiteHostList.contains(host)) {
+                    log.error("Csrf 防盗链主机源端白名单为【{}】, 当前主机【{}】不在白名单内，禁止访问!", whiteHostList, host);
                     PrintWriter writer = servletResponse.getWriter();
                     JsonResponse jsonResponse = JsonResponse.builder().errcode(JsonResponse.ERROR_CODE).timestamp(DateUtil.getCurrent())
                             .status(JsonResponse.ERROR_STATUS).path(request.getServletPath())
                             .message("Forbidden: invalid host access: "+host).build();
                     String jsonResponseStr = JacksonUtils.obj2json(jsonResponse);
-                    log.debug(jsonResponseStr);
                     writer.write(jsonResponseStr);
                     writer.flush();
                     writer.close();

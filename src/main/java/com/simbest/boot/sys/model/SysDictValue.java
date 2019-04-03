@@ -25,6 +25,11 @@ import javax.persistence.*;
 @Entity
 public class SysDictValue extends LogicModel {
 
+    public final static String VALUE_TYPE_INT = "int";
+    public final static String VALUE_TYPE_VARCHAR = "varchar";
+    public final static String VALUE_TYPE_DATE = "date";
+    public final static String VALUE_TYPE_DATETIME = "datetime";
+
     @Id
     @Column(name = "id", length = 40)
     @GeneratedValue(generator = "snowFlakeId")
@@ -49,6 +54,9 @@ public class SysDictValue extends LogicModel {
 
     @Column(nullable = false)
     private String dictType;
+
+    @Column
+    private String valueType;
 
     @Column
     private Boolean isDefault;
