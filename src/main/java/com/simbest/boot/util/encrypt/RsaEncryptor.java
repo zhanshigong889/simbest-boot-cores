@@ -5,6 +5,8 @@ package com.simbest.boot.util.encrypt;
 
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.util.BootAppFileReader;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +38,7 @@ import java.util.List;
  * @author lishuyi
  * 时间: 2017/12/28  22:02 
  */
+@Slf4j
 @Component
 public class RsaEncryptor extends AbstractEncryptor {
 
@@ -307,10 +310,17 @@ public class RsaEncryptor extends AbstractEncryptor {
     protected String decryptCode(String code) {
         try {
             byte[] binaryData = decrypt(getPrivateKey(), org.apache.commons.codec.binary.Base64.decodeBase64(code) /*org.apache.commons.codec.binary.Base64.decodeBase64(base46String.getBytes())*/);
-            String string = new String(binaryData);
-            return string;
+            return new String(binaryData);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            try{
+                log.warn("解密【{}】失败第一次", code);
+                code = StringUtils.replace(code, " ", "+");
+                byte[] binaryData = decrypt(getPrivateKey(), org.apache.commons.codec.binary.Base64.decodeBase64(code) /*org.apache.commons.codec.binary.Base64.decodeBase64(base46String.getBytes())*/);
+                return new String(binaryData);
+            } catch (Exception e1) {
+                log.error("解密【{}】失败第二次", code);
+                throw new RuntimeException(e1);
+            }
         }
     }
 
