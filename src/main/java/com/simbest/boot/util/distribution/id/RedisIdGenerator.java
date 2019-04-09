@@ -7,12 +7,15 @@ import com.github.wenhao.jpa.Specifications;
 import com.google.common.base.Strings;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.security.IUser;
 import com.simbest.boot.sys.model.SysDict;
 import com.simbest.boot.sys.model.SysDictValue;
 import com.simbest.boot.sys.service.ISysDictService;
 import com.simbest.boot.sys.service.ISysDictValueService;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.security.LoginUtils;
+import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,6 +42,9 @@ public class RedisIdGenerator {
 
     @Autowired
     private ISysDictValueService dictValueService;
+
+    @Autowired
+    private LoginUtils loginUtils;
 
     /**
      * 返回当前年（2位）+当前天在当前年的第几天（3位）+当前小时（2位）
@@ -74,6 +80,10 @@ public class RedisIdGenerator {
      * @return
      */
     private Long incrId(String cacheName, String prefix, int length) {
+        IUser currentUser = SecurityUtils.getCurrentUser();
+        if(null == currentUser) {
+            loginUtils.adminLogin();
+        }
         String orderId = null;
         String rediskey = cacheName.concat(ApplicationConstants.COLON).concat(prefix);
         Specification<SysDict> dictCondition = Specifications.<SysDict>and()
@@ -132,21 +142,40 @@ public class RedisIdGenerator {
 
     /**
      *
+     * @return 1836517001
+     */
+    public Long getDateHourId() {
+        // 转成数字类型，可排序
+        return getDateHourId("default");
+    }
+
+    /**
+     *
      * @param cacheName
      * @return 1836517001
      */
     public Long getDateHourId(String cacheName) {
         // 转成数字类型，可排序
-        return incrId(cacheName, getDateHourPrefix(new Date()), DEFAULT_FORMAT_ADD_LENGTH);
+        return getDateHourId(cacheName, DEFAULT_FORMAT_ADD_LENGTH);
     }
 
     /**
      *
-     * @return 1836517001
+     * @param cacheName
+     * @return 1836517001, 001的位数取决于传参length
      */
-    public Long getDateHourId() {
+    public Long getDateHourId(String cacheName, int length) {
         // 转成数字类型，可排序
-        return incrId("default", getDateHourPrefix(new Date()), DEFAULT_FORMAT_ADD_LENGTH);
+        return incrId(cacheName, getDateHourPrefix(new Date()), length);
+    }
+
+    /**
+     *
+     * @return 181231001
+     */
+    public Long getDateId() {
+        // 转成数字类型，可排序
+        return getDateId("default");
     }
 
     /**
@@ -156,15 +185,17 @@ public class RedisIdGenerator {
      */
     public Long getDateId(String cacheName) {
         // 转成数字类型，可排序
-        return incrId(cacheName, getDatePrefix(new Date()), DEFAULT_FORMAT_ADD_LENGTH);
+        return getDateId(cacheName, DEFAULT_FORMAT_ADD_LENGTH);
     }
 
     /**
      *
-     * @return 181231001
+     * @param cacheName
+     * @return 181231001, 001的位数取决于传参length
      */
-    public Long getDateId() {
+    public Long getDateId(String cacheName, int length) {
         // 转成数字类型，可排序
-        return incrId("default", getDatePrefix(new Date()), DEFAULT_FORMAT_ADD_LENGTH);
+        return incrId(cacheName, getDatePrefix(new Date()), length);
     }
+
 }
