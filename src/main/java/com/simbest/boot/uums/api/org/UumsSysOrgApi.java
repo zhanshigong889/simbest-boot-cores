@@ -285,6 +285,32 @@ public class UumsSysOrgApi {
     }
 
     /**
+     * 出某些组织之出省公司以及18个地市分公司，不要省飞达等公司
+     * @param appcode
+     * @return
+     */
+    public List<SimpleOrg> findPOrgAnd18CityOrg(String appcode) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findPOrgAnd18CityOrg"+SSO)
+                .param( AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param( AuthoritiesConstants.SSO_API_APP_CODE,appcode )
+                .param( "appCode",appcode )
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.debug("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList )){
+            log.debug("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<SimpleOrg> orgList = JacksonUtils.json2Type(json, new TypeReference<List<SimpleOrg>>(){});
+        return orgList;
+    }
+
+    /**
      * 查出用户所在的市公司下的部门以及市公司下的县公司
      * @param appcode
      * @return

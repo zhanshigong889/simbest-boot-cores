@@ -77,6 +77,18 @@ public class UumsSysOrgController {
     }
 
     /**
+     * 出某些组织之出省公司以及18个地市分公司，不要省飞达等公司
+     * @param appcode
+     * @return
+     */
+    @ApiOperation (value = "出某些组织之出省公司以及18个地市分公司，不要省飞达等公司", notes = "出某些组织之出省公司以及18个地市分公司，不要省飞达等公司")
+    @ApiImplicitParam(name = "appcode", value = "应用code", dataType = "String", paramType = "query")
+    @PostMapping ("/findPOrgAnd18CityOrg")
+    public JsonResponse findPOrgAnd18CityOrg( @RequestParam  String appcode) {
+        return JsonResponse.success(uumsSysOrgApi.findPOrgAnd18CityOrg( appcode ));
+    }
+
+    /**
      * 查出用户所在的市公司下的部门以及市公司下的县公司
      * @param appcode
      * @return
