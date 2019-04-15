@@ -121,6 +121,18 @@ public class UumsSysOrgController {
     public JsonResponse findRootByCorpId(@RequestParam(required = false)  String appcode,@RequestParam String corpId) {
         return JsonResponse.success(uumsSysOrgApi.findRootByCorpId(appcode,corpId));
     }
+
+    /**
+     * 用于查询当前人所在的组织树，直到企业的顶级
+     * @param corpMap
+     * @return
+     */
+    @ApiOperation(value = "用于查询当前人所在的组织树，直到企业的顶级", notes = "用于查询当前人所在的组织树，直到企业的顶级")
+    @ApiImplicitParam(name = "appcode", value = "应用code", dataType = "String", paramType = "query")
+    @PostMapping(value = {"/findOrgTreeFromCorp","/findOrgTreeFromCorp/sso"})
+    public JsonResponse findOrgTreeFromCorp(@RequestParam(required = false) String appcode, @RequestBody(required = false) Map<String,Object> corpMap) {
+        return JsonResponse.success(uumsSysOrgApi.findUserTreeFromCorp(appcode,corpMap));
+    }
 }
 
 

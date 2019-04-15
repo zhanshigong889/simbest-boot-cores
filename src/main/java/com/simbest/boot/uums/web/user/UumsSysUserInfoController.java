@@ -518,6 +518,39 @@ public class UumsSysUserInfoController {
         return  uumsSysUserinfoApi.findAllInfosUnderOrgTogether(orgCode,appCode);
     }
 
-
+    //根据组织（精确）以及用户oa账号、用户名、手机号（模糊）获取用户并分页
+    @ApiOperation(value = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页", notes = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页",tags={"人员api 根据人员查"})
+    @ApiImplicitParams ({ //
+            @ApiImplicitParam (name = "page", value = "当前页码", dataType = "int", paramType = "query", //
+                    required = true, example = "1"), //
+            @ApiImplicitParam(name = "size", value = "每页数量", dataType = "int", paramType = "query", //
+                    required = true, example = "10"), //
+            @ApiImplicitParam(name = "direction", value = "排序规则（asc/desc）", dataType = "String", //
+                    paramType = "query"), //
+            @ApiImplicitParam(name = "properties", value = "排序规则（属性名称）", dataType = "String", //
+                    paramType = "query"), //
+            @ApiImplicitParam(name = "appcode", value = "当前应用appcode", dataType = "String", //
+                    paramType = "query"),
+            @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String", //
+                    paramType = "query"),
+            @ApiImplicitParam(name = "username", value = "OA账号", dataType = "String", //
+                    paramType = "query"),
+            @ApiImplicitParam(name = "truename", value = "真实姓名", dataType = "String", //
+                    paramType = "query"),
+            @ApiImplicitParam(name = "preferredMobile", value = "手机号码", dataType = "String", //
+                    paramType = "query")
+    })
+    @PostMapping("/findUserOrgDim")
+    public JsonResponse findUserOrgDim( @RequestParam(required = false, defaultValue = "1") int page, //
+                                                @RequestParam(required = false, defaultValue = "10") int size, //
+                                                @RequestParam(required = false) String direction, //
+                                                @RequestParam(required = false) String properties,
+                                                @RequestParam(required = false) String appcode,
+                                                @RequestParam(required = false) String orgCode,
+                                                @RequestParam(required = false) String username,
+                                                @RequestParam(required = false) String truename,
+                                                @RequestParam(required = false) String preferredMobile ) {
+        return uumsSysUserinfoApi.findUserOrgDim(page,size,direction,properties,appcode,orgCode,username,truename,preferredMobile);
+    }
 }
 

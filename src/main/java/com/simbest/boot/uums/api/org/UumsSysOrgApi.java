@@ -9,6 +9,7 @@ import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.SimpleOrg;
+import com.simbest.boot.security.UserOrgTree;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
@@ -393,6 +394,39 @@ public class UumsSysOrgApi {
         String json = JacksonUtils.obj2json(response.getData());
         SimpleOrg auth = JacksonUtils.json2obj(json, SimpleOrg.class);
         return auth;
+    }
+
+
+    /**
+     * 用于查询当前人所在的组织树，直到企业的顶级
+     * @param appcode
+     * @param corpMap
+     * @return
+     */
+    public List<UserOrgTree> findUserTreeFromCorp(String appcode, Map<String,Object> corpMap) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(corpMap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOrgTreeFromCorp"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        if(response==null){
+            log.debug("--response对象为空!--");
+            return null;
+        }
+        if(response.getData() == null ){
+            log.debug(response.getMessage());
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList )){
+            log.debug("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<UserOrgTree> userOrgTreeList = JacksonUtils.json2Type(json, new TypeReference<List<UserOrgTree>>(){});
+        return userOrgTreeList;
     }
 
 }
