@@ -4,8 +4,6 @@ package com.simbest.boot.security.auth.controller;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.IPermission;
-import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
-
 /**
  * 用途：登录校验控制器
  * 作者: lishuyi
@@ -34,7 +30,7 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping("/httpauth")
-public class AuthenticationController {
+public class UumsHttpValidationAuthenticationController {
 
     private final static String LOGTAG = "UUMS认证控制器";
 
@@ -56,39 +52,25 @@ public class AuthenticationController {
     public JsonResponse validate(@RequestParam String username, @RequestParam String password, @RequestParam String appcode) {
         try {
             if(StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password) && StringUtils.isNotEmpty(appcode)) {
-                if(!authService.checkUserAccessApp(username, appcode)) {
-                    log.error(LOGTAG + "认证用户【{}】访问【{}】失败", username, appcode);
-                    return JsonResponse.fail("用户"+username +"访问"+appcode+"失败",
-                            ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP, ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP);
-                }
-                log.debug(LOGTAG + "认证用户【{}】访问【{}】成功", username, appcode);
                 UsernamePasswordAuthenticationToken passwordToken = new UsernamePasswordAuthenticationToken(username, rsaEncryptor.decrypt(password));
                 Authentication authentication = authenticationManager.authenticate(passwordToken);
                 if(authentication.isAuthenticated()) {
-                    IUser authUser = (IUser) authentication.getPrincipal();
-                    //追加权限
-                    Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(username, appcode);
-                    if(null != appPermission && !appPermission.isEmpty()) {
-                        log.debug(LOGTAG + "即将为用户【{}】在应用【{}】追加【{}】项权限", username, appcode, appPermission.size());
-                        authUser.addAppPermissions(appPermission);
-                        authUser.addAppAuthorities(appPermission);
-                    }
-                    return JsonResponse.success(authUser);
+                    return JsonResponse.success(authentication.getPrincipal());
                 }
                 else {
-                    log.error(LOGTAG + "认证用户【{}】认证【{}】失败", username, appcode);
+                    log.error(LOGTAG + "认证用户【{}】通过密码【{}】访问应用【{}】失败", username, password, appcode);
                     return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }
             } else {
                 log.error(LOGTAG + "认证用户【{}】访问【{}】失败", username, appcode);
-                return JsonResponse.fail(ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
+                return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
         } catch (AuthenticationException e){
             log.error(LOGTAG + "认证用户【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         } catch (Exception e){
             log.error(LOGTAG + "认证用户【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
-            return JsonResponse.fail(ErrorCodeConstants.UNKNOW_ERROR);
+            return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         }
     }
 }

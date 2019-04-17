@@ -20,7 +20,7 @@ import java.text.ParseException;
  */
 @Slf4j
 @Component
-public class MochaSsoAuthenticationServiceImpl extends AbstractSsoAuthenticationService {
+public class MochaSsoAuthenticationServiceImpl extends AbstractEncryptorSsoAuthenticationService {
 
     private final static Integer TIMEOUT = 1800;
 
@@ -28,16 +28,16 @@ public class MochaSsoAuthenticationServiceImpl extends AbstractSsoAuthentication
     private AppConfig config;
 
     @Override
-    public String decryptUsername(String username) {
-        String decryptUsername = null;
-        if(StringUtils.isNotEmpty(username)){
+    public String decryptKeyword(String encodeKeyword) {
+        String decodeKeyword = null;
+        if(StringUtils.isNotEmpty(encodeKeyword)){
             try {
-                decryptUsername = EncryptorUtil.decode(config.getMochaPortalToken(), username, TIMEOUT);
+                decodeKeyword = EncryptorUtil.decode(config.getMochaPortalToken(), encodeKeyword, TIMEOUT);
             } catch (Exception e) {
-                log.warn("SSO解密服务【{}】解密密钥【{}】， 解密后用户名为【{}】, 发生【{}】异常", this.getClass().getSimpleName(), username, decryptUsername, e.getMessage());
+                log.debug("SSO解密服务【{}】解密密钥【{}】， 解密后用户名为【{}】, 发生【{}】异常", this.getClass().getSimpleName(), encodeKeyword, decodeKeyword, e.getMessage());
             }
         }
-        return decryptUsername;
+        return decodeKeyword;
     }
 
     public static void main(String[] args) {

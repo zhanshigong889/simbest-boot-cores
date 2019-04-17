@@ -3,8 +3,6 @@
  */
 package com.simbest.boot.security.auth.provider.sso.service;
 
-import com.simbest.boot.security.auth.provider.sso.token.SsoUsernameAuthentication;
-
 /**
  * 用途：单点登录验证服务
  * 作者: lishuyi 
@@ -17,13 +15,6 @@ public interface SsoAuthenticationService {
      * @param request 验证请求
      * @return 用户名
      */
-    String decryptUsername(String username);
-
-    /**
-     * 初级认证
-     * @param authentication
-     * @return
-     */
-    SsoUsernameAuthentication attemptAuthentication(SsoUsernameAuthentication authentication);
+    String decryptKeyword(String encodeKeyword);
 
 }

@@ -6,8 +6,8 @@ package com.simbest.boot.security.auth.filter;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
-import com.simbest.boot.security.auth.provider.sso.token.UumsAuthentication;
-import com.simbest.boot.security.auth.provider.sso.token.UumsAuthenticationCredentials;
+import com.simbest.boot.security.auth.authentication.UumsAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
         String username = request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
         String password = request.getParameter(AuthoritiesConstants.SSO_UUMS_PASSWORD);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
-
+        log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
         String key = AuthoritiesConstants.LOGIN_FAILED_KEY + username;
         Integer failedTimes = RedisUtil.getBean(key, Integer.class);
         if(null != failedTimes && failedTimes >= AuthoritiesConstants.ATTEMPT_LOGIN_MAX_TIMES){

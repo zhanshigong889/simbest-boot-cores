@@ -3,8 +3,8 @@
  */
 package com.simbest.boot.security.auth.oauth2;
 
-import com.simbest.boot.security.auth.provider.sso.token.UumsAuthentication;
-import com.simbest.boot.security.auth.provider.sso.token.UumsAuthenticationCredentials;
+import com.simbest.boot.security.auth.authentication.UumsAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AccountStatusException;
@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
-import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

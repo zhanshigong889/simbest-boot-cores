@@ -6,9 +6,9 @@ package com.simbest.boot.security.auth.filter;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
-import com.simbest.boot.security.auth.provider.sso.token.KeyTypePrincipal;
-import com.simbest.boot.security.auth.provider.sso.token.SsoUsernameAuthentication;
-import com.simbest.boot.security.auth.provider.sso.token.UsernamePrincipal;
+import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
+import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
+import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -77,15 +77,13 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throws AuthenticationException {
         Principal principal = obtainPrincipal(request);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
-        log.debug("SSO 单点认证过滤器Principal【{}】尝试访问【{}】的URL资源为【{}】", principal.getName(), appcode, request.getRequestURI());
         if (null == principal || StringUtils.isEmpty(appcode)) {
             log.error("SSO 认证主体Principal【{}】和访问应用【{}】不能为空！", principal, appcode);
             throw new BadCredentialsException(
                     "SSO 认证主体Principal【"+principal+"】和访问应用【"+appcode+"】不能为空！");
         }
-
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-        if (authenticationIsRequired(existingAuth, principal)) {
+        if (authenticationIsRequired(request, existingAuth, principal, appcode)) {
             SsoUsernameAuthentication ssoUsernameAuthentication = new SsoUsernameAuthentication(principal, appcode);
             return this.getAuthenticationManager().authenticate(ssoUsernameAuthentication);
         }
@@ -98,24 +96,26 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
      * @param username 用户名
      * @return true/false
      */
-    private boolean authenticationIsRequired(Authentication existingAuth, Principal principal) {
-        String decryptName = null;
+    private boolean authenticationIsRequired(HttpServletRequest request, Authentication existingAuth, Principal principal, String appcode) {
+        String decodeKeyword = null;
         for(SsoAuthenticationService authService : ssoAuthenticationRegister.getSsoAuthenticationService()) {
-            decryptName = authService.decryptUsername(principal.getName());
-            if(StringUtils.isNotEmpty(decryptName)) {
+            decodeKeyword = authService.decryptKeyword(principal.getName());
+            if(StringUtils.isNotEmpty(decodeKeyword)) {
                 break;
             }
         }
-        if(StringUtils.isEmpty(decryptName)){
+        if(StringUtils.isEmpty(decodeKeyword)){
             log.error("SSO 认证主体Principal【{}】无法解密！", principal.getName());
             throw new BadCredentialsException(
                     "SSO 认证主体Principal【"+principal.getName()+"】无法解密！");
+        } else {
+            log.info("SSO 单点认证用户【{}】尝试访问【{}】的URL资源为【{}】", decodeKeyword, appcode, request.getRequestURI());
         }
 
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
             return true;
         } else if (existingAuth instanceof SsoUsernameAuthentication
-                && !existingAuth.getName().equals(decryptName)) {
+                && !existingAuth.getName().equals(decodeKeyword)) {
             return true;
         }
         return false;

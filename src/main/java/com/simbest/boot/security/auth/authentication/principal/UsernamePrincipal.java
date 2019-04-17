@@ -1,9 +1,8 @@
 /*
  * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
  */
-package com.simbest.boot.security.auth.provider.sso.token;
+package com.simbest.boot.security.auth.authentication.principal;
 
-import com.simbest.boot.security.IAuthService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,14 +20,12 @@ import java.security.Principal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class KeyTypePrincipal implements Principal, Serializable {
+public class UsernamePrincipal implements Principal, Serializable {
 
-    private IAuthService.KeyType keyType;
-
-    private String keyword;
+    private String username;
 
     @Override
     public String getName() {
-        return keyword;
+        return username;
     }
 }

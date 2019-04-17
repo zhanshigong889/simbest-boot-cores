@@ -10,21 +10,17 @@ import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AccesssAppDeniedException;
+import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
 import com.simbest.boot.security.IUser;
-import com.simbest.boot.security.SimpleUser;
-import com.simbest.boot.security.auth.provider.sso.token.UumsAuthentication;
-import com.simbest.boot.security.auth.provider.sso.token.UumsAuthenticationCredentials;
-import com.simbest.boot.util.json.JacksonUtils;
+import com.simbest.boot.security.auth.authentication.UumsAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.stereotype.Component;
 
 
@@ -45,7 +41,8 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
     @Autowired
     private AppConfig config;
 
-    private UserDetailsChecker preAuthenticationChecks = new AccountStatusUserDetailsChecker();
+    @Autowired
+    private GenericAuthenticationChecker genericAuthenticationChecker;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -55,26 +52,41 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
             IUser authUser = null;
             try {
                 UumsAuthenticationCredentials uumsCredentials = (UumsAuthenticationCredentials)credentials;
+                String username = principal.toString();
+                String password = uumsCredentials.getPassword();
+                String appcode = uumsCredentials.getAppcode();
+                log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
                 JsonResponse response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
-                        .param(AuthoritiesConstants.SSO_UUMS_USERNAME, principal.toString())
-                        .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, uumsCredentials.getPassword())
-                        .param(AuthoritiesConstants.SSO_API_APP_CODE, uumsCredentials.getAppcode())
+                        .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
+                        .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
+                        .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
                         .asBean(JsonResponse.class);
-                if(response.getErrcode().equals(ErrorCodeConstants.ERRORCODE_LOGIN_APP_UNREGISTER_GROUP)) {
-                    log.error(LOGTAG + "UUMS认证 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
+                if(!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
+                    log.error(LOGTAG + "UUMS认证 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                     throw new
-                            AccesssAppDeniedException(ErrorCodeConstants.LOGIN_APP_UNREGISTER_GROUP);
+                            BadCredentialsException(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }else {
-                    String userJson = JacksonUtils.obj2json(response.getData());
-                    authUser = JacksonUtils.json2obj(userJson, SimpleUser.class);
-                    preAuthenticationChecks.check(authUser);
-                    UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(authUser,
-                            authUser.getPassword(), authUser.getAuthorities());
-                    result.setDetails(authentication.getDetails());
-                    log.info(LOGTAG + "UUMS认证 【{}】 访问 【{}】 成功", principal, uumsCredentials.getAppcode());
-                    return result;
+                    UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
+                            .password(password).appcode(appcode).build());
+                    return genericAuthenticationChecker.authChek(authentication, appcode);
                 }
-            }catch (HttpClientException e){
+            }
+            catch (BadCredentialsException e){
+                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                throw new
+                        BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
+            }
+            catch (AttempMaxLoginFaildException e){
+                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                throw new
+                        AttempMaxLoginFaildException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
+            }
+            catch (AccesssAppDeniedException e){
+                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                throw new
+                        AccesssAppDeniedException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
+            }
+            catch (HttpClientException e){
                 log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);

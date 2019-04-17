@@ -163,7 +163,7 @@ public class FastDfsClient {
      * 上传本地文件方法
      * <p>Title: uploadFile</p>
      * <p>Description: </p>
-     * @param fileName 文件全路径
+     * @param local_fileName 文件全路径
      * @param extName 文件扩展名，不包含（.）
      * @param metas 文件扩展信息
      * @return

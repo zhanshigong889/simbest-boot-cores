@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -47,6 +48,7 @@ import org.springframework.util.Assert;
  * 作者: lishuyi
  * 时间: 2018/5/29  22:21
  */
+@Slf4j
 public class ExcelUtil<T> {
     Class<T> clazz;
 
@@ -82,7 +84,7 @@ public class ExcelUtil<T> {
                                 .getAnnotation(ExcelVOAttribute.class);
                         int col = getExcelCol(attr.column());// 获得列号
                         maxCol = Math.max(col, maxCol);
-                        // System.out.println(col + "====" + field.getName());
+                        // log.info(col + "====" + field.getName());
                         field.setAccessible(true);// 设置类的私有字段属性可访问.
                         fieldsMap.put(col, field);
                     }
@@ -111,7 +113,7 @@ public class ExcelUtil<T> {
                             continue;
                         }
                         entity = (entity == null ? clazz.newInstance() : entity);// 如果不存在实例则新建.
-                        // System.out.println(cells[j].getContents());
+                        // log.info(cells[j].getContents());
                         Field field = fieldsMap.get(j);// 从map中得到对应列的field.
                         if (field == null) {
                             continue;
@@ -217,7 +219,7 @@ public class ExcelUtil<T> {
                                 .getAnnotation(ExcelVOAttribute.class);
                         int col = getExcelCol(attr.column());// 获得列号
                         maxCol = Math.max(col, maxCol);
-                        // System.out.println(col + "====" + field.getName());
+                        // log.info(col + "====" + field.getName());
                         field.setAccessible(true);// 设置类的私有字段属性可访问.
                         fieldsMap.put(col, field);
                     }
@@ -310,7 +312,7 @@ public class ExcelUtil<T> {
 //                                .getAnnotation(ExcelVOAttribute.class);
 //                        int col = getExcelCol(attr.column());// 获得列号
 //                        maxCol = Math.max(col, maxCol);
-//                        // System.out.println(col + "====" + field.getName());
+//                        // log.info(col + "====" + field.getName());
 //                        field.setAccessible(true);// 设置类的私有字段属性可访问.
 //                        fieldsMap.put(col, field);
 //                    }
@@ -403,19 +405,7 @@ public class ExcelUtil<T> {
     }
 
     /**
-     * 将集合数组长度小于65535的数据导出到excel中
-     * @param list 集合记录
-     * @param sheetName sheet页名称
-     * @param output 输出流
-     * @param isTagValue 标记是否导出此列
-     * @return
-     */
-    public boolean exportExcel(List<T> list, String sheetName, OutputStream output, String isTagValue) {
-        return exportExcelList(list, sheetName, 65535, output,isTagValue);
-    }
-
-    /**
-     * controller里传递过来的list的元素大于65535就需要在这里分离成多个list然后放在集合中再调用导出方法。
+     * 传递过来的list的元素大于65535时，会自动分离成多个list导出到多个sheet页中
      * 为什么是65535？
      * excel的sheet页支持65536行
      * 第一行被表头占用，所以都用65536-1=65535来表示sheetSize。
@@ -426,23 +416,20 @@ public class ExcelUtil<T> {
      * @param isTagValue 标记是否导出此列
      * @return
      */
-    public boolean exportExcelList(List<T> list, String sheetName, int rowSize,
-                                   OutputStream output, String isTagValue) {
-        if (rowSize > 65535 || rowSize < 1) {
-            rowSize = 65535;
-        }
+    public boolean exportExcel(List<T> list, String sheetName, OutputStream output, String isTagValue) {
+        int rowSize = 65535;
         double sheetNo = Math.ceil(list.size() / rowSize)+1;// 取出一共有多少个sheet.
         String sheetNames[] = new String[(int) sheetNo];
-        List<T>[]lists=new ArrayList[(int) sheetNo];
+        List<T>[] lists = new ArrayList[(int) sheetNo];
         sheetNames[0] = sheetName;
-        for(int i=1;i<sheetNo;i++){
+        for(int i=1; i<sheetNo; i++){
             sheetNames[i] = sheetName + i;
         }
-        for(int i=0;i<sheetNo;i++){
+        for(int i=0; i<sheetNo; i++){
             int startNo = i * rowSize;
             int endNo = Math.min(startNo + rowSize, list.size());
             List listi = new ArrayList();
-            for (int j = startNo; j < endNo; j++) {
+            for (int j=startNo; j<endNo; j++) {
                 listi.add(list.get(j));
             }
             lists[i] = listi;
@@ -460,24 +447,18 @@ public class ExcelUtil<T> {
      *            java输出流
      */
     public boolean exportExcel(List<T> lists[], String sheetNames[], OutputStream output, String isTagValue) {
-
         if (lists.length != sheetNames.length) {
-            System.out.println("数组长度不一致");
+            log.error("无法导出Excel，原因为对象列表长度与Sheet页数组长度不一致");
             return false;
         }
 
         HSSFWorkbook workbook = new HSSFWorkbook();// 产生工作薄对象
-
         for (int ii = 0; ii < lists.length; ii++) {
             List<T> list = lists[ii];
             String sheetName = sheetNames[ii];
-
             List<Field> fields = getMappedFiled(clazz, null, isTagValue);
-
             HSSFSheet sheet = workbook.createSheet();// 产生工作表对象
-
             workbook.setSheetName(ii, sheetName);
-
             HSSFRow row;
             HSSFCell cell;// 产生单元格
             HSSFCellStyle style = workbook.createCellStyle();
@@ -550,9 +531,9 @@ public class ExcelUtil<T> {
                             cell.setCellStyle(style);
                         }
                     } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
+                        Exceptions.printException(e);
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        Exceptions.printException(e);
                     }
                 }
             }
@@ -564,24 +545,11 @@ public class ExcelUtil<T> {
             output.close();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Output is closed ");
+            Exceptions.printException(e);
             return false;
         }
 
     }
-
-
-//	public boolean exportExcel(Collection<T> list, String sheetName, int sheetSize,
-//			OutputStream output,String resu) {
-//		Collection<T>[] lists = new ArrayCollection[1];
-//		lists[0] = list;
-//
-//		String[] sheetNames = new String[1];
-//		sheetNames[0] = sheetName;
-//
-//		return exportExcel(lists, sheetNames, output);
-//	}
 
     /**
      * 将EXCEL中A,B,C,D,E列映射成0,1,2,3

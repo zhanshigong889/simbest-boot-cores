@@ -10,7 +10,6 @@ import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.model.SysFile;
 import com.simbest.boot.sys.web.SysFileController;
-import com.simbest.boot.util.encrypt.UrlEncryptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -22,17 +21,30 @@ import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
+import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,9 +61,6 @@ public class AppFileUtil {
     private static final String UPLOAD_FILE_PATTERN =
             "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|txt|rar|zip|7z)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
-
-    @Autowired
-    private UrlEncryptor urlEncryptor;
 
     @Autowired
     private AppConfig config;
@@ -84,7 +93,8 @@ public class AppFileUtil {
      */
     public static String getFileName(String pathToName) {
         Assert.notNull(pathToName, "File name can not empty!");
-        return FilenameUtils.getName(pathToName);
+        String fileName = FilenameUtils.getName(pathToName);
+        return StringUtils.isEmpty(fileName) || "0".equals(fileName) ? null : fileName;
     }
 
     /**
@@ -95,7 +105,8 @@ public class AppFileUtil {
      */
     public static String getFileBaseName(String pathToName) {
         Assert.notNull(pathToName, "File name can not empty!");
-        return FilenameUtils.getBaseName(pathToName);
+        String fileBaseName =  FilenameUtils.getBaseName(pathToName);
+        return StringUtils.isEmpty(fileBaseName) || "0".equals(fileBaseName) ? null : fileBaseName;
     }
 
     /**
@@ -132,10 +143,10 @@ public class AppFileUtil {
 
     /**
      * 上传单个文件
-     *
-     * @param file file
-     * @return SysFile
-     * @throws IOException
+     * @param directory 相对路径
+     * @param multipartFile
+     * @return
+     * @throws Exception
      */
     public SysFile uploadFile(String directory, MultipartFile multipartFile) throws Exception {
         Assert.notNull(multipartFile, "Upload file can not empty!");
@@ -144,10 +155,10 @@ public class AppFileUtil {
 
     /**
      * 上传多个文件
-     *
-     * @param files files
-     * @return UploadFileModel
-     * @throws IOException
+     * @param directory 相对路径
+     * @param multipartFiles
+     * @return
+     * @throws Exception
      */
     public List<SysFile> uploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
         Assert.notEmpty(multipartFiles, "Upload file can not empty!");
@@ -164,15 +175,8 @@ public class AppFileUtil {
                 log.debug("Will upload file {} to {}", filename, serverUploadLocation);
                 switch (serverUploadLocation) {
                     case disk:
+                        File targetFileDirectory = createUploadStorePath(directory);
                         byte[] bytes = multipartFile.getBytes();
-                        String storePath = config.getUploadPath() + ApplicationConstants.SLASH + DateUtil.getCurrentStr()
-                                + ApplicationConstants.SLASH + directory + ApplicationConstants.SLASH
-                                + CodeGenerator.randomInt(4);
-                        File targetFileDirectory = new File(storePath);
-                        if (!targetFileDirectory.exists()) {
-                            FileUtils.forceMkdir(targetFileDirectory);
-                            log.debug("Directory {} is not exist, force create direcorty....", storePath);
-                        }
                         Path path = Paths.get(targetFileDirectory.getPath() + ApplicationConstants.SLASH + filename);
                         Files.write(path, bytes);
                         filePath = path.toString();
@@ -185,7 +189,7 @@ public class AppFileUtil {
                 SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename))
                         .filePath(filePath).fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
                                 build();
-                log.debug("Upload save file is {}", sysFile.toString());
+                log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
                 fileModels.add(sysFile);
             } else {
                 log.error("File {} upload is forbidden type, can not upload to server!", filename);
@@ -195,7 +199,246 @@ public class AppFileUtil {
     }
 
     /**
-     * 创建无后缀临时文件
+     * 将文件在远程URL读取后，再上传
+     * @param fileUrl   远程文件URL
+     * @param fileName  存储文件名称
+     * @param directory 相对路径
+     * @return 返回存储路径
+     */
+    public SysFile uploadFromUrl(String fileUrl, String directory) throws Exception {
+        String filePath = null;
+        String fileName = null;
+        Long fileSize = null;
+        HttpURLConnection urlConnection = null;
+        UrlFile urlFile = null;
+        try {
+            urlFile = openAndConnectUrl(fileUrl);
+            urlConnection = urlFile.getConn();
+            if(StringUtils.isEmpty(urlFile.getFileName())){
+                //URL连接上面没有文件名
+                fileName = CodeGenerator.systemUUID();
+            }
+            fileName = fileName + ApplicationConstants.DOT + urlFile.getFileSuffix();
+            switch (serverUploadLocation) {
+                case disk:
+                    File targetFileDirectory = createUploadStorePath(directory);
+                    File storeFile = new File(targetFileDirectory.getAbsolutePath()
+                            + ApplicationConstants.SLASH + fileName);
+                    FileUtils.touch(storeFile); //覆盖文件
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), storeFile);
+                    filePath = storeFile.getAbsolutePath();
+                    fileSize = storeFile.length();
+                    break;
+                case fastdfs:
+                    File tmpFile = createTempFile();
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile);
+                    filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(new FileInputStream(tmpFile)),
+                            fileName, getFileSuffix(fileName));
+                    fileSize = tmpFile.length();
+                    break;
+            }
+            urlConnection.disconnect();
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+                urlConnection = null;
+            }
+            Exceptions.printException(e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+                urlConnection = null;
+            }
+        }
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(urlFile.getFileSuffix())
+                .filePath(filePath).fileSize(fileSize).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
+                        build();
+        log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
+        return sysFile;
+    }
+
+    /**
+     * 将本地文件上传至系统
+     * @param localFile  系统临时目录的文件
+     * @param directory 相对路径
+     * @return 返回存储路径
+     */
+    public SysFile uploadFromLocal(File localFile, String directory) {
+        String filePath = null;
+        String fileName = localFile.getName();
+        try {
+            switch (serverUploadLocation) {
+                case disk:
+                    File targetFileDirectory = createUploadStorePath(directory);
+                    Path path = Paths.get(targetFileDirectory.getPath() + ApplicationConstants.SLASH + localFile.getName());
+                    Files.write(path, Files.readAllBytes(Paths.get(localFile.getAbsolutePath())));
+                    filePath = path.toString();
+                    break;
+                case fastdfs:
+                    filePath = FastDfsClient.uploadLocalFile(localFile.getAbsolutePath());
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            Exceptions.printException(e);
+        }
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(localFile.getAbsolutePath()))
+                .filePath(filePath).fileSize(localFile.length()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
+                        build();
+        log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
+        return sysFile;
+    }
+
+    private BufferedImage toBufferedImage(Image image) {
+        if (image instanceof BufferedImage) {
+            return (BufferedImage) image;
+        }
+        // This code ensures that all the pixels in the image are loaded
+        image = new ImageIcon(image).getImage();
+        BufferedImage bimage = null;
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        try {
+            int transparency = Transparency.OPAQUE;
+            GraphicsDevice gs = ge.getDefaultScreenDevice();
+            GraphicsConfiguration gc = gs.getDefaultConfiguration();
+            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
+        } catch (HeadlessException e) {
+            // The system does not have a screen
+        }
+        if (bimage == null) {
+            // Create a buffered image using the default color model
+            int type = BufferedImage.TYPE_INT_RGB;
+            bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+        }
+        // Copy image to buffered image
+        Graphics g = bimage.createGraphics();
+        // Paint the image onto the buffered image
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+        return bimage;
+    }
+
+    /**
+     * 将应用系统中的图片压缩后，再上传
+     * <p>
+     * 图片高质量压缩参考：http://www.lac.inpe.br/JIPCookbook/6040-howto-compressimages.jsp
+     *
+     * @param imageFile 应用系统Context路径下的图片
+     * @param quality   压缩质量
+     * @param directory 相对路径
+     * @return 返回存储路径
+     */
+    public SysFile uploadCompressImage(File imageFile, float quality, String directory) {
+        String filePath = null;
+        String fileName = imageFile.getName();
+        ByteArrayOutputStream baos = null;
+        ImageOutputStream ios = null;
+        ByteArrayInputStream bais = null;
+        ImageWriter writer;
+        try {
+            BufferedImage image = null;
+            if(getFileSuffix(imageFile.getName()).equalsIgnoreCase("bmp")){
+                image = ImageIO.read(imageFile);
+            } else {
+//            java上传图片，压缩、更改尺寸等导致变色（表层蒙上一层红色）
+//            https://blog.csdn.net/qq_25446311/article/details/79140008?tdsourcetag=s_pctim_aiomsg
+                Image bufferedImage = Toolkit.getDefaultToolkit().getImage(imageFile.getAbsolutePath());
+                image = this.toBufferedImage(bufferedImage);// Image to BufferedImage
+            }
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix("jpg");
+            if (!writers.hasNext())
+                throw new IllegalStateException("No writers found");
+            writer = (ImageWriter) writers.next();
+            ImageWriteParam param = writer.getDefaultWriteParam();
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(quality);
+            baos = new ByteArrayOutputStream(32768);
+            switch (serverUploadLocation) {
+                case disk:
+                    File targetFileDirectory = createUploadStorePath(directory);
+                    File compressedFile = new File(targetFileDirectory.getAbsolutePath() + ApplicationConstants.SLASH + imageFile.getName());
+                    log.debug("压缩图片保存路径为 :" + compressedFile.getPath());
+                    ios = ImageIO.createImageOutputStream(baos);
+                    FileImageOutputStream output = new FileImageOutputStream(compressedFile);
+                    writer.setOutput(output);
+                    writer.write(null, new IIOImage(image, null, null), param);
+                    output.flush();
+                    writer.dispose();
+                    ios.flush();
+                    ios.close();
+                    baos.close();
+                    output = null;
+                    writer = null;
+                    ios = null;
+                    baos = null;
+                    filePath = compressedFile.getAbsolutePath();
+                    break;
+                case fastdfs:
+                    ios = ImageIO.createImageOutputStream(baos);
+                    File tmpFile = createTempFile(getFileSuffix(imageFile.getName()));
+                    output = new FileImageOutputStream(tmpFile);
+                    writer.setOutput(output);
+                    writer.write(null, new IIOImage(image, null, null), param);
+                    output.flush();
+                    writer.dispose();
+                    ios.flush();
+                    ios.close();
+                    baos.close();
+                    output = null;
+                    writer = null;
+                    ios = null;
+                    baos = null;
+                    filePath = FastDfsClient.uploadLocalFile(tmpFile.getAbsolutePath());
+                    tmpFile.deleteOnExit();
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            Exceptions.printException(e);
+        } finally {
+            if (baos != null)
+                try {
+                    baos.close();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+        }
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(imageFile.getAbsolutePath()))
+                .filePath(filePath).fileSize(imageFile.length()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
+                        build();
+        log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
+        return sysFile;
+    }
+
+    /**
+     * 从远程URL上传压缩图片
+     * @param imageUrl
+     * @param quality
+     * @param directory 相对路径
+     * @return
+     */
+    public SysFile uploadCompressImageFromUrl(String imageUrl, float quality, String directory) {
+        File imageFile = downloadFromUrl(imageUrl);
+        return uploadCompressImage(imageFile, quality, directory);
+    }
+
+    public File createUploadStorePath(String directory) throws IOException {
+        String storePath = config.getUploadPath()
+                + ApplicationConstants.SLASH + directory
+                + ApplicationConstants.SLASH + DateUtil.getCurrentStr();
+                //+ ApplicationConstants.SLASH + CodeGenerator.randomInt(4);
+        File targetFileDirectory = new File(storePath);
+        if (!targetFileDirectory.exists()) {
+            FileUtils.forceMkdir(targetFileDirectory);
+            log.debug("Directory {} is not exist, force create direcorty....", storePath);
+        }
+        return targetFileDirectory;
+    }
+
+    /**
+     * 创建临时后缀临时文件
      * @return
      */
     public static File createTempFile(){
@@ -214,7 +457,7 @@ public class AppFileUtil {
         } catch (IOException e) {
             Exceptions.printException(e);
         }
-        log.debug("Create temp file absolute path is {}", tempFile.getAbsolutePath());
+        log.debug("创建的临时文件路径为：{}", tempFile.getAbsolutePath());
         return tempFile;
     }
 
@@ -231,7 +474,7 @@ public class AppFileUtil {
                 realFile = new File(filePath);
                 break;
             case fastdfs:
-                realFile = downloadFromUrl(config.getAppHostPort() + ApplicationConstants.SLASH + filePath);
+                realFile = downloadFromUrl(getFileUrlFromFastDfs(filePath));
                 break;
         }
         return realFile;
@@ -252,38 +495,56 @@ public class AppFileUtil {
      * @return
      */
     public File downloadFromUrl(String fileUrl) {
-        File targetFile = createTempFile(getFileSuffix(fileUrl));
-        HttpURLConnection conn = null;
+        File targetFile = null;
+        HttpURLConnection urlConnection = null;
         try {
-            log.debug("Download origal url is {}", fileUrl);
-            String urlStr = FilenameUtils.getFullPath(fileUrl) + urlEncryptor.encrypt(getFileName(fileUrl));
-            log.debug("Download real url is {}", urlStr);
-            URL url = new URL(urlStr);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(true);
-            conn.setRequestMethod(ApplicationConstants.HTTPGET);
-            conn.connect();
-            if (conn.getContentLengthLong() != 0) {
-                FileUtils.copyURLToFile(url, targetFile);
-                conn.disconnect();
-                log.debug("Downloaded file from url: {}, and save at: {}", fileUrl, targetFile.getAbsolutePath());
+            UrlFile urlFile = openAndConnectUrl(fileUrl);
+            urlConnection = urlFile.getConn();
+            targetFile = createTempFile(urlFile.getFileSuffix());
+            if (urlFile.getConn().getContentLengthLong() != 0) {
+                FileUtils.copyURLToFile(urlFile.getConnUrl(), targetFile);
+                urlFile.getConn().disconnect();
+                log.debug("即将从路径: {} 下载文件保存至： {}", fileUrl, targetFile.getAbsolutePath());
             } else {
-                log.error("Want to download file from {}, but get nothing......", fileUrl);
+                log.error("从路径: {} 下载文件发生异常", fileUrl);
             }
         } catch (Exception e) {
-            if (conn != null) {
-                conn.disconnect();
-                conn = null;
+            if (urlConnection!= null) {
+                urlConnection.disconnect();
+                urlConnection = null;
             }
             Exceptions.printException(e);
         } finally {
-            if (conn != null) {
-                conn.disconnect();
+            if (urlConnection != null) {
+                urlConnection.disconnect();
             }
         }
         return targetFile;
     }
 
+    private UrlFile openAndConnectUrl(String remoteFileUrl) throws Exception {
+        String urlStr = FilenameUtils.getFullPath(remoteFileUrl);
+        //URL路径中有/分割的文件名，进行URL编码处理中文，否则不做处理
+        String fileName = getFileName(remoteFileUrl);
+        if(StringUtils.isNotEmpty(fileName)){
+            urlStr += URLEncoder.encode(fileName);
+        }
+        log.debug("Download real url is {}", urlStr);
+        URL connUrl = new URL(urlStr);
+        HttpURLConnection urlConnection = (HttpURLConnection) connUrl.openConnection();
+        urlConnection.setDoInput(true);
+        urlConnection.setRequestMethod(ApplicationConstants.HTTPGET);
+        urlConnection.connect();
+        String suffix = getFileSuffix(remoteFileUrl);
+        if(StringUtils.isEmpty(suffix)){
+            BufferedInputStream bis = new BufferedInputStream(urlConnection.getInputStream());
+            String contentType = HttpURLConnection.guessContentTypeFromStream(bis);
+            if(contentType.trim().startsWith("image")){
+                suffix = StringUtils.substringAfter(contentType, ApplicationConstants.SLASH);
+            }
+        }
+        return UrlFile.builder().remoteFileUrl(remoteFileUrl).conn(urlConnection).connUrl(connUrl).fileName(fileName).fileSuffix(suffix).build();
+    }
 
     public int deleteFile(String filePath) {
         int result = 0;
@@ -313,10 +574,17 @@ public class AppFileUtil {
         return result;
     }
 
-    public static void main(String[] args) {
-        String file = "http://aaa/bbb.jpg";
-        System.out.println(getFileName(file));
-        System.out.println(getFileBaseName(file));
-        System.out.println(getFileSuffix(file));
+    public static void setServerUploadLocation(StoreLocation serverUploadLocation) {
+        AppFileUtil.serverUploadLocation = serverUploadLocation;
+    }
+
+    public static void main(String[] args) throws Exception {
+//        String fileUrl = "http://mmbiz.qpic.cn/mmbiz_jpg/MyDnHITZqkiaoqpMdyFh84RP6pDZ4dMIHa2d4JFJWO5R6nGPVN1EA9GyVnfqiaxZ9EY5L3L0CBpAvRheQlxgvJ5Q/0";
+        String fileUrl = "http://10.92.81.163:8088/group1/M00/00/00/ClxQR1uWKAyAM4c4AAAyAsyPzjY83.docx";
+        AppFileUtil util = new AppFileUtil();
+        File files = util.downloadFromUrl(fileUrl);
+        System.out.println(getFileName(fileUrl));
+        System.out.println(getFileBaseName(fileUrl));
+        System.out.println(getFileSuffix(fileUrl));
     }
 }

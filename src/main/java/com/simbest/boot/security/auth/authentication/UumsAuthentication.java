@@ -1,7 +1,7 @@
 /*
  * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
  */
-package com.simbest.boot.security.auth.provider.sso.token;
+package com.simbest.boot.security.auth.authentication;
 
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 public class UumsAuthentication extends UsernamePasswordAuthenticationToken {
 
 
-    public UumsAuthentication(Object principal, Object credentials) {
-        super(principal, credentials);
+    public UumsAuthentication(Object principal, Object uumsAuthenticationCredentials) {
+        super(principal, uumsAuthenticationCredentials);
     }
+
 }

@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.provider.sso.service.impl;
 
+import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
 import com.simbest.boot.util.encrypt.AbstractEncryptor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,23 +18,22 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 @Data
 @NoArgsConstructor
-public class AbstractEncryptorSsoAuthenticationService extends AbstractSsoAuthenticationService {
+public class AbstractEncryptorSsoAuthenticationService implements SsoAuthenticationService {
 
     private AbstractEncryptor encryptor;
 
     @Override
-    public String decryptUsername(String username) {
-        String decryptUsername = null;
-        if(StringUtils.isNotEmpty(username)){
+    public String decryptKeyword(String encodeKeyword) {
+        String decodeKeyword = null;
+        if(StringUtils.isNotEmpty(encodeKeyword)){
             try {
-                decryptUsername = this.getEncryptor().decrypt(username);
-                log.debug("SSO解密服务【{}】解密用户名为【{}】", this.getClass().getSimpleName(), decryptUsername);
+                decodeKeyword = this.getEncryptor().decrypt(encodeKeyword);
+                log.debug("SSO解密服务【{}】解密用户名为【{}】", this.getClass().getSimpleName(), decodeKeyword);
             } catch (Exception e) {
-                log.warn("SSO解密服务【{}】解密密钥【{}】发生【{}】异常", this.getClass().getSimpleName(), username, e.getMessage());
+                log.debug("SSO解密服务【{}】解密密钥【{}】发生【{}】异常", this.getClass().getSimpleName(), encodeKeyword, e.getMessage());
             }
         }
-
-        return decryptUsername;
+        return decodeKeyword;
     }
 
 }

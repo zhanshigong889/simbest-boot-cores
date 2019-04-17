@@ -5,7 +5,7 @@ package com.simbest.boot.security.auth.config;
 
 import com.simbest.boot.base.service.IOauth2ClientDetailsService;
 import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.auth.authentication.Oauth2RedisTokenStore;
+import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
 import com.simbest.boot.security.auth.oauth2.CustomWebResponseExceptionTranslator;
 import com.simbest.boot.security.auth.oauth2.OauthExceptionEntryPoint;
 import com.simbest.boot.security.auth.oauth2.UumsTokenGranter;
