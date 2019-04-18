@@ -13,16 +13,12 @@ import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
 import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal;
-import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.stereotype.Component;
 
@@ -53,11 +49,19 @@ public class GenericAuthenticationChecker {
         try {
             if (authentication instanceof UsernamePasswordAuthenticationToken
                     || authentication instanceof UumsAuthentication) {
-                authUser = authService.findByKey(authentication.getPrincipal().toString(), IAuthService.KeyType.username);
+                authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.username);
+                //用户名，可能是手机号码，所以再尝试一次
+                if(null == authUser){
+                    authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.preferredMobile);
+                }
             } else if (authentication instanceof SsoUsernameAuthentication) {
                 if (authentication.getPrincipal() instanceof UsernamePrincipal) {
                     UsernamePrincipal principal = (UsernamePrincipal) authentication.getPrincipal();
                     authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.username);
+                    //用户名，可能是手机号码，所以再尝试一次
+                    if(null == authUser){
+                        authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.preferredMobile);
+                    }
                 } else if (authentication.getPrincipal() instanceof KeyTypePrincipal) {
                     KeyTypePrincipal principal = (KeyTypePrincipal) authentication.getPrincipal();
                     authUser = authService.findByKey(principal.getKeyword(), principal.getKeyType());

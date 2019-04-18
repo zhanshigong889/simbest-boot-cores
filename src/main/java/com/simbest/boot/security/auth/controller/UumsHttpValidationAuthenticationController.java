@@ -4,6 +4,7 @@ package com.simbest.boot.security.auth.controller;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -44,7 +45,7 @@ public class UumsHttpValidationAuthenticationController {
     private IAuthService authService;
 
     @ApiOperation(value = "从UUMS认证登录", notes = "应用向远程UUMS发起认证请求")
-    @ApiImplicitParams({@ApiImplicitParam(name = "username", value = "用户账号", required = true, dataType = "String", paramType = "query"),
+    @ApiImplicitParams({@ApiImplicitParam(name = "username", value = "用户账号关键字", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "appcode", value = "应用编码", required = true, dataType = "String", paramType = "query")
     })
@@ -58,18 +59,18 @@ public class UumsHttpValidationAuthenticationController {
                     return JsonResponse.success(authentication.getPrincipal());
                 }
                 else {
-                    log.error(LOGTAG + "认证用户【{}】通过密码【{}】访问应用【{}】失败", username, password, appcode);
+                    log.error(LOGTAG + "认证用户账号关键字【{}】通过密码【{}】访问应用【{}】失败", username, password, appcode);
                     return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }
             } else {
-                log.error(LOGTAG + "认证用户【{}】访问【{}】失败", username, appcode);
+                log.error(LOGTAG + "认证用户账号关键字【{}】访问【{}】失败", username, appcode);
                 return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
         } catch (AuthenticationException e){
-            log.error(LOGTAG + "认证用户【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
+            log.error(LOGTAG + "认证用户账号关键字【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         } catch (Exception e){
-            log.error(LOGTAG + "认证用户【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
+            log.error(LOGTAG + "认证用户账号关键字【{}】认证【{}】发生【{}】异常", username, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         }
     }
