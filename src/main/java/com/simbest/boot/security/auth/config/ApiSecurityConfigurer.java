@@ -50,9 +50,13 @@ import java.util.List;
  *
  * http://andaily.com/blog/?p=528 返回格式
  *
- * 注意：client模式没有refresh_token
  * 刷新token请求（/oauth/token），请求所需参数：grant_type、refresh_token、client_id、client_secret
+ * 注意：client模式没有refresh_token
  * http://localhost:8080/uums/oauth/token?grant_type=refresh_token&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e&refresh_token=fbde81ee-f419-42b1-1234-9191f1f95be9
+ *
+ * 检查token请求
+ * http://localhost:8080/uums/oauth/check_token?token=d1034046-064d-4b5f-b9a6-c0f66abba28d
+ *
  */
 @Configuration
 @Order(20)
@@ -127,7 +131,8 @@ public class ApiSecurityConfigurer {
         public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
             security
                     .tokenKeyAccess("permitAll()")
-                    .checkTokenAccess("isAuthenticated()")
+//                    .checkTokenAccess("isAuthenticated()")
+                    .checkTokenAccess("permitAll()")
                     .allowFormAuthenticationForClients()
                     .authenticationEntryPoint(new OauthExceptionEntryPoint())
                     .accessDeniedHandler(accessDeniedHandler());
