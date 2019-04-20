@@ -4,6 +4,7 @@
 package com.simbest.boot.util;
 
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import com.google.common.collect.Lists;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
@@ -527,9 +528,13 @@ public class AppFileUtil {
         //URL路径中有/分割的文件名，进行URL编码处理中文，否则不做处理
         String fileName = getFileName(remoteFileUrl);
         if(StringUtils.isNotEmpty(fileName)){
-            urlStr += URLEncoder.encode(fileName);
+            if(ChineseHelper.containsChinese(fileName)){
+                urlStr += URLEncoder.encode(fileName);
+            }else {
+                urlStr += fileName;
+            }
         }
-        log.debug("Download real url is {}", urlStr);
+        log.debug("即将从地址【{}】下载文件", urlStr);
         URL connUrl = new URL(urlStr);
         HttpURLConnection urlConnection = (HttpURLConnection) connUrl.openConnection();
         urlConnection.setDoInput(true);
@@ -580,7 +585,9 @@ public class AppFileUtil {
 
     public static void main(String[] args) throws Exception {
 //        String fileUrl = "http://mmbiz.qpic.cn/mmbiz_jpg/MyDnHITZqkiaoqpMdyFh84RP6pDZ4dMIHa2d4JFJWO5R6nGPVN1EA9GyVnfqiaxZ9EY5L3L0CBpAvRheQlxgvJ5Q/0";
-        String fileUrl = "http://10.92.81.163:8088/group1/M00/00/00/ClxQR1uWKAyAM4c4AAAyAsyPzjY83.docx";
+//        String fileUrl = "http://10.92.81.163:8088/group1/M00/00/00/ClxQR1uWKAyAM4c4AAAyAsyPzjY83.docx";
+//        String fileUrl = "http://shmhzs.free.idcfengye.com/anon/file/anonymous/sys/file/download?id=V569213798079004672";
+        String fileUrl = "http://10.87.42.136:8088/maipdocument/夏季防洪防汛.doc";
         AppFileUtil util = new AppFileUtil();
         File files = util.downloadFromUrl(fileUrl);
         System.out.println(getFileName(fileUrl));
