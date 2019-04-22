@@ -11,6 +11,12 @@ import java.util.concurrent.TimeUnit;
  * 时间: 2018/2/27  17:45
  */
 public class ApplicationConstants {
+    public static final String DEV = "dev";
+    public static final String TEST = "test";
+    public static final String UAT = "uat";
+    public static final String PRD = "prd";
+    public static final String OTHER = "other";
+
     public static final int ZERO = 0;
     public static final int ONE = 1;
 
