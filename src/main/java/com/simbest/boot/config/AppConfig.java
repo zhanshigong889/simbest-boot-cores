@@ -42,6 +42,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfig {
 
+    @Value("${logback.artifactId}")
+    private String appcode;
+
     @Value("${server.servlet.context-path}")
     private String contextPath;
 

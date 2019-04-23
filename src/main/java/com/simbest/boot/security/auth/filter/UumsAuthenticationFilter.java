@@ -6,12 +6,14 @@ package com.simbest.boot.security.auth.filter;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
+import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -70,12 +72,24 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
      * @return true/false
      */
     private boolean authenticationIsRequired(Authentication existingAuth, String username) {
-        if (existingAuth == null || !SecurityUtils.isAuthenticated()) {
+        if (existingAuth == null || !existingAuth.isAuthenticated()) {
             return true;
-        } else if (existingAuth instanceof UumsAuthentication
+        }
+        else if (existingAuth instanceof UumsAuthentication
                 && !existingAuth.getName().equals(username)) {
             return true;
         }
+        else if (existingAuth instanceof UsernamePasswordAuthenticationToken
+                && !existingAuth.getName().equals(username)) {
+            return true;
+        }
+
+//        if (existingAuth == null || !SecurityUtils.isAuthenticated()) {
+//            return true;
+//        } else if (existingAuth instanceof UumsAuthentication
+//                && !existingAuth.getName().equals(username)) {
+//            return true;
+//        }
         return false;
     }
 

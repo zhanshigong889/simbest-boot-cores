@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -114,7 +115,12 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
             return true;
-        } else if (existingAuth instanceof SsoUsernameAuthentication
+        }
+        else if (existingAuth instanceof SsoUsernameAuthentication
+                && !existingAuth.getName().equals(decodeKeyword)) {
+            return true;
+        }
+        else if (existingAuth instanceof UsernamePasswordAuthenticationToken
                 && !existingAuth.getName().equals(decodeKeyword)) {
             return true;
         }

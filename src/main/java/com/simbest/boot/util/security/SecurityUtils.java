@@ -9,6 +9,7 @@ import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.DateUtil;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,25 +26,30 @@ public final class SecurityUtils {
 
     public static void updateCurrentUser(IUser newuser) {
         Assert.notNull(newuser, "变更的用户信息不可为空！");
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            if (authentication.getPrincipal() instanceof IUser) {
-                IUser currentUser = (IUser) authentication.getPrincipal();
-                if(currentUser.getUsername().equals(newuser.getUsername())){
-                    currentUser.setCurrentBloc(newuser.getCurrentBloc());
-                    currentUser.setCurrentCorp(newuser.getCurrentCorp());
-                    currentUser.setBelongCompanyCode(newuser.getBelongCompanyCode());
-                    currentUser.setBelongCompanyName(newuser.getBelongCompanyName());
-                    currentUser.setBelongCompanyTypeDictDesc(newuser.getBelongCompanyTypeDictDesc());
-                    currentUser.setBelongCompanyTypeDictValue(newuser.getBelongCompanyTypeDictValue());
-                    currentUser.setBelongDepartmentCode(newuser.getBelongDepartmentCode());
-                    currentUser.setBelongDepartmentName(newuser.getBelongDepartmentName());
-                    currentUser.setBelongOrgCode(newuser.getBelongOrgCode());
-                    currentUser.setBelongOrgName(newuser.getBelongOrgName());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
-        }
+        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
+        Assert.notNull(existingAuth, "当前认证信息不能为空！");
+        UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
+                newuser, existingAuth.getCredentials(), existingAuth.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(existingAuth);
+
+//        if (authentication != null) {
+//            if (authentication.getPrincipal() instanceof IUser) {
+//                IUser currentUser = (IUser) authentication.getPrincipal();
+//                if(currentUser.getUsername().equals(newuser.getUsername())){
+//                    currentUser.setCurrentBloc(newuser.getCurrentBloc());
+//                    currentUser.setCurrentCorp(newuser.getCurrentCorp());
+//                    currentUser.setBelongCompanyCode(newuser.getBelongCompanyCode());
+//                    currentUser.setBelongCompanyName(newuser.getBelongCompanyName());
+//                    currentUser.setBelongCompanyTypeDictDesc(newuser.getBelongCompanyTypeDictDesc());
+//                    currentUser.setBelongCompanyTypeDictValue(newuser.getBelongCompanyTypeDictValue());
+//                    currentUser.setBelongDepartmentCode(newuser.getBelongDepartmentCode());
+//                    currentUser.setBelongDepartmentName(newuser.getBelongDepartmentName());
+//                    currentUser.setBelongOrgCode(newuser.getBelongOrgCode());
+//                    currentUser.setBelongOrgName(newuser.getBelongOrgName());
+//                    SecurityContextHolder.getContext().setAuthentication(authentication);
+//                }
+//            }
+//        }
     }
 
     public static IUser getCurrentUser() {
