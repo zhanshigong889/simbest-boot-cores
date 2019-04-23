@@ -12,15 +12,21 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.SimplePermission;
+import com.simbest.boot.security.auth.authentication.GenericAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
+import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 
 import java.util.Map;
@@ -35,16 +41,19 @@ import java.util.Set;
 @Data
 public abstract class AbstractAuthService implements IAuthService {
 
-    private AppConfig appConfig;
+    protected AppConfig appConfig;
 
-    private UumsSysUserinfoApi userinfoApi;
+    protected UumsSysUserinfoApi userinfoApi;
 
     private RedisOperationsSessionRepository redisOperationsSessionRepository;
 
-    public AbstractAuthService(AppConfig appConfig, UumsSysUserinfoApi userinfoApi, RedisOperationsSessionRepository redisOperationsSessionRepository){
+    private Oauth2RedisTokenStore oauth2RedisTokenStore;
+
+    public AbstractAuthService(AppConfig appConfig, UumsSysUserinfoApi userinfoApi, RedisOperationsSessionRepository redisOperationsSessionRepository, Oauth2RedisTokenStore oauth2RedisTokenStore){
         this.appConfig = appConfig;
         this.userinfoApi = userinfoApi;
         this.redisOperationsSessionRepository = redisOperationsSessionRepository;
+        this.oauth2RedisTokenStore = oauth2RedisTokenStore;
     }
 
     @Override
@@ -77,7 +86,8 @@ public abstract class AbstractAuthService implements IAuthService {
         Assert.notNull(newUser, "更新用户不能为空！");
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
         Assert.notNull(existingAuth, "当前认证信息不能为空！");
-        //清空当前浏览器会话
+
+        //清空当前会话--Start
         SecurityContextHolder.getContext().setAuthentication(null);
         Map<String, Long> delPrincipal = Maps.newHashMap();
         Set<String> keys = RedisUtil.globalKeys(ApplicationConstants.STAR + ":org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:" + newUser.getUsername());
@@ -92,11 +102,36 @@ public abstract class AbstractAuthService implements IAuthService {
                 log.debug("即将清理键值【{}】结果为【{}】", member.toString(), number2);
             }
         }
+        //清空当前会话--End
 
-        UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
-                newUser, existingAuth.getCredentials(), existingAuth.getAuthorities());
+        //构建已认证通过的上下文--Start
+        Authentication newAuth = null;
+        if(existingAuth instanceof GenericAuthentication){
+            newAuth = new GenericAuthentication(newUser, (UumsAuthenticationCredentials)existingAuth.getCredentials(), existingAuth.getAuthorities());
+        }
+        else if(existingAuth instanceof OAuth2Authentication){
+            OAuth2Authentication oAuth2Authentication = (OAuth2Authentication)existingAuth;
+            OAuth2AuthenticationDetails oAuth2AuthenticationDetails = (OAuth2AuthenticationDetails)oAuth2Authentication.getDetails();
+            OAuth2AccessToken accessToken;
+            if(null != oAuth2AuthenticationDetails) {
+                //OUATH2 API 内部之间方式修改的取法
+                accessToken = oauth2RedisTokenStore.readAccessToken(oAuth2AuthenticationDetails.getTokenValue());
+
+            } else {
+                //OUATH2 API 转Web方式修改的取法，第一次取不到OAuth2AuthenticationDetails
+                accessToken = oauth2RedisTokenStore.getAccessToken(oAuth2Authentication);
+            }
+            GenericAuthentication userAuthentication = new GenericAuthentication(newUser,
+                    (UumsAuthenticationCredentials) oAuth2Authentication.getUserAuthentication().getCredentials(),
+                    existingAuth.getAuthorities());
+            OAuth2Request storedRequest = oAuth2Authentication.getOAuth2Request();
+            OAuth2Authentication newOAuth2Authentication = new OAuth2Authentication(storedRequest, userAuthentication);
+            oauth2RedisTokenStore.storeAccessToken(accessToken, newOAuth2Authentication);
+            newAuth = newOAuth2Authentication;
+        }
         SecurityContextHolder.getContext().setAuthentication(newAuth);
         log.debug("更新后的认证信息为【{}】", newAuth);
+        //构建已认证通过的上下文--End
     }
 
     @Override
