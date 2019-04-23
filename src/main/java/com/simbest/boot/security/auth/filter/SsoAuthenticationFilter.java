@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.filter;
 
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
 import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
 import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
@@ -121,6 +122,10 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             return true;
         }
         else if (existingAuth instanceof UsernamePasswordAuthenticationToken
+                && !existingAuth.getName().equals(decodeKeyword)) {
+            return true;
+        }
+        else if (existingAuth instanceof GenericAuthentication
                 && !existingAuth.getName().equals(decodeKeyword)) {
             return true;
         }

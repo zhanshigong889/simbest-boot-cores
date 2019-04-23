@@ -6,18 +6,19 @@ package com.simbest.boot.util.security;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal;
 import com.simbest.boot.sys.model.SysLogLogin;
 import com.simbest.boot.sys.service.ISysLogLoginService;
 import com.simbest.boot.util.DateUtil;
-import com.simbest.boot.util.encrypt.Md5Encryptor;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.server.HostUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,9 +39,6 @@ public class LoginUtils {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private Md5Encryptor md5Encryptor;
 
     @Autowired
     private RsaEncryptor rsaEncryptor;
@@ -66,16 +64,15 @@ public class LoginUtils {
 
     /**
      * 根据用户名和密码，自动登录
-     * @param username 用户名需要RSA算法进行加密
+     * @param username 用户名需要RSA加密
      * @param password 密码需要由RSA加密
      * @param appcode
      */
     public void manualLogin(String username, String password, String appcode) {
         String rawUsername = rsaEncryptor.decrypt(username);
-        String rawPassword = rsaEncryptor.decrypt(password);
-        String md5Hex = md5Encryptor.encrypt(rawPassword);
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(rawUsername, md5Hex);
-        Authentication auth = authenticationManager.authenticate(authReq);
+        UumsAuthentication uumsAuthentication = new UumsAuthentication(rawUsername, UumsAuthenticationCredentials.builder()
+                .password(password).appcode(appcode).build());
+        Authentication auth = authenticationManager.authenticate(uumsAuthentication);
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
     }
@@ -85,7 +82,7 @@ public class LoginUtils {
      */
     public void adminLogin() {
         IUser iUser = authService.findByKey(ApplicationConstants.ADMINISTRATOR, IAuthService.KeyType.username);
-        SsoUsernameAuthentication auth = new SsoUsernameAuthentication(iUser, null, iUser.getAuthorities());
+        GenericAuthentication auth = new GenericAuthentication(iUser, null, iUser.getAuthorities());
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
     }

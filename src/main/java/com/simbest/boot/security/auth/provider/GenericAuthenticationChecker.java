@@ -9,8 +9,10 @@ import com.simbest.boot.exceptions.AccesssAppDeniedException;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
+import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
 import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +27,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * 用途：通用的校验检查器
+ * 用途：对通过密码校验的authentication进行账户是否到期、是否可以访问应用的检查，并追加应用权限
  * 作者: lishuyi
  * 时间: 2018/9/6  16:57
  */
@@ -40,7 +42,7 @@ public class GenericAuthenticationChecker {
 
     /**
      *
-     * @param authentication 检查前可能不同，检查后统一为IUser
+     * @param authentication
      * @param appcode
      * @return
      */
@@ -88,8 +90,8 @@ public class GenericAuthenticationChecker {
                 authUser.addAppPermissions(appPermission);
                 authUser.addAppAuthorities(appPermission);
             }
-            UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
-                    authUser, authUser.getPassword(), authUser.getAuthorities());
+            GenericAuthentication result = new GenericAuthentication(authUser, UumsAuthenticationCredentials.builder()
+                    .password(authUser.getPassword()).appcode(appcode).build(), authUser.getAuthorities());
             result.setDetails(authentication.getDetails());
             log.info("用户【{}】访问【{}】认证成功！", authUser.getUsername(), appcode);
             return result;

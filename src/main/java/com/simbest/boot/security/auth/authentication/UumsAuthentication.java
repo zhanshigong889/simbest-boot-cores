@@ -4,6 +4,7 @@
 package com.simbest.boot.security.auth.authentication;
 
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 /**
@@ -13,9 +14,18 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
  */
 public class UumsAuthentication extends UsernamePasswordAuthenticationToken {
 
-
+    /**
+     * 认证前
+     * @param principal username
+     * @param uumsAuthenticationCredentials password和appcode
+     */
     public UumsAuthentication(Object principal, Object uumsAuthenticationCredentials) {
         super(principal, uumsAuthenticationCredentials);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
 }

@@ -6,6 +6,7 @@ package com.simbest.boot.security.auth.filter;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
+import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
@@ -83,13 +84,10 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
                 && !existingAuth.getName().equals(username)) {
             return true;
         }
-
-//        if (existingAuth == null || !SecurityUtils.isAuthenticated()) {
-//            return true;
-//        } else if (existingAuth instanceof UumsAuthentication
-//                && !existingAuth.getName().equals(username)) {
-//            return true;
-//        }
+        else if (existingAuth instanceof GenericAuthentication
+                && !existingAuth.getName().equals(username)) {
+            return true;
+        }
         return false;
     }
 
