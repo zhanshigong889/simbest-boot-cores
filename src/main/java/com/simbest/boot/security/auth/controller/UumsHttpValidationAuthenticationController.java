@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 作者: lishuyi
  * 时间: 2018/1/31  15:49
  */
-@Api(description = "AuthenticationController", tags = {"权限管理-UUMS登录校验"})
+@Api(description = "UumsHttpValidationAuthenticationController", tags = {"权限管理-UUMS登录校验"})
 @Slf4j
 @RestController
 @RequestMapping("/httpauth")
