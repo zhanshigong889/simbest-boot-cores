@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.filter;
 
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
 import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
@@ -37,6 +38,9 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Setter
     private SsoAuthenticationRegister ssoAuthenticationRegister;
 
+    @Setter
+    private IAuthService authService;
+
     public SsoAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher) {
         super(requiresAuthenticationRequestMatcher);
     }
@@ -60,15 +64,15 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
     protected Principal obtainPrincipal(HttpServletRequest request) {
         Principal principal = null;
         if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME))){
-            principal = UsernamePrincipal.builder().username(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME)).build();
-            log.debug("SSO 单点认证过滤器从【{}】提取到Principal【{}】", AuthoritiesConstants.SSO_API_USERNAME, principal.getName());
+            principal = UsernamePrincipal.builder().username(decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME), IAuthService.KeyType.username)).build();
+            log.debug("SSO 单点认证过滤器从【{}】提取到Principal为：【{}】", AuthoritiesConstants.SSO_API_USERNAME, principal.getName());
         } else if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_UID))){
-            principal = UsernamePrincipal.builder().username(request.getParameter(AuthoritiesConstants.SSO_API_UID)).build();
-            log.debug("SSO 单点认证过滤器从【{}】提取到Principal【{}】", AuthoritiesConstants.SSO_API_UID, principal.getName());
+            principal = UsernamePrincipal.builder().username(decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_UID), IAuthService.KeyType.username)).build();
+            log.debug("SSO 单点认证过滤器从【{}】提取到Principal为：【{}】", AuthoritiesConstants.SSO_API_UID, principal.getName());
         } else if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD))){
-            principal = KeyTypePrincipal.builder().keyword(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD))
+            principal = KeyTypePrincipal.builder().keyword(decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD), IAuthService.KeyType.valueOf(request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE))))
                     .keyType(IAuthService.KeyType.valueOf(request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE))).build();
-            log.debug("SSO 单点认证过滤器从【{}】和【{}】提取到Principal【{}】", AuthoritiesConstants.SSO_API_KEYWORD, request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE),
+            log.debug("SSO 单点认证过滤器从【{}】和【{}】提取到Principal为：【{}】", AuthoritiesConstants.SSO_API_KEYWORD, request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE),
                     principal.getName());
         }
         return principal;
@@ -79,10 +83,10 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throws AuthenticationException {
         Principal principal = obtainPrincipal(request);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
-        if (null == principal || StringUtils.isEmpty(appcode)) {
-            log.error("SSO 认证主体Principal【{}】和访问应用【{}】不能为空！", principal, appcode);
+        if (null == principal || StringUtils.isEmpty(appcode) || StringUtils.isEmpty(principal.getName())) {
+            log.error("SSO 认证主体Principal【{}】及名称【{}】在访问应用【{}】时不能为空，请求路径为【{}】！", principal, principal.getName(), appcode, request.getRequestURI());
             throw new BadCredentialsException(
-                    "SSO 认证主体Principal【"+principal+"】和访问应用【"+appcode+"】不能为空！");
+                    "SSO 认证主体Principal【"+principal+"】及名称【"+principal.getName()+"】在访问应用【"+appcode+"】不能为空，请求路径为【"+request.getRequestURI()+"】！");
         }
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
         if (authenticationIsRequired(request, existingAuth, principal, appcode)) {
@@ -99,36 +103,38 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
      * @return true/false
      */
     private boolean authenticationIsRequired(HttpServletRequest request, Authentication existingAuth, Principal principal, String appcode) {
-        String decodeKeyword = null;
-        for(SsoAuthenticationService authService : ssoAuthenticationRegister.getSsoAuthenticationService()) {
-            decodeKeyword = authService.decryptKeyword(principal.getName());
-            if(StringUtils.isNotEmpty(decodeKeyword)) {
-                break;
-            }
-        }
-        if(StringUtils.isEmpty(decodeKeyword)){
-            log.error("SSO 认证主体Principal【{}】无法解密！", principal.getName());
-            throw new BadCredentialsException(
-                    "SSO 认证主体Principal【"+principal.getName()+"】无法解密！");
-        } else {
-            log.info("SSO 单点认证用户【{}】尝试访问【{}】的URL资源为【{}】", decodeKeyword, appcode, request.getRequestURI());
-        }
-
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
             return true;
         }
         else if (existingAuth instanceof SsoUsernameAuthentication
-                && !existingAuth.getName().equals(decodeKeyword)) {
+                && !existingAuth.getName().equals(principal.getName())) {
             return true;
         }
         else if (existingAuth instanceof UsernamePasswordAuthenticationToken
-                && !existingAuth.getName().equals(decodeKeyword)) {
+                && !existingAuth.getName().equals(principal.getName())) {
             return true;
         }
         else if (existingAuth instanceof GenericAuthentication
-                && !existingAuth.getName().equals(decodeKeyword)) {
+                && !existingAuth.getName().equals(principal.getName())) {
             return true;
         }
         return false;
     }
+
+    private String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType){
+        String decodeKeyword = null;
+        for(SsoAuthenticationService decryptService : ssoAuthenticationRegister.getSsoAuthenticationService()) {
+            decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
+            if(StringUtils.isNotEmpty(decodeKeyword)) {
+                IUser iUser = authService.findByKey(decodeKeyword, keyType);
+                if (null != iUser) {
+                    break;
+                } else {
+                    decodeKeyword = null;
+                }
+            }
+        }
+        return decodeKeyword;
+    }
+
 }

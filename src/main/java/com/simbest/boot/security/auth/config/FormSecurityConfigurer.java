@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.config;
 
 import com.simbest.boot.config.Swagger2CsrfProtection;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.entryPoint.AccessDeniedEntryPoint;
 import com.simbest.boot.security.auth.filter.CaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.CustomAbstractAuthenticationProcessingFilter;
@@ -94,6 +95,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private FindByIndexNameSessionRepository sessionRepository;
+
+    @Autowired
+    private IAuthService authService;
 
     @Bean
     public SpringSessionBackedSessionRegistry sessionRegistry() {
@@ -234,6 +238,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
         filter.setAuthenticationManager(authenticationManagerBean());
         filter.setSsoAuthenticationRegister(ssoAuthenticationRegister);
+        filter.setAuthService(authService);
         // 不跳回首页
         filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
         //跳至登陆页，但不作任何提醒
