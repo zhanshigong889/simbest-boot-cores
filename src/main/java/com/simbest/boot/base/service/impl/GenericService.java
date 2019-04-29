@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,41 +52,33 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
     }
 
     @Override
-    public Pageable getPageable(int page, int size, String direction, String properties) {
-        int pagePage = page < 1 ? 0 : (page - 1);
-        int pageSize = size < 1 ? 1 : (size > 100 ? 100 : size);
-        Pageable pageable;
-
-        if ( StringUtils.isNotEmpty(direction) && StringUtils.isNotEmpty(properties)) {
-            // 生成指定排序规则-顺序
-            Sort.Direction sortDirection;
-            String[] sortProperties;
-            try {
-                // 先转换为大写
-                direction = direction.toUpperCase();
-                // 再获取枚举
-                sortDirection = Sort.Direction.valueOf(direction);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                sortDirection = Sort.Direction.ASC;
-            }
-
-            // 生成指定排序规则-关键字
-            sortProperties = properties.split(",");
-
-            // 生成排序规则
-            Sort sort = new Sort(sortDirection, sortProperties);
-            pageable = PageRequest.of(pagePage, pageSize, sort);
-        } else {
-            pageable = PageRequest.of(pagePage, pageSize);
-        }
-
-        return pageable;
+    public Pageable getPageable() {
+        return genericRepository.getPageable();
     }
 
     @Override
-    public Specification<T> getSpecification(Condition conditions) {
+    public Pageable getPageable(int page, int size) {
+        return genericRepository.getPageable(page, size);
+    }
+
+    @Override
+    public Pageable getPageable(int page, int size, String direction, String properties) {
+        return genericRepository.getPageable(page, size, direction, properties);
+    }
+
+    @Override
+    public Specification<T> getSpecification(T entity) {
+        return genericRepository.getSpecification(entity);
+    }
+
+    @Override
+    public Specification<T> getSpecification(Map<String, Object> conditions) {
         return genericRepository.getSpecification(conditions);
+    }
+
+    @Override
+    public Specification<T> getSpecification(Condition condition) {
+        return genericRepository.getSpecification(condition);
     }
 
     /**
@@ -122,6 +115,12 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
     public T findOne ( PK id ) {
         log.debug("@Generic Repository Service getOne object by id: " + id);
         return genericRepository.getOne(id);
+    }
+
+    @Override
+    public T findOne(Specification<T> conditions){
+        log.debug("@Generic Repository Service findOne Specification param");
+        return genericRepository.findOne(conditions).orElse(null);
     }
 
     /**

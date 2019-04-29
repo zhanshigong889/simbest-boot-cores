@@ -126,11 +126,14 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
         for(SsoAuthenticationService decryptService : ssoAuthenticationRegister.getSsoAuthenticationService()) {
             decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
             if(StringUtils.isNotEmpty(decodeKeyword)) {
+                log.debug("通过关键字【{}】解密后为【{}】", encodeKeyword, decodeKeyword);
                 IUser iUser = authService.findByKey(decodeKeyword, keyType);
                 if (null != iUser) {
+                    //成功返回
                     break;
                 } else {
                     decodeKeyword = null;
+                    log.warn("请注意关键字【{}】拉取用户信息为NULL！", decodeKeyword);
                 }
             }
         }

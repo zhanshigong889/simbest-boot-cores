@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
 /**
@@ -26,9 +27,17 @@ import java.util.List;
  */
 public interface IGenericService <T extends GenericModel,PK extends Serializable> {
 
+    Pageable getPageable();
+
+    Pageable getPageable(int page, int size);
+
     Pageable getPageable(int page, int size, String direction, String properties);
 
-    Specification<T> getSpecification(Condition conditions);
+    Specification<T> getSpecification(T entity);
+
+    Specification<T> getSpecification(Map<String, Object> conditions);
+
+    Specification<T> getSpecification(Condition condition);
 
     long count();
 
@@ -49,6 +58,8 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      * @return a reference to the entity with the given identifier.
      */
     T findOne(PK id);
+
+    T findOne(Specification<T> conditions);
 
     T findById(PK id);
 

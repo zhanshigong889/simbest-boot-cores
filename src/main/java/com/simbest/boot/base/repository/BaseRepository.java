@@ -102,19 +102,19 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 	 * 在这里封装一个单表查询的对象<br>
 	 * 只判断属性值是否相等
 	 *
-	 * @param conditions 条件
+	 * @param entity 对象条件
 	 *
 	 * @return 结果集
 	 */
-	default Specification<T> getSpecification(T conditions) {
-		if (conditions == null) {
+	default Specification<T> getSpecification(T entity) {
+		if (entity == null) {
 			return null;
 		}
 
 		return (root, query, cb) -> {
 			List<Predicate> list = new ArrayList<>();
 
-			Class<?> clazz = conditions.getClass();
+			Class<?> clazz = entity.getClass();
 
 			// 获取所有的字段包括private/public，但不包括继承的字段
 			Field[] declaredFields = clazz.getDeclaredFields();
@@ -144,7 +144,7 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 					// 获取方法
 					Method getMethod = clazz.getMethod(getMethodName);
 					// 这个对象字段get方法的值
-					Object value = getMethod.invoke(conditions);
+					Object value = getMethod.invoke(entity);
 					// 跳过空值
 					if (value == null) {
 						continue;
@@ -180,6 +180,82 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 			// =
 			for (Map.Entry<String, Object> entry : conditions.entrySet()) {
 				list.add(cb.equal(root.get(entry.getKey()), entry.getValue()));
+			}
+
+			Predicate[] p = new Predicate[list.size()];
+			return cb.and(list.toArray(p));
+		};
+	}
+
+	/**
+	 * 在这里封装一个单表查询的方法（Condition）
+	 *
+	 * @param conditions 条件
+	 *
+	 * @return 结果集
+	 */
+	default Specification<T> getSpecification(Condition condition) {
+		if (condition == null) {
+			return null;
+		}
+
+		return (root, query, cb) -> {
+			List<Predicate> list = new ArrayList<>();
+
+			// =
+			Map<String, Object> eq = condition.getEq();
+			if (eq != null) {
+				for (Map.Entry<String, Object> entry : eq.entrySet()) {
+					list.add(cb.equal(root.get(entry.getKey()), entry.getValue()));
+				}
+			}
+
+			// =
+			Map<String, Object> neq = condition.getNeq();
+			if (neq != null) {
+				for (Map.Entry<String, Object> entry : neq.entrySet()) {
+					list.add(cb.notEqual(root.get(entry.getKey()), entry.getValue()));
+				}
+			}
+
+			// >
+			Map<String, Number> gt = condition.getGt();
+			if (gt != null) {
+				for (Map.Entry<String, Number> entry : gt.entrySet()) {
+					list.add(cb.gt(root.get(entry.getKey()), entry.getValue()));
+				}
+			}
+
+			// <
+			Map<String, Number> lt = condition.getLt();
+			if (lt != null) {
+				for (Map.Entry<String, Number> entry : lt.entrySet()) {
+					list.add(cb.lt(root.get(entry.getKey()), entry.getValue()));
+				}
+			}
+
+			// %
+			Map<String, String> like = condition.getLike();
+			if (lt != null) {
+				for (Map.Entry<String, String> entry : like.entrySet()) {
+					list.add(cb.like(root.get(entry.getKey()), entry.getValue()));
+				}
+			}
+
+			// in
+			Map<String, List<Object>> in = condition.getIn();
+			if (lt != null) {
+				for (Map.Entry<String, List<Object>> entry : in.entrySet()) {
+					list.add(cb.and(root.get(entry.getKey()).in(entry.getValue())));
+				}
+			}
+
+			// notIn
+			Map<String, List<Object>> notIn = condition.getNotIn();
+			if (lt != null) {
+				for (Map.Entry<String, List<Object>> entry : notIn.entrySet()) {
+					list.add(cb.not(root.get(entry.getKey()).in(entry.getValue())));
+				}
 			}
 
 			Predicate[] p = new Predicate[list.size()];
@@ -236,81 +312,5 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
         return true;
     }
 
-
-	/**
-	 * 在这里封装一个单表查询的方法（Condition）
-	 *
-	 * @param conditions 条件
-	 *
-	 * @return 结果集
-	 */
-	default Specification<T> getSpecification(Condition conditions) {
-		if (conditions == null) {
-			return null;
-		}
-
-		return (root, query, cb) -> {
-			List<Predicate> list = new ArrayList<>();
-
-			// =
-			Map<String, Object> eq = conditions.getEq();
-			if (eq != null) {
-				for (Map.Entry<String, Object> entry : eq.entrySet()) {
-					list.add(cb.equal(root.get(entry.getKey()), entry.getValue()));
-				}
-			}
-
-			// =
-			Map<String, Object> neq = conditions.getNeq();
-			if (neq != null) {
-				for (Map.Entry<String, Object> entry : neq.entrySet()) {
-					list.add(cb.notEqual(root.get(entry.getKey()), entry.getValue()));
-				}
-			}
-
-			// >
-			Map<String, Number> gt = conditions.getGt();
-			if (gt != null) {
-				for (Map.Entry<String, Number> entry : gt.entrySet()) {
-					list.add(cb.gt(root.get(entry.getKey()), entry.getValue()));
-				}
-			}
-
-			// <
-			Map<String, Number> lt = conditions.getLt();
-			if (lt != null) {
-				for (Map.Entry<String, Number> entry : lt.entrySet()) {
-					list.add(cb.lt(root.get(entry.getKey()), entry.getValue()));
-				}
-			}
-
-			// %
-			Map<String, String> like = conditions.getLike();
-			if (lt != null) {
-				for (Map.Entry<String, String> entry : like.entrySet()) {
-					list.add(cb.like(root.get(entry.getKey()), entry.getValue()));
-				}
-			}
-
-			// in
-			Map<String, List<Object>> in = conditions.getIn();
-			if (lt != null) {
-				for (Map.Entry<String, List<Object>> entry : in.entrySet()) {
-					list.add(cb.and(root.get(entry.getKey()).in(entry.getValue())));
-				}
-			}
-
-			// notIn
-			Map<String, List<Object>> notIn = conditions.getNotIn();
-			if (lt != null) {
-				for (Map.Entry<String, List<Object>> entry : notIn.entrySet()) {
-					list.add(cb.not(root.get(entry.getKey()).in(entry.getValue())));
-				}
-			}
-
-			Predicate[] p = new Predicate[list.size()];
-			return cb.and(list.toArray(p));
-		};
-	}
 
 }

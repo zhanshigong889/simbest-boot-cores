@@ -47,62 +47,93 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
 
     @Override
     public long count ( ) {
-        log.debug("@Logic Repository Service count null param");
-        return logicRepository.countActive();
+        long count = logicRepository.countActive();
+        log.debug("LogicService count 调用结果为【{}】", count);
+        return count;
     }
 
     @Override
     public long count ( Specification<T> specification ) {
-        log.debug("@Logic Repository Service count Specification param");
-        return logicRepository.countActive( specification );
+        long count = logicRepository.countActive(specification);
+        log.debug("LogicService count 调用结果为【{}】", count);
+        return count;
     }
 
     @Override
     public boolean exists ( PK id ) {
-        log.debug("@Logic Repository Service exists object by id: " + id);
-        return logicRepository.existsActive( id );
+        boolean exist = logicRepository.existsActive( id );
+        log.debug("LogicService exists 参数为【】，调用结果为【{}】", id, exist);
+        return exist;
     }
 
     @Override
     public T findOne ( PK id ){
-        log.debug("@Logic Repository Service getOne");
-        return logicRepository.findOneActive(id);
+        T obj = logicRepository.findOneActive(id);
+        log.debug("LogicService findOne 参数为【】，调用结果为【{}】", id, obj);
+        return obj;
     }
 
     @Override
     public T findById ( PK id ){
-        log.debug("@Logic Repository Service findById");
-        return logicRepository.findOneActive(id);
+        T obj = logicRepository.findOneActive(id);
+        log.debug("LogicService findById 参数为【】，调用结果为【{}】", id, obj);
+        return obj;
+    }
+
+    @Override
+    public T findOne(Specification<T> conditions){
+        T obj = logicRepository.findOneActive(conditions);
+        log.debug("LogicService findOne 参数为【】，调用结果为【{}】", conditions, obj);
+        return obj;
     }
 
     @Override
     public Page<T> findAll ( ) {
-        log.debug("@Logic Repository Service findAll");
-        return logicRepository.findAllActive();
+        Page<T> page = logicRepository.findAllActive();
+        log.debug("LogicService findAll 调用结果返回记录数为【{}】", page.getTotalElements());
+        return page;
+    }
+
+    @Override
+    public List<T> findAllNoPage(){
+        List<T> list = logicRepository.findAllActiveNoPage();
+        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
+        return list;
     }
 
     @Override
     public Page<T>  findAll ( Pageable pageable ) {
-        log.debug("@Logic Repository Service findAll object PageSize:" + pageable.getPageSize() + ":PageNumber:" + pageable.getPageNumber());
-        return logicRepository.findAllActive( pageable );
+        Page<T> page = logicRepository.findAllActive( pageable );
+        log.debug("LogicService findAll 调用页码【{}】和页容量【{}】, 调用结果返回记录数为【{}】", pageable.getPageNumber(), pageable.getPageSize(), page.getTotalElements());
+        return page;
     }
 
     @Override
     public Page<T>  findAll ( Sort sort ) {
-        log.debug("@Logic Repository Service object by Sort");
-        return logicRepository.findAllActive(PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE, sort));
+        Page<T> page = logicRepository.findAllActive(PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE, sort));
+        log.debug("LogicService findAll 调用结果返回记录数为【{}】", page.getTotalElements());
+        return page;
     }
 
     @Override
     public List<T> findAllByIDs(Iterable<PK> ids) {
-        log.debug("@Logic Repository Service object by findAllByIDs");
-        return logicRepository.findAllActive(ids);
+        List<T> list = logicRepository.findAllActive(ids);
+        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
+        return list;
     }
 
     @Override
     public Page<T> findAll (Specification<T> conditions, Pageable pageable ) {
-        log.debug("@Logic Repository Service findAll");
-        return logicRepository.findAllActive(conditions, pageable);
+        Page<T> page = logicRepository.findAllActive(conditions, pageable);
+        log.debug("LogicService findAll 调用结果返回记录数为【{}】", page.getTotalElements());
+        return page;
+    }
+
+    @Override
+    public List<T> findAllNoPage(Specification<T> conditions){
+        List<T> list = logicRepository.findAllActive(conditions);
+        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
+        return list;
     }
 
     @Override
@@ -110,20 +141,23 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     public T updateEnable (PK id, boolean enabled) {
         T obj =  super.findById( id );
         if (obj == null) {
+            log.warn("根据主键ID【{}】无法检索到对象，无法更新，请确认！", id);
             return null;
         }
         obj.setEnabled( enabled );
-        return update(obj);
+        obj = update(obj);
+        log.debug("主键为【{}】的【{}】对象可用性已调整为【{}】", id, obj.getClass(), enabled);
+        return obj;
     }
 
     @Override
     @Transactional
     public T insert ( T source) {
         if(null == ObjectUtil.getEntityIdVaue(source)) {
-            log.debug("@Logic Repository Service create new object: " + source);
             wrapCreateInfo(source);
             T target = logicRepository.save(source);
             CustomBeanUtil.copyTransientProperties(source,target);
+            log.debug("对象【{}】保存成功", target);
             return target;
         } else {
             throw new InsertExistObjectException();
@@ -135,12 +169,12 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     public T update ( T source) {
         PK pk = (PK)ObjectUtil.getEntityIdVaue(source);
         if(null != pk) {
-            log.debug("@Logic Repository Service update a already object: " + source);
             T target = findById(pk);
             CustomBeanUtil.copyPropertiesIgnoreNull(source, target);
             wrapUpdateInfo( target );
             T newTarget = logicRepository.save(target);
             CustomBeanUtil.copyTransientProperties(target,newTarget);
+            log.debug("对象【{}】修改成功", newTarget);
             return newTarget;
         } else {
             throw new UpdateNotExistObjectException();
@@ -150,12 +184,12 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     @Override
     @Transactional
     public List<T> saveAll(Iterable<T> entities) {
-        log.debug("@Logic Repository Service saveAll");
         List<T> list = Lists.newArrayList();
         for(T o : entities){
             o = insert(o);
             list.add(o);
         }
+        log.debug("成功保存【{}】条记录", list.size());
         return list;
     }
 
@@ -164,52 +198,56 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     public void deleteById ( PK id ) {
         T o = findById(id);
         wrapUpdateInfo(o);
-        log.debug("@Logic Repository Service deleteById object by id: " + id);
+        log.debug("已成功删除主键为【{}】的记录", id);
         logicRepository.logicDelete( id );
     }
 
     @Override
     @Transactional
     public void delete ( T o ) {
-        log.debug("@Logic Repository Service delete object: " + o);
         wrapUpdateInfo( o );
         logicRepository.logicDelete( o );
+        log.debug("已成功删除对象【{}】", o);
     }
 
     @Override
     @Transactional
     public void deleteAll ( Iterable<? extends T> iterable ) {
-        log.debug("@Logic Repository Service deleteAll Iterable param");
-        iterable.forEach( o -> delete(o));
+        iterable.forEach( o -> {
+            delete(o);
+            log.debug("已成功删除对象【{}】", o);
+        });
     }
 
     @Override
     @Transactional
     public void deleteAll ( ) {
-        log.debug("@Logic Repository Service deleteAll null param");
         Iterable<? extends T> iterable = findAllNoPage();
         deleteAll(iterable);
+        iterable.forEach( o -> log.debug("已成功删除对象【{}】", o));
     }
 
     @Override
     @Transactional
     public void deleteAllByIds ( Iterable<? extends PK> pks ) {
-        log.debug("@Logic Repository Service deleteAllByIds Iterable param");
-        pks.forEach( pk -> deleteById(pk));
+        pks.forEach( pk -> {
+            deleteById(pk);
+            log.debug("已成功删除对象主键为【{}】的记录", pk);
+        });
     }
 
     @Override
     @Transactional
     public void scheduleLogicDelete(PK id, LocalDateTime localDateTime) {
-        log.debug("@Logic Repository Service schedule logic delete object with id: %s at %s", id, localDateTime.now());
         logicRepository.scheduleLogicDelete(id, localDateTime);
+        log.debug("将在【{}】删除主键ID为【{}】的记录", localDateTime.now(), id);
     }
 
     @Override
     @Transactional
     public void scheduleLogicDelete(T entity, LocalDateTime localDateTime) {
-        log.debug("@Logic Repository Service schedule logic delete object : %s at %s", entity, localDateTime.now());
         logicRepository.scheduleLogicDelete(entity, localDateTime);
+        log.debug("将在【{}】删除对象【{}】", localDateTime.now(), entity);
     }
 
     protected void wrapCreateInfo(T o) {

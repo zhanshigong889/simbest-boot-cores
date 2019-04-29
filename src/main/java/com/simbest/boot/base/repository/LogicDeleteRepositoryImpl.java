@@ -76,7 +76,7 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
 
     @Override
     public boolean existsActive(ID id) {
-        Assert.notNull(id, "The entity must not be null!");
+        Assert.notNull(id, "实体ID不能为空");
         return findOneActive(id) != null ? true : false;
     }
 
@@ -92,8 +92,19 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
     }
 
     @Override
+    public T findOneActive(Specification<T> conditions) {
+        List<T> list = super.findAll(conditions.and(notDeleted()));
+        return list.size()==0 ? null : list.get(0);
+    }
+
+    @Override
     public Page<T> findAllActive() {
         return super.findAll(notDeleted(), PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE));
+    }
+
+    @Override
+    public List<T> findAllActiveNoPage() {
+        return super.findAll(notDeleted());
     }
 
     @Override
@@ -124,6 +135,11 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
         TypedQuery<T> query = getQuery(Specifications.where(specification).and(notDeleted()), (Sort) null);
 
         return query.setParameter(specification.parameter, ids).getResultList();
+    }
+
+    @Override
+    public List<T> findAllActive(Specification<T> conditions) {
+        return super.findAll(conditions.and(notDeleted()));
     }
 
     @Override
