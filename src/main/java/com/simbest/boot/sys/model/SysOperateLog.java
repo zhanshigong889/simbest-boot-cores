@@ -36,7 +36,7 @@ public class SysOperateLog extends LogicModel {
     @EntityIdPrefix (prefix = "L") //主键前缀，此为可选项注解
     private String id;
 
-    @Column(length = 40)
+    @Column(length = 150)
     private String bussinessKey;                    //业务操作主键
 
     @Column(nullable = false,length = 500)
