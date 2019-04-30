@@ -41,6 +41,7 @@ public class SysOperateLogService extends LogicService<SysOperateLog,String> imp
      */
     @Override
     public SysOperateLog saveLog ( SysOperateLog sysOperateLog ) {
-        return sysOperateLogRepository.save( sysOperateLog );
+        return insert( sysOperateLog );
     }
+
 }
