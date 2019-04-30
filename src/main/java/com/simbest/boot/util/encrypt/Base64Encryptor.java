@@ -5,12 +5,12 @@ package com.simbest.boot.util.encrypt;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * 用途：Base64加密工具类
@@ -53,7 +53,7 @@ public class Base64Encryptor extends AbstractEncryptor {
     protected String decryptCode(String code) {
         try {
             byte[] binaryData = Base64.decodeBase64(code);
-            String string = new String(binaryData);
+            String string = new String(binaryData,DEFAULT_URL_ENCODING);
             return string;
         } catch (Exception e) {
             throw new RuntimeException(e);
