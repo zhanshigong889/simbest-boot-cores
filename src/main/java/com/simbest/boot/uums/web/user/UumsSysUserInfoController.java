@@ -235,7 +235,7 @@ public class UumsSysUserInfoController {
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String" ,paramType = "query")
     })
     @PostMapping(value ="/findOneStep")
-    public JsonResponse findOneStep(@RequestParam String appcode,@RequestParam(required = false) String orgCode,@RequestParam(required = false) Map<String,Object> extraValueMap){
+    public JsonResponse findOneStep(@RequestParam String appcode,@RequestParam(required = false) String orgCode,@RequestBody(required = false) Map<String,Object> extraValueMap){
         return JsonResponse.success(uumsSysUserinfoApi.findOneStep(appcode,orgCode,extraValueMap));
     }
 

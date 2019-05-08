@@ -517,7 +517,6 @@ public class UumsSysUserinfoApi {
                     .json( json0 )
                     .asBean(JsonResponse.class);
         }
-
         if(response==null){
             log.error("--response对象为空!--");
             return null;
