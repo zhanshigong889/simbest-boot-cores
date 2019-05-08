@@ -500,13 +500,15 @@ public class UumsSysUserinfoApi {
      * @param orgCode
      * @return
      */
-    public List<UserOrgTree> findOneStep(String appcode,String orgCode){
+    public List<UserOrgTree> findOneStep(String appcode,String orgCode,Map<String,Object> extraValueMap){
         String loginUser = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", loginUser);
-        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO)
-                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
-                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
-                .param("orgCode",orgCode)
+        String json0=JacksonUtils.obj2json(extraValueMap);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                +"&orgCode="+orgCode)
+                .json( json0 )
                 .asBean(JsonResponse.class);
         if(response==null){
             log.error("--response对象为空!--");
@@ -814,12 +816,10 @@ public class UumsSysUserinfoApi {
      * @param properties
      * @param appcode
      * @param orgCode
-     * @param username
-     * @param truename
-     * @param preferredMobile
+     * @param searchFields
      * @return
      */
-    public JsonResponse findUserOrgDim(int page,  int size, String direction,  String properties,String appcode, String orgCode,String username,String truename,String preferredMobile ){
+    public JsonResponse findUserOrgDim(int page,  int size, String direction,  String properties,String appcode, String orgCode,String searchFields ){
         String loginUser = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", loginUser);
         JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserOrgDim"+SSO)
@@ -830,9 +830,7 @@ public class UumsSysUserinfoApi {
                 .param("direction", direction)
                 .param("properties", properties)
                 .param("orgCode", orgCode)
-                .param("username", username)
-                .param("truename", truename)
-                .param("preferredMobile", preferredMobile)
+                .param("searchFields", searchFields)
                 .asBean(JsonResponse.class);
         return response;
     }

@@ -235,8 +235,8 @@ public class UumsSysUserInfoController {
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String" ,paramType = "query")
     })
     @PostMapping(value ="/findOneStep")
-    public JsonResponse findOneStep(@RequestParam String appcode,@RequestParam(required = false) String orgCode){
-        return JsonResponse.success(uumsSysUserinfoApi.findOneStep(appcode,orgCode));
+    public JsonResponse findOneStep(@RequestParam String appcode,@RequestParam(required = false) String orgCode,@RequestParam(required = false) Map<String,Object> extraValueMap){
+        return JsonResponse.success(uumsSysUserinfoApi.findOneStep(appcode,orgCode,extraValueMap));
     }
 
     /**
@@ -518,8 +518,18 @@ public class UumsSysUserInfoController {
         return  uumsSysUserinfoApi.findAllInfosUnderOrgTogether(orgCode,appCode);
     }
 
-    //根据组织（精确）以及用户oa账号、用户名、手机号（模糊）获取用户并分页
-    @ApiOperation(value = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页", notes = "根据用户中文姓名以及主数据首先移动号码模糊查询并分页",tags={"人员api 根据人员查"})
+    /**
+     * 根据组织（精确）以及用户oa账号、用户名、手机号（模糊）获取用户并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param orgCode
+     * @param searchFields
+     * @return
+     */
+    @ApiOperation(value = "根据组织（精确）以及用户oa账号、用户名、手机号（模糊）获取用户并分页", notes = "根据组织（精确）以及用户oa账号、用户名、手机号（模糊）获取用户并分页",tags={"人员api 根据人员查"})
     @ApiImplicitParams ({ //
             @ApiImplicitParam (name = "page", value = "当前页码", dataType = "int", paramType = "query", //
                     required = true, example = "1"), //
@@ -533,11 +543,7 @@ public class UumsSysUserInfoController {
                     paramType = "query"),
             @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String", //
                     paramType = "query"),
-            @ApiImplicitParam(name = "username", value = "OA账号", dataType = "String", //
-                    paramType = "query"),
-            @ApiImplicitParam(name = "truename", value = "真实姓名", dataType = "String", //
-                    paramType = "query"),
-            @ApiImplicitParam(name = "preferredMobile", value = "手机号码", dataType = "String", //
+            @ApiImplicitParam(name = "searchFields", value = "搜索内容", dataType = "String", //
                     paramType = "query")
     })
     @PostMapping("/findUserOrgDim")
@@ -547,10 +553,8 @@ public class UumsSysUserInfoController {
                                                 @RequestParam(required = false) String properties,
                                                 @RequestParam(required = false) String appcode,
                                                 @RequestParam(required = false) String orgCode,
-                                                @RequestParam(required = false) String username,
-                                                @RequestParam(required = false) String truename,
-                                                @RequestParam(required = false) String preferredMobile ) {
-        return uumsSysUserinfoApi.findUserOrgDim(page,size,direction,properties,appcode,orgCode,username,truename,preferredMobile);
+                                                @RequestParam(required = false) String searchFields ) {
+        return uumsSysUserinfoApi.findUserOrgDim(page,size,direction,properties,appcode,orgCode,searchFields);
     }
 }
 
