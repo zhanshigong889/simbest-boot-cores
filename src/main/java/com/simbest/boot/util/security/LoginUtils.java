@@ -51,7 +51,7 @@ public class LoginUtils {
 
     /**
      * 根据用户名，自动登录
-     * @param username 用户名需要3DES、RSA或Mocha算法进行加密
+     * @param username 用户名不能加密，必须明文
      * @param appcode
      */
     public void manualLogin(String username, String appcode) {

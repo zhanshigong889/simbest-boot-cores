@@ -63,7 +63,37 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
 
     @Override
     public Pageable getPageable(int page, int size, String direction, String properties) {
-        return genericRepository.getPageable(page, size, direction, properties);
+//        return genericRepository.getPageable(page, size, direction, properties);
+        // 页码是从零开始的
+        int pagePage = page < 1 ? 0 : (page - 1);
+        int pageSize = size < 1 ? 1 : (size > 100 ? 100 : size);
+
+        Pageable pageable;
+
+        if (StringUtils.isNotEmpty(direction) && StringUtils.isNotEmpty(properties)) {
+            // 生成指定排序规则-顺序
+            Sort.Direction sortDirection;
+            String[] sortProperties;
+            try {
+                // 先转换为大写
+                direction = direction.toUpperCase();
+                // 再获取枚举
+                sortDirection = Sort.Direction.valueOf(direction);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                sortDirection = Sort.Direction.ASC;
+            }
+
+            // 生成指定排序规则-关键字
+            sortProperties = properties.split(",");
+
+            // 生成排序规则
+            Sort sort = new Sort(sortDirection, sortProperties);
+            pageable = PageRequest.of(pagePage, pageSize, sort);
+        } else {
+            pageable = PageRequest.of(pagePage, pageSize);
+        }
+        return pageable;
     }
 
     @Override

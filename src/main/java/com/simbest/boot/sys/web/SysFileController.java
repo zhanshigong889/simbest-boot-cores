@@ -59,7 +59,7 @@ public class SysFileController extends LogicController<SysFile, String> {
 
     public final static String UPLOAD_PROCESS_FILES_URL = "/uploadProcessFiles";
     public final static String UPLOAD_PROCESS_FILES_URL_SSO = "/uploadProcessFiles/sso";
-    public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest/sso";
+    public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest";
     public final static String DOWNLOAD_URL = "/download";
     public final static String DOWNLOAD_URL_SSO = "/download/sso";
     public final static String DOWNLOAD_URL_DATABASE = "/sys/file/download";

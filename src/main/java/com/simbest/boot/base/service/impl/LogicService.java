@@ -62,28 +62,28 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     @Override
     public boolean exists ( PK id ) {
         boolean exist = logicRepository.existsActive( id );
-        log.debug("LogicService exists 参数为【】，调用结果为【{}】", id, exist);
+        log.debug("LogicService exists 参数为【{}】，调用结果为【{}】", id, exist);
         return exist;
     }
 
     @Override
     public T findOne ( PK id ){
         T obj = logicRepository.findOneActive(id);
-        log.debug("LogicService findOne 参数为【】，调用结果为【{}】", id, obj);
+        log.debug("LogicService findOne 参数为【{}】，调用结果为【{}】", id, obj);
         return obj;
     }
 
     @Override
     public T findById ( PK id ){
         T obj = logicRepository.findOneActive(id);
-        log.debug("LogicService findById 参数为【】，调用结果为【{}】", id, obj);
+        log.debug("LogicService findById 参数为【{}】，调用结果为【{}】", id, obj);
         return obj;
     }
 
     @Override
     public T findOne(Specification<T> conditions){
         T obj = logicRepository.findOneActive(conditions);
-        log.debug("LogicService findOne 参数为【】，调用结果为【{}】", conditions, obj);
+        log.debug("LogicService findOne 参数为【{}】，调用结果为【{}】", conditions, obj);
         return obj;
     }
 

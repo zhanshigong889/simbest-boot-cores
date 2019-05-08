@@ -433,5 +433,6 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
 
     public static void main ( String[] args ) {
         System.out.println(  CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,"permission_code") );
+        System.out.println(  CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,"permissionCode") );
     }
 }
