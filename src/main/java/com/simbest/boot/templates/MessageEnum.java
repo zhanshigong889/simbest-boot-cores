@@ -119,6 +119,15 @@ public enum MessageEnum {
     MT000004("【${appName}】您提交的“${serialNumber}”${appName}申请，已完成审批。审批结果：${approveResult}。请登录系统查看"),
 
     /**
+     * @param appName	            系统名称。
+     * @param fromUser		        发送人。
+     * @param itemSubject			事项主题。
+     * @param description           事件描述
+     * @消息内容 协作配合:您收到汪祥向您发送的"关于台前分公司拆除楼顶消防水箱的请示"的督办事件，请及时处理。
+     */
+    MT000006("${appName}:您收到${fromUser}向您发送的[${itemSubject}]的${appName}${description}事件，请及时处理。"),
+
+    /**
      * 工单流转时有代理人的提示信息
      * @param companyName	        : 公司名称。
      * @param departmentName		: 部门名称。
@@ -127,6 +136,8 @@ public enum MessageEnum {
      * @消息内容 工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理。
      */
     MW000005("工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理,被代理人为：${agentedCompanyName}${agentedDepartmentName}-${agentedTrueName}${agentedPositionName}"),
+
+
 
     /*************************************************************流程消息模板***********************************************************************/
     W21000000("流程引擎接口调用提交失败，错误信息为：【21000000】原因可能为提交数据的状态不正确或者提交人没有获取到！");
