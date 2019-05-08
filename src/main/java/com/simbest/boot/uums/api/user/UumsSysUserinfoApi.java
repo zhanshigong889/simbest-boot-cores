@@ -506,10 +506,18 @@ public class UumsSysUserinfoApi {
         String json0=JacksonUtils.obj2json(extraValueMap);
         String username1=encryptor.encrypt(loginUser);
         String username2=username1.replace("+","%2B");
-        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO+"?loginuser="+username2+"&appcode="+appcode
-                +"&orgCode="+orgCode)
-                .json( json0 )
-                .asBean(JsonResponse.class);
+        JsonResponse response = new JsonResponse(  );
+        if(StringUtils.isEmpty( orgCode )){
+             response = HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                    .json( json0 )
+                    .asBean(JsonResponse.class);
+        }else{
+             response = HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                    +"&orgCode="+orgCode)
+                    .json( json0 )
+                    .asBean(JsonResponse.class);
+        }
+
         if(response==null){
             log.error("--response对象为空!--");
             return null;
