@@ -38,8 +38,7 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Setter
     private SsoAuthenticationRegister ssoAuthenticationRegister;
 
-    @Setter
-    private IAuthService authService;
+
 
     public SsoAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher) {
         super(requiresAuthenticationRequestMatcher);
@@ -64,13 +63,13 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
     protected Principal obtainPrincipal(HttpServletRequest request) {
         Principal principal = null;
         if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME))){
-            principal = UsernamePrincipal.builder().username(decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME), IAuthService.KeyType.username)).build();
+            principal = UsernamePrincipal.builder().username(ssoAuthenticationRegister.decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_USERNAME), IAuthService.KeyType.username)).build();
             log.debug("SSO 单点认证过滤器从【{}】提取到Principal为：【{}】", AuthoritiesConstants.SSO_API_USERNAME, principal.getName());
         } else if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_UID))){
-            principal = UsernamePrincipal.builder().username(decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_UID), IAuthService.KeyType.username)).build();
+            principal = UsernamePrincipal.builder().username(ssoAuthenticationRegister.decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_UID), IAuthService.KeyType.username)).build();
             log.debug("SSO 单点认证过滤器从【{}】提取到Principal为：【{}】", AuthoritiesConstants.SSO_API_UID, principal.getName());
         } else if(StringUtils.isNotEmpty(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD))){
-            principal = KeyTypePrincipal.builder().keyword(decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD), IAuthService.KeyType.valueOf(request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE))))
+            principal = KeyTypePrincipal.builder().keyword(ssoAuthenticationRegister.decodeKeyword(request.getParameter(AuthoritiesConstants.SSO_API_KEYWORD), IAuthService.KeyType.valueOf(request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE))))
                     .keyType(IAuthService.KeyType.valueOf(request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE))).build();
             log.debug("SSO 单点认证过滤器从【{}】和【{}】提取到Principal为：【{}】", AuthoritiesConstants.SSO_API_KEYWORD, request.getParameter(AuthoritiesConstants.SSO_API_KEYTYPE),
                     principal.getName());
@@ -121,23 +120,6 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
         return false;
     }
 
-    private String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType){
-        String decodeKeyword = null;
-        for(SsoAuthenticationService decryptService : ssoAuthenticationRegister.getSsoAuthenticationService()) {
-            decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
-            if(StringUtils.isNotEmpty(decodeKeyword)) {
-                log.debug("通过关键字【{}】解密后为【{}】", encodeKeyword, decodeKeyword);
-                IUser iUser = authService.findByKey(decodeKeyword, keyType);
-                if (null != iUser) {
-                    //成功返回
-                    break;
-                } else {
-                    decodeKeyword = null;
-                    log.warn("请注意关键字【{}】拉取用户信息为NULL！", decodeKeyword);
-                }
-            }
-        }
-        return decodeKeyword;
-    }
+
 
 }

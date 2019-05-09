@@ -238,7 +238,6 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
         filter.setAuthenticationManager(authenticationManagerBean());
         filter.setSsoAuthenticationRegister(ssoAuthenticationRegister);
-        filter.setAuthService(authService);
         // 不跳回首页
         filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
         //跳至登陆页，但不作任何提醒

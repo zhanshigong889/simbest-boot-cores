@@ -5,10 +5,10 @@ package com.simbest.boot.security.auth.provider.sso.service.impl;
 
 import com.mochasoft.portal.encrypt.EncryptorUtil;
 import com.simbest.boot.config.AppConfig;
+import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -38,6 +38,16 @@ public class MochaSsoAuthenticationServiceImpl extends AbstractEncryptorSsoAuthe
             }
         }
         return decodeKeyword;
+    }
+
+    @Override
+    public int compareTo(SsoAuthenticationService o) {
+        return this.getOrder().compareTo(o.getOrder());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER_MOCHA;
     }
 
     public static void main(String[] args) {

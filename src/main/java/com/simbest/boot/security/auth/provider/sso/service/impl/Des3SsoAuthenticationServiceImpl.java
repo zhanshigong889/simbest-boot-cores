@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.provider.sso.service.impl;
 
+import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
 import com.simbest.boot.util.encrypt.Des3Encryptor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -26,5 +27,14 @@ public class Des3SsoAuthenticationServiceImpl extends AbstractEncryptorSsoAuthen
         this.encryptor = encryptor;
     }
 
+    @Override
+    public int compareTo(SsoAuthenticationService o) {
+        return this.getOrder().compareTo(o.getOrder());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER_3DES;
+    }
 
 }

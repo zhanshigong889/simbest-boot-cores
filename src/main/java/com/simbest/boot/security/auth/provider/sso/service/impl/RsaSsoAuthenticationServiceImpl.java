@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.provider.sso.service.impl;
 
+import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -27,4 +28,13 @@ public class RsaSsoAuthenticationServiceImpl extends AbstractEncryptorSsoAuthent
     }
 
 
+    @Override
+    public int compareTo(SsoAuthenticationService o) {
+        return this.getOrder().compareTo(o.getOrder());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER_RSA;
+    }
 }

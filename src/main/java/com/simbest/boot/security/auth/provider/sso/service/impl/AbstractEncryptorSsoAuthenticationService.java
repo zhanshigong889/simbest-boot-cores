@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 @Data
 @NoArgsConstructor
-public class AbstractEncryptorSsoAuthenticationService implements SsoAuthenticationService {
+public abstract class AbstractEncryptorSsoAuthenticationService implements SsoAuthenticationService {
 
     private AbstractEncryptor encryptor;
 

@@ -25,7 +25,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 /**
- * 用途：
+ * 用途：二维码工具类
  * 作者: lishuyi
  * 时间: 2018/5/31  16:22
  */
