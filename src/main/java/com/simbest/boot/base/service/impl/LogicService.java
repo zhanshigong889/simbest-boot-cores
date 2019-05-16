@@ -137,6 +137,13 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     }
 
     @Override
+    public List<T> findAllNoPage(Specification<T> conditions, Sort sort){
+        List<T> list = logicRepository.findAllActive(conditions, sort);
+        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
+        return list;
+    }
+
+    @Override
     @Transactional
     public T updateEnable (PK id, boolean enabled) {
         T obj =  super.findById( id );

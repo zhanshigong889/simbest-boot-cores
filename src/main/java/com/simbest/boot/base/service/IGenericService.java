@@ -118,6 +118,14 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
     Iterable<T> findAllNoPage(Specification<T> conditions);
 
     /**
+     * 按条件查询全部记录，并排序
+     * @param conditions
+     * @param sort
+     * @return
+     */
+    Iterable<T> findAllNoPage(Specification<T> conditions, Sort sort);
+
+    /**
      * 新增-不允许实体主键字段有值
      * @param o
      * @return

@@ -219,6 +219,12 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
         return genericRepository.findAll(conditions);
     }
 
+    @Override
+    public Iterable<T> findAllNoPage(Specification<T> conditions, Sort sort){
+        log.debug("@Generic Repository Service object by findAllNoPage");
+        return genericRepository.findAll(conditions, sort);
+    }
+
     /**
      * @see
      */

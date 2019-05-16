@@ -49,6 +49,8 @@ public interface LogicRepository<T, PK extends Serializable> extends SystemRepos
 
     Page<T> findAllActive(Specification<T> conditions, Pageable pageable);
 
+    List<T> findAllActive(Specification<T> conditions, Sort sort);
+
     T findByIdActive(PK id);
 
     T findOneActive(PK id);

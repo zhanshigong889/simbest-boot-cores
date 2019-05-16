@@ -143,6 +143,11 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
     }
 
     @Override
+    public List<T> findAllActive(Specification<T> conditions, Sort sort) {
+        return super.findAll(conditions.and(notDeleted()), sort);
+    }
+
+    @Override
     public Page<T> findAllActive(Specification<T> conditions, Pageable pageable) {
         return super.findAll(conditions.and(notDeleted()), pageable);
     }
