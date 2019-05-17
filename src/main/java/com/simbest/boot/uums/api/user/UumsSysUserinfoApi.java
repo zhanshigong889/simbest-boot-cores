@@ -19,6 +19,8 @@ import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -179,7 +181,7 @@ public class UumsSysUserinfoApi {
      * @param appcode
      * @return
      */
-    public SimpleUser findByUsername(String username,String appcode) {
+    public SimpleUser findByUsername(String username,String appcode) throws AuthenticationException {
         JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findByUsername"+SSO)
                 .param(AuthoritiesConstants.SSO_API_USERNAME,encryptor.encrypt(username))
                 .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
@@ -189,9 +191,17 @@ public class UumsSysUserinfoApi {
             log.error("--response对象为空!--");
             return null;
         }
-        String json = JacksonUtils.obj2json(response.getData());
-        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
-        return auth;
+        else {
+            if(response.getErrcode().equals(JsonResponse.SUCCESS_CODE)){
+                String json = JacksonUtils.obj2json(response.getData());
+                SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+                return auth;
+            }
+            else {
+                throw new InternalAuthenticationServiceException(response.getError());
+            }
+        }
+
     }
 
     /**
