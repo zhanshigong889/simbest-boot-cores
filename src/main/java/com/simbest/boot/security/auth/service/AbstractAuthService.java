@@ -19,7 +19,10 @@ import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,6 +43,8 @@ import java.util.Set;
 @Slf4j
 @Data
 public abstract class AbstractAuthService implements IAuthService {
+
+    protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
     protected AppConfig appConfig;
 
@@ -138,6 +143,11 @@ public abstract class AbstractAuthService implements IAuthService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDetails userDetails = userinfoApi.findByUsername(username, appConfig.getAppcode());
         log.debug("通过用户名【{}】和应用代码【{}】提取到的用户信息为【{}】", username, appConfig.getAppcode(), userDetails);
+        if(null == userDetails){
+            throw new UsernameNotFoundException(messages.getMessage(
+                    "AbstractUserDetailsAuthenticationProvider.badCredentials",
+                    "Bad credentials"));
+        }
         return userDetails;
     }
 

@@ -241,7 +241,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         // 不跳回首页
         filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
         //跳至登陆页，但不作任何提醒
-        filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_PAGE));
+        //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_PAGE));
+        //记录失败登录日志
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
     }
 

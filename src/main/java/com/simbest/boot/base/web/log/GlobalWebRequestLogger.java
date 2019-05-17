@@ -52,13 +52,13 @@ public class GlobalWebRequestLogger {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         // 记录下请求内容
-        log.info(LOGTAG + "URL : " + request.getRequestURL().toString());
-        log.info(LOGTAG + "HTTP_METHOD : " + request.getMethod());
+        log.debug(LOGTAG + "URL : " + request.getRequestURL().toString());
+        log.debug(LOGTAG + "HTTP_METHOD : " + request.getMethod());
 //        log.info("IP : " + request.getRemoteAddr());
-        log.info(LOGTAG + "IP : " + HostUtil.getClientIpAddress(request));
-        log.info(LOGTAG + "CLASS_METHOD : "
+        log.debug(LOGTAG + "IP : " + HostUtil.getClientIpAddress(request));
+        log.debug(LOGTAG + "CLASS_METHOD : "
                 + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
-        log.info(LOGTAG + "ARGS : " + Arrays.toString(joinPoint.getArgs()));
+        log.debug(LOGTAG + "ARGS : " + Arrays.toString(joinPoint.getArgs()));
     }
 
     /**
@@ -69,7 +69,7 @@ public class GlobalWebRequestLogger {
     @AfterReturning(returning = "ret", pointcut = "webLog()")
     public void doAfterReturning(Object ret) throws Throwable {
         // 处理完请求，返回内容
-        log.info(LOGTAG + "RESPONSE : " + ret);
-        log.info(LOGTAG + "SPEND TIME : " + (System.currentTimeMillis() - startTime.get()) + "ms");
+        log.debug(LOGTAG + "RESPONSE : " + ret);
+        log.debug(LOGTAG + "SPEND TIME : " + (System.currentTimeMillis() - startTime.get()) + "ms");
     }
 }

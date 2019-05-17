@@ -72,7 +72,7 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
      * @param username 用户名
      * @return true/false
      */
-    private boolean authenticationIsRequired(Authentication existingAuth, String username) {
+    protected boolean authenticationIsRequired(Authentication existingAuth, String username) {
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
             return true;
         }
