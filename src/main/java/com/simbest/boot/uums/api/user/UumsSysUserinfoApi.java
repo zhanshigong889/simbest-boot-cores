@@ -16,6 +16,7 @@ import com.simbest.boot.security.UserOrgTree;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
+import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,9 @@ public class UumsSysUserinfoApi {
     //private String uumsAddress="http://localhost:8080/uums";
     @Autowired
     private RsaEncryptor encryptor;
+
+    @Autowired
+    private ApiRequestHandle<SimpleUser> simpleUserApiHandle;
 
     /**
      * 不登录更新用户信息
@@ -187,21 +191,21 @@ public class UumsSysUserinfoApi {
                 .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
                 .param("username",username)
                 .asBean(JsonResponse.class);
-        if(response==null){
-            log.error("--response对象为空!--");
-            return null;
-        }
-        else {
-            if(response.getErrcode().equals(JsonResponse.SUCCESS_CODE)){
-                String json = JacksonUtils.obj2json(response.getData());
-                SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
-                return auth;
-            }
-            else {
-                throw new InternalAuthenticationServiceException(response.getError());
-            }
-        }
-
+        return simpleUserApiHandle.handRemoteResponse(response, SimpleUser.class);
+//        if(response==null){
+//            log.error("--response对象为空!--");
+//            return null;
+//        }
+//        else {
+//            if(response.getErrcode().equals(JsonResponse.SUCCESS_CODE)){
+//                String json = JacksonUtils.obj2json(response.getData());
+//                SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+//                return auth;
+//            }
+//            else {
+//                throw new InternalAuthenticationServiceException(response.getError());
+//            }
+//        }
     }
 
     /**

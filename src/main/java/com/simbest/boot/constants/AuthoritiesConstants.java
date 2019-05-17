@@ -3,12 +3,22 @@
  */
 package com.simbest.boot.constants;
 
+import org.springframework.security.authentication.AccountExpiredException;
+
 /**
  * 用途：定义权限相关常量
  * 作者: lishuyi
  * 时间: 2018/2/6  17:11
  */
 public class AuthoritiesConstants {
+    public static final String UsernameNotFoundException = "用户或密码错误!";
+    public static final String BadCredentialsException = "用户或密码错误";
+    public static final String AccountExpiredException = "账户已到期";
+    public static final String DisabledException = "账号已禁用";
+    public static final String LockedException = "账号已锁定";
+    public static final String CredentialsExpiredException = "账户密码已到期";
+    public static final String InternalAuthenticationServiceException = "认证内部错误";
+
     public static final String ADMIN = "ROLE_ADMIN";
 
     public static final String USER = "ROLE_USER";

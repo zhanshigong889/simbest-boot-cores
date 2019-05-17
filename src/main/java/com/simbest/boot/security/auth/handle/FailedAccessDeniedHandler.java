@@ -11,7 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -55,8 +61,26 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
         JsonResponse jsonResponse = JsonResponse.builder().
                 errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(exception.getMessage())
+                .error(HttpStatus.UNAUTHORIZED.name())
                 .build();
+        if(null != exception) {
+            log.warn("登录认证发生【{}】异常，错误信息为【{}】", exception.getClass().getSimpleName(), exception.getMessage());
+            if (exception instanceof UsernameNotFoundException || exception.getCause() instanceof UsernameNotFoundException) {
+                jsonResponse.setError(AuthoritiesConstants.UsernameNotFoundException);
+            } else if (exception instanceof BadCredentialsException || exception.getCause() instanceof BadCredentialsException) {
+                jsonResponse.setError(AuthoritiesConstants.BadCredentialsException);
+            } else if (exception instanceof AccountExpiredException || exception.getCause() instanceof AccountExpiredException) {
+                jsonResponse.setError(AuthoritiesConstants.AccountExpiredException);
+            } else if (exception instanceof DisabledException || exception.getCause() instanceof DisabledException) {
+                jsonResponse.setError(AuthoritiesConstants.DisabledException);
+            } else if (exception instanceof LockedException || exception.getCause() instanceof LockedException) {
+                jsonResponse.setError(AuthoritiesConstants.LockedException);
+            } else if (exception instanceof CredentialsExpiredException || exception.getCause() instanceof CredentialsExpiredException) {
+                jsonResponse.setError(AuthoritiesConstants.CredentialsExpiredException);
+            } else {
+                jsonResponse.setError(AuthoritiesConstants.InternalAuthenticationServiceException);
+            }
+        }
         response.getWriter().print(JacksonUtils.obj2json(jsonResponse));
     }
 
