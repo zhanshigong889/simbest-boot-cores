@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.mzlion.core.lang.Assert;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
@@ -20,7 +21,6 @@ import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -144,9 +144,7 @@ public abstract class AbstractAuthService implements IAuthService {
         UserDetails userDetails = userinfoApi.findByUsername(username, appConfig.getAppcode());
         log.debug("通过用户名【{}】和应用代码【{}】提取到的用户信息为【{}】", username, appConfig.getAppcode(), userDetails);
         if(null == userDetails){
-            throw new UsernameNotFoundException(messages.getMessage(
-                    "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                    "Bad credentials"));
+            throw new UsernameNotFoundException(AuthoritiesConstants.UsernameNotFoundException);
         }
         return userDetails;
     }

@@ -3,22 +3,12 @@
  */
 package com.simbest.boot.constants;
 
-import org.springframework.security.authentication.AccountExpiredException;
-
 /**
  * 用途：定义权限相关常量
  * 作者: lishuyi
  * 时间: 2018/2/6  17:11
  */
 public class AuthoritiesConstants {
-    public static final String UsernameNotFoundException = "用户或密码错误!";
-    public static final String BadCredentialsException = "用户或密码错误";
-    public static final String AccountExpiredException = "账户已到期";
-    public static final String DisabledException = "账号已禁用";
-    public static final String LockedException = "账号已锁定";
-    public static final String CredentialsExpiredException = "账户密码已到期";
-    public static final String InternalAuthenticationServiceException = "认证内部错误";
-
     public static final String ADMIN = "ROLE_ADMIN";
 
     public static final String USER = "ROLE_USER";
@@ -51,5 +41,15 @@ public class AuthoritiesConstants {
     public static final int ATTEMPT_LOGIN_MAX_TIMES = 5;
     public static final int ATTEMPT_LOGIN_FAILED_WAIT_SECONDS = 60 * 5;
     public static final String LOGIN_FAILED_KEY = "LOGIN_FAILED:";
+
+    public static final String UsernameNotFoundException = "用户或密码错误!";
+    public static final String BadCredentialsException = "用户或密码错误";
+    public static final String AccountExpiredException = "账户已到期";
+    public static final String DisabledException = "账号已禁用";
+    public static final String LockedException = "账号已锁定";
+    public static final String CredentialsExpiredException = "账户密码已到期";
+    public static final String InsufficientAuthenticationException = "账户密码等参数缺失";
+    public static final String AttempMaxLoginFaildException = "错误登录超过"+ATTEMPT_LOGIN_MAX_TIMES+"次，锁定"+ATTEMPT_LOGIN_FAILED_WAIT_SECONDS/60+"分钟";
+    public static final String InternalAuthenticationServiceException = "认证内部错误";
 
 }
