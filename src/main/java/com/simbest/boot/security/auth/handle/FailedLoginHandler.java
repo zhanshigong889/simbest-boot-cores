@@ -4,13 +4,13 @@
 package com.simbest.boot.security.auth.handle;
 
 import com.simbest.boot.constants.ApplicationConstants;
-import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AccesssAppDeniedException;
 import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
-import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -25,7 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 用途：记录登录错误日志
@@ -40,13 +39,11 @@ public class FailedLoginHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException, ServletException {
-
         //登录发生错误计数，每错误一次，即向后再延时等待5分钟
-        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
-        Integer failedTimes = RedisUtil.getBean(key, Integer.class);
-        failedTimes = null == failedTimes ? AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES : failedTimes + AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES;
-        RedisUtil.setBean(key, failedTimes);
-        RedisUtil.expire(key, AuthoritiesConstants.ATTEMPT_LOGIN_FAILED_WAIT_SECONDS, TimeUnit.SECONDS);
+        String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+        if(StringUtils.isNotEmpty(username)){
+            RedisRetryLoginCache.addTryTimes(username);
+        }
 
         if (exception != null) {
             // 隐藏账户不存在异常，统一抛出认证密码异常

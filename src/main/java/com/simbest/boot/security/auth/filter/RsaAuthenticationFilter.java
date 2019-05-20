@@ -3,28 +3,23 @@
  */
 package com.simbest.boot.security.auth.filter;
 
-import com.simbest.boot.constants.AuthoritiesConstants;
-import com.simbest.boot.constants.ErrorCodeConstants;
-import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
-import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 用途：重载UsernamePasswordAuthenticationFilter
  * 作者: lishuyi
  * 时间: 2018/3/7  0:10
  */
+@Slf4j
 public class RsaAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Setter
@@ -41,7 +36,6 @@ public class RsaAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     /**
-     * 最大错误登录次数不超过5次可尝试进行登录
      * @param request
      * @param response
      * @return
@@ -50,13 +44,9 @@ public class RsaAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
-        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + obtainUsername(request);
-        Integer failedTimes = RedisUtil.getBean(key, Integer.class);
-        if(null != failedTimes && failedTimes >= AuthoritiesConstants.ATTEMPT_LOGIN_MAX_TIMES){
-            throw new AttempMaxLoginFaildException(ErrorCodeConstants.LOGIN_ERROR_EXCEED_MAX_TIMES);
-        } else {
-            return super.attemptAuthentication(request, response);
-        }
+        RedisRetryLoginCache.preCheckTryTimes(obtainUsername(request));
+        log.debug("用户【{}】即将通过凭证【{}】访问应用", obtainUsername(request), obtainPassword(request));
+        return super.attemptAuthentication(request, response);
     }
 
 }

@@ -3,13 +3,11 @@
  */
 package com.simbest.boot.security.auth.handle;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
-import com.simbest.boot.util.json.GetJsonRequestUtil;
 import com.simbest.boot.util.json.JacksonUtils;
-import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +29,6 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 用途：无权限访问事件拦截
@@ -53,17 +50,12 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
         //登录发生错误计数，每错误一次，即向后再延时等待5分钟
         String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
         if(StringUtils.isNotEmpty(username)){
-            String key = AuthoritiesConstants.LOGIN_FAILED_KEY + username;
-            Integer failedTimes = RedisUtil.getBean(key, Integer.class);
-            failedTimes = null == failedTimes ? AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES : failedTimes + AuthoritiesConstants.ATTEMPT_LOGIN_INIT_TIMES;
-            RedisUtil.setBean(key, failedTimes);
-            RedisUtil.expire(key, AuthoritiesConstants.ATTEMPT_LOGIN_FAILED_WAIT_SECONDS, TimeUnit.SECONDS);
+            RedisRetryLoginCache.addTryTimes(username);
         }
-
         handleResponse(response, exception);
     }
 
-    private void handleResponse(HttpServletResponse response, Exception exception) throws IOException{
+    protected void handleResponse(HttpServletResponse response, Exception exception) throws IOException{
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
         JsonResponse jsonResponse = JsonResponse.builder().

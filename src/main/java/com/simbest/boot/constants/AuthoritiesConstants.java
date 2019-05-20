@@ -42,8 +42,8 @@ public class AuthoritiesConstants {
     public static final int ATTEMPT_LOGIN_FAILED_WAIT_SECONDS = 60 * 5;
     public static final String LOGIN_FAILED_KEY = "LOGIN_FAILED:";
 
-    public static final String UsernameNotFoundException = "用户或密码错误!";
-    public static final String BadCredentialsException = "用户或密码错误";
+    public static final String UsernameNotFoundException = "账号或密码错误!";
+    public static final String BadCredentialsException = "账号或密码错误";
     public static final String AccountExpiredException = "账户已到期";
     public static final String DisabledException = "账号已禁用";
     public static final String LockedException = "账号已锁定";

@@ -73,6 +73,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     private FailedLoginHandler failedLoginHandler;
 
     @Autowired
+    private SsoSuccessLoginHandler ssoSuccessLoginHandler;
+
+    @Autowired
     private RestSuccessLoginHandler restSuccessLoginHandler;
 
     @Autowired
@@ -80,9 +83,6 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private DefaultLogoutHandler defaultLogoutHandler;
-
-    @Autowired
-    private SsoSuccessLoginHandler ssoSuccessLoginHandler;
 
     @Autowired
     private Swagger2CsrfProtection swagger2CsrfProtection;
@@ -143,8 +143,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 表单安全验证器
-     *
+     * 配置通用表单安全验证器
      * @param http
      * @throws Exception
      */
@@ -191,6 +190,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         }
     }
 
+    /**
+     * UUMS主数据登录认证拦截器，拦截/login请求
+     * @return
+     * @throws Exception
+     */
     @Bean
     public RsaAuthenticationFilter rsaAuthenticationFilter() throws Exception {
         RsaAuthenticationFilter filter = new RsaAuthenticationFilter();
@@ -204,6 +208,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
        return filter;
     }
 
+    /**
+     * 通过UUMS认证的应用认证拦截器，拦截/uumslogin请求（WEB方式）
+     * @return
+     * @throws Exception
+     */
     @Bean
     public UumsAuthenticationFilter uumsAuthenticationFilter() throws Exception {
         UumsAuthenticationFilter filter = new UumsAuthenticationFilter(new AntPathRequestMatcher(ApplicationConstants.UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
@@ -215,24 +224,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
-    @Bean
-    public RestUumsAuthenticationFilter restUumsAuthenticationFilter() throws Exception {
-        RestUumsAuthenticationFilter filter = new RestUumsAuthenticationFilter(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
-        filter.setAuthenticationManager(authenticationManagerBean());
-        //记录成功登录日志
-        filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
-        //记录失败登录日志
-        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
-        return filter;
-    }
-
-    @Bean
-    public LogoutFilter restUumsLogoutFilter() throws Exception {
-        LogoutFilter filter = new LogoutFilter(restSuccessLogoutHandler, defaultLogoutHandler);
-        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
-        return filter;
-    }
-
+    /**
+     * 通过SSO单点的认证拦截器，拦截url请求中包含/sso的请求
+     * @return
+     * @throws Exception
+     */
     @Bean
     public SsoAuthenticationFilter ssoAuthenticationFilter() throws Exception {
         SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
@@ -247,6 +243,38 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
+    /**
+     * 通过UUMS认证的应用认证拦截器，拦截/restuumslogin请求（REST方式）
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    public RestUumsAuthenticationFilter restUumsAuthenticationFilter() throws Exception {
+        RestUumsAuthenticationFilter filter = new RestUumsAuthenticationFilter(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //记录成功登录日志
+        filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
+        //记录失败登录日志
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
+        return filter;
+    }
+
+    /**
+     * REST方式退出登录，拦截/restuumslogout请求
+     * @return
+     */
+    @Bean
+    public LogoutFilter restUumsLogoutFilter() {
+        LogoutFilter filter = new LogoutFilter(restSuccessLogoutHandler, defaultLogoutHandler);
+        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
+        return filter;
+    }
+
+    /**
+     * 验证码
+     * @return
+     * @throws Exception
+     */
     @Bean
     public CaptchaAuthenticationFilter captchaUsernamePasswordAuthenticationFilter() throws Exception {
         CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
@@ -259,9 +287,15 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
+    /**
+     * 向外暴露Spring Security的AuthenticationManager
+     * @return
+     * @throws Exception
+     */
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
 }

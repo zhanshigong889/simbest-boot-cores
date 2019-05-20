@@ -4,16 +4,14 @@
 package com.simbest.boot.security.auth.handle;
 
 import com.simbest.boot.base.web.response.JsonResponse;
-import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.json.JacksonUtils;
-import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import com.simbest.boot.util.security.LoginUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -40,10 +38,9 @@ public class RestSuccessLoginHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException, ServletException {
         if(authentication.getPrincipal() instanceof IUser){
             IUser iUser = (IUser)authentication.getPrincipal();
-            log.debug("用户【{}】登录成功，用户身份详细信息为【{}】", iUser.getUsername(), iUser);
             //登录成功后，立即清除失败缓存，不再等待错误缓存的到期时间
-            String key = AuthoritiesConstants.LOGIN_FAILED_KEY + iUser.getUsername();
-            Boolean value = RedisUtil.delete(key);
+            RedisRetryLoginCache.cleanTryTimes(iUser.getUsername());
+            log.debug("用户【{}】登录成功，用户身份详细信息为【{}】", iUser.getUsername(), iUser);
 
             //记录登录日志
             loginUtils.recordLoginLog(request, authentication);

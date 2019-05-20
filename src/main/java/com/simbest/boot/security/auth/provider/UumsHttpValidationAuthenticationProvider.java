@@ -62,41 +62,42 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                         .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
                         .asBean(JsonResponse.class);
                 if(!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
-                    log.error(LOGTAG + "UUMS认证 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
+                    log.warn(LOGTAG + "UUMS认证用户 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                     throw new
                             BadCredentialsException(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }else {
+                    log.info(LOGTAG + "UUMS认证用户 【{}】 访问 【{}】 成功！", principal, uumsCredentials.getAppcode());
                     UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                             .password(password).appcode(appcode).build());
                     return genericAuthenticationChecker.authChek(authentication, appcode);
                 }
             }
             catch (BadCredentialsException e){
-                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
             catch (AttempMaxLoginFaildException e){
-                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         AttempMaxLoginFaildException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
             catch (AccesssAppDeniedException e){
-                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         AccesssAppDeniedException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
             catch (HttpClientException e){
-                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }catch (Exception e){
-                log.error(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
+                log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
         } else {
-            log.error(LOGTAG + "UUMS认证 【{}】 失败， 令牌或凭证不能为空!", principal);
+            log.warn(LOGTAG + "UUMS认证 【{}】 失败， 令牌或凭证不能为空!", principal);
             throw new
                     BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
         }

@@ -4,14 +4,10 @@
 package com.simbest.boot.security.auth.filter;
 
 import com.simbest.boot.constants.AuthoritiesConstants;
-import com.simbest.boot.constants.ErrorCodeConstants;
-import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
-import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
-import com.simbest.boot.util.redis.RedisUtil;
-import com.simbest.boot.util.security.SecurityUtils;
+import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,26 +39,21 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
         String username = request.getParameter(AuthoritiesConstants.SSO_UUMS_USERNAME);
         String password = request.getParameter(AuthoritiesConstants.SSO_UUMS_PASSWORD);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
+        RedisRetryLoginCache.preCheckTryTimes(username);
         log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
-        String key = AuthoritiesConstants.LOGIN_FAILED_KEY + username;
-        Integer failedTimes = RedisUtil.getBean(key, Integer.class);
-        if(null != failedTimes && failedTimes >= AuthoritiesConstants.ATTEMPT_LOGIN_MAX_TIMES){
-            throw new AttempMaxLoginFaildException(ErrorCodeConstants.LOGIN_ERROR_EXCEED_MAX_TIMES);
-        } else {
-            if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password) || StringUtils.isEmpty(appcode)) {
-                log.error("UUMS 认证失败， 令牌、密码、应用标识不能为空！");
-                throw new BadCredentialsException(
-                        "UUMS 认证失败， 令牌、密码、应用标识不能为空: " + username);
-            }
-
-            Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-            if (authenticationIsRequired(existingAuth, username)) {
-                UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
-                        .password(password).appcode(appcode).build());
-                return this.getAuthenticationManager().authenticate(uumsAuthentication);
-            }
-            return existingAuth;
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password) || StringUtils.isEmpty(appcode)) {
+            log.error("UUMS 认证失败， 令牌、密码、应用标识不能为空！");
+            throw new BadCredentialsException(
+                    "UUMS 认证失败， 令牌、密码、应用标识不能为空: " + username);
         }
+
+        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (authenticationIsRequired(existingAuth, username)) {
+            UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
+                    .password(password).appcode(appcode).build());
+            return this.getAuthenticationManager().authenticate(uumsAuthentication);
+        }
+        return existingAuth;
 
     }
 
