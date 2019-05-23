@@ -192,7 +192,8 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
                     for (UniqueConstraint uniqueConstraint : uniqueConstraints) {
                         Map<String, Object> data = new HashMap<>();
                         for (String name : uniqueConstraint.columnNames()) {
-                            name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name );
+                            //name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name );
+                            name = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
                             PropertyDescriptor pd = new PropertyDescriptor(name, entityClass);
                             Object value = pd.getReadMethod().invoke(entity);
                             if (value == null) {
