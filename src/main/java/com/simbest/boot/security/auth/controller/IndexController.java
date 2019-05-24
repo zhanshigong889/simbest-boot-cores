@@ -50,7 +50,7 @@ public class IndexController {
     }
 
     @ApiOperation(value = "获取当前登陆人信息")
-    @PostMapping(value={"/getCurrentUser","/getCurrentUser/sso"})
+    @PostMapping(value={"/getCurrentUser","/getCurrentUser/sso","/getCurrentUser/api"})
     @ResponseBody
     public JsonResponse getCurrentUser() {
         IUser iuser = SecurityUtils.getCurrentUser();
