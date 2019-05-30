@@ -136,8 +136,8 @@ public class JacksonUtils {
         //以下定义因为特殊业务要求，放开的字符
 //            escapeValue=escapeValue.replaceAll("&quot;", "\"");
             escapeValue=escapeValue.replaceAll("&amp;", "&");
-//            escapeValue=escapeValue.replaceAll("&ldquo;", "“");
-//            escapeValue=escapeValue.replaceAll("&rdquo;", "”");
+            escapeValue=escapeValue.replaceAll("&ldquo;", "“");
+            escapeValue=escapeValue.replaceAll("&rdquo;", "”");
 //            escapeValue=escapeValue.replaceAll("&mdash;", "—");
 //            escapeValue=escapeValue.replaceAll("&times;", "×");
 //            escapeValue=escapeValue.replaceAll("&lt;", "<");
