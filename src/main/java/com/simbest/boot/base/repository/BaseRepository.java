@@ -110,55 +110,42 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 		if (entity == null) {
 			return null;
 		}
-
-		return (root, query, cb) -> {
-			List<Predicate> list = new ArrayList<>();
-
-			Class<?> clazz = entity.getClass();
-
-			// 获取所有的字段包括private/public，但不包括继承的字段
-			Field[] declaredFields = clazz.getDeclaredFields();
-			for (Field declaredField : declaredFields) {
-				// 获取字段的注解
-				Annotation[] annotations = declaredField.getAnnotations();
-				for (Annotation annotation : annotations) {
-					if (annotation instanceof Id || annotation instanceof Column) {
-						declaredField = null;
-						break;
-					}
-				}
-
-				// 跳过数据库中没有的字段
-				if (declaredField == null) {
-					continue;
-				}
-
-				// 获得字段名称
-				String filedName = declaredField.getName();
-				// 获得字段第一个字母大写
-				String firstLetter = filedName.substring(0, 1).toUpperCase();
-				// 转换成字段的get方法
-				String getMethodName = "get" + firstLetter + filedName.substring(1);
-
-				try {
-					// 获取方法
-					Method getMethod = clazz.getMethod(getMethodName);
-					// 这个对象字段get方法的值
-					Object value = getMethod.invoke(entity);
-					// 跳过空值
-					if (value == null) {
-						continue;
-					}
-
-					// =
-					list.add(cb.equal(root.get(filedName), value));
-				} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-					e.printStackTrace();
-				}
-			}
-			Predicate[] p = new Predicate[list.size()];
-			return cb.and(list.toArray(p));
-		};
+        return (root, query, cb) -> {
+            List<Predicate> list = new ArrayList<>();
+            Class<?> clazz = entity.getClass();
+            // 获取所有的字段包括private/public，但不包括继承的字段
+            Field[] declaredFields = clazz.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                // 获取字段的注解
+                Annotation[] annotations = declaredField.getAnnotations();
+                for (Annotation annotation : annotations) {
+                    if (annotation instanceof Id || annotation instanceof Column) {
+                        // 获得字段名称
+                        String filedName = declaredField.getName();
+                        // 获得字段第一个字母大写
+                        String firstLetter = filedName.substring(0, 1).toUpperCase();
+                        // 转换成字段的get方法
+                        String getMethodName = "get" + firstLetter + filedName.substring(1);
+                        try {
+                            // 获取方法
+                            Method getMethod = clazz.getMethod(getMethodName);
+                            // 这个对象字段get方法的值
+                            Object value = getMethod.invoke(entity);
+                            // 跳过空值
+                            if (value == null) {
+                                continue;
+                            }
+                            // =
+                            list.add(cb.equal(root.get(filedName), value));
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            Predicate[] p = new Predicate[list.size()];
+            return cb.and(list.toArray(p));
+        };
 	}
 
 	/**
@@ -190,7 +177,7 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 	/**
 	 * 在这里封装一个单表查询的方法（Condition）
 	 *
-	 * @param conditions 条件
+	 * @param condition 条件
 	 *
 	 * @return 结果集
 	 */
