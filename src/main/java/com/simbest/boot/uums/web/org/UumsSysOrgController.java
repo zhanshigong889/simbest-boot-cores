@@ -133,6 +133,18 @@ public class UumsSysOrgController {
     public JsonResponse findOrgTreeFromCorp(@RequestParam(required = false) String appcode, @RequestBody(required = false) Map<String,Object> corpMap) {
         return JsonResponse.success(uumsSysOrgApi.findUserTreeFromCorp(appcode,corpMap));
     }
+
+    /**
+     * 出某些组织的上级组织以及它的全部下级组织以及某些组织的上级组织
+     * @param orgMap
+     * @return
+     */
+    @ApiOperation(value = "出某些组织的上级组织以及它的全部下级组织以及某些组织的上级组织", notes = "出某些组织的上级组织以及它的全部下级组织以及某些组织的上级组织")
+    @ApiImplicitParam(name = "appcode", value = "应用code", dataType = "String", paramType = "query")
+    @PostMapping(value = {"/findRuleOrgTree","/findRuleOrgTree/sso"})
+    public JsonResponse findRuleOrgTree(@RequestParam(required = false) String appcode, @RequestBody(required = false) Map<String,Object> orgMap) {
+        return JsonResponse.success(uumsSysOrgApi.findRuleOrgTree(appcode,orgMap));
+    }
 }
 
 

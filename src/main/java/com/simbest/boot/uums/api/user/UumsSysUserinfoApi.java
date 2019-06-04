@@ -20,7 +20,6 @@ import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
@@ -668,7 +667,7 @@ public class UumsSysUserinfoApi {
      * 人员编号   employeeNumber
      * 手机号码   preferredMobile
      * 邮箱       email
-     * 保留关键字 reserve1 可存微信openid
+     * 可存微信openid openid
      * @param keyword
      * @param keytype
      * @param appcode

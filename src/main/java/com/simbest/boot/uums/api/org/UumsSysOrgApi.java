@@ -13,9 +13,11 @@ import com.simbest.boot.security.UserOrgTree;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
+import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,9 @@ public class UumsSysOrgApi {
     //private String uumsAddress="http://localhost:8080/uums";
     @Autowired
     private RsaEncryptor encryptor;
+    @Autowired
+    private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
+
 
     /**
      * 根据id查找
@@ -429,4 +434,22 @@ public class UumsSysOrgApi {
         return userOrgTreeList;
     }
 
+
+    /**
+     * 出某些组织的上级组织以及它的全部下级组织以及某些组织的上级组织
+     * @param appcode
+     * @param orgMap
+     * @return
+     */
+    public List<UserOrgTree> findRuleOrgTree(String appcode, Map<String,Object> orgMap) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(orgMap);
+        String username1 = encryptor.encrypt(username);
+        String username2 = UriEncoder.encode( username1 );
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findRuleOrgTree"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        return userOrgTreeApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<UserOrgTree>>(){});
+    }
 }
