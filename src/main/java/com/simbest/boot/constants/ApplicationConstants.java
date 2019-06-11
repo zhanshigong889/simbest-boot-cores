@@ -46,7 +46,7 @@ public class ApplicationConstants {
     public static final String LOGIN_VALIDATE_CODE = "verifyCode";
     public static final String ANY_PASSWORD = "SimBest_SSO_2018";
 
-    public static final int DEFAULT_PAGE = ONE;
+    public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 100;
 
     public static final String FORMAT_DATE_TIME = "yyyy-MM-dd HH:mm:ss";
