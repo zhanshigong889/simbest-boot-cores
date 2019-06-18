@@ -82,11 +82,16 @@ public final class DateUtil {
         Date nowTime1 = parseTimestamp("2014-01-02 11:32:55");
         Date nowTime2 = parseTimestamp("2014-01-02 15:32:55");
         Date nowTime3 = parseTimestamp("2014-01-02 19:32:55");
-        Date beginTime = parseTimestamp("2019-01-02 14:32:55");
-        Date endTime = parseTimestamp("2011-11-05 18:32:55");
+        Date beginTime = parseTimestamp("2019-01-02 14:30:55");
+        Date endTime = parseTimestamp("2019-01-02 18:29:58");
         System.out.println(belongTimeZone(nowTime1, beginTime, endTime));
         System.out.println(belongTimeZone(nowTime2, beginTime, endTime));
         System.out.println(belongTimeZone(nowTime3, beginTime, endTime));
+        long[] times = timeBetweenDates(beginTime, endTime);
+        System.out.println(times[0]);
+        System.out.println(times[1]);
+        System.out.println(times[2]);
+        System.out.println(times[3]);
     }
 
     /**
@@ -566,7 +571,8 @@ public final class DateUtil {
 		  long days = diff / (1000 * 60 * 60 * 24);
 		  long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60 * 60);
 		  long minutes = (diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60))/(1000* 60);
-		  return new long[]{days, hours, minutes};
+          long seconds = ((diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60)- minutes*(1000* 60)))/1000;
+		  return new long[]{days, hours, minutes, seconds};
 	}
 
 	public static DateTime getJodaDateTime (Object object){
@@ -593,6 +599,33 @@ public final class DateUtil {
 		DateTimeFormatter fmt = DateTimeFormat.forPattern(datePattern);//自定义日期格式
 		return DateTime.parse(dateStr, fmt);
 	}
+
+    /**
+     * 返回当前年（2位）+当前天在当前年的第几天（3位）+当前小时（2位）
+     * @param date
+     * @return 1836517
+     */
+    public static String getDateHourPrefix(Date date) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int year = c.get(Calendar.YEAR);
+        int day = c.get(Calendar.DAY_OF_YEAR); // 今天是第多少天
+        int hour =  c.get(Calendar.HOUR_OF_DAY);
+        String dayFmt = String.format("%1$03d", day); // 返回一年中第几天，0补位操作 必须满足三位
+        String hourFmt = String.format("%1$02d", hour);  //返回一天中第几个小时，0补位操作 必须满足2位
+        StringBuffer prefix = new StringBuffer();
+        prefix.append((year - 2000)).append(dayFmt).append(hourFmt);
+        return prefix.toString();
+    }
+
+    /**
+     * 返回当前年（2位）+当前日期（4位）
+     * @param date
+     * @return 181231
+     */
+    public static String getDatePrefix(Date date) {
+        return DateUtil.getDate(date, DateUtil.datePattern4);
+    }
 
     /**
      * 将Date类转换为XMLGregorianCalendar

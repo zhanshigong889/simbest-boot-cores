@@ -6,6 +6,7 @@ package com.simbest.boot.util.distribution.id;
 import com.github.wenhao.jpa.Specifications;
 import com.google.common.base.Strings;
 import com.simbest.boot.base.exception.Exceptions;
+import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.sys.model.SysDict;
@@ -46,51 +47,27 @@ public class RedisIdGenerator {
     @Autowired
     private LoginUtils loginUtils;
 
-    /**
-     * 返回当前年（2位）+当前天在当前年的第几天（3位）+当前小时（2位）
-     * @param date
-     * @return 1836517
-     */
-    public String getDateHourPrefix(Date date) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        int year = c.get(Calendar.YEAR);
-        int day = c.get(Calendar.DAY_OF_YEAR); // 今天是第多少天
-        int hour =  c.get(Calendar.HOUR_OF_DAY);
-        String dayFmt = String.format("%1$03d", day); // 返回一年中第几天，0补位操作 必须满足三位
-        String hourFmt = String.format("%1$02d", hour);  //返回一天中第几个小时，0补位操作 必须满足2位
-        StringBuffer prefix = new StringBuffer();
-        prefix.append((year - 2000)).append(dayFmt).append(hourFmt);
-        return prefix.toString();
-    }
+    @Autowired
+    private AppConfig appConfig;
 
     /**
-     * 返回当前年（2位）+当前日期（4位）
-     * @param date
-     * @return 181231
-     */
-    public String getDatePrefix(Date date) {
-        return DateUtil.getDate(date, DateUtil.datePattern4);
-    }
-
-    /**
-     * 增加Id值
-     * @param cacheName
-     * @param prefix
+     * 增加Id值(与数据字典绑定)
+     * @param cacheName 内部缓存空间名称
+     * @param prefix    缓存前缀
+     * @param length    编号生成长度
      * @return
      */
-    private Long incrId(String cacheName, String prefix, int length) {
+    private String incrId(String cacheName, String prefix, int length) {
         IUser currentUser = SecurityUtils.getCurrentUser();
         if(null == currentUser) {
             loginUtils.adminLogin();
         }
-        String orderId = null;
-        String rediskey = cacheName.concat(ApplicationConstants.COLON).concat(prefix);
+        String rediskey = appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(cacheName).concat(ApplicationConstants.COLON).concat(prefix);
+        //查询数据字典类型为genCode的数据字典
         Specification<SysDict> dictCondition = Specifications.<SysDict>and()
-                .eq("dictType", "genCode")
-                .build();
+                .eq("dictType", "genCode").build();
         Iterable<SysDict> dicts = dictService.findAllNoPage(dictCondition);
-        //如果应用的数据字典不存在代码生成的字典值，则需要创建一条记录
+        //如果类型为genCode的数据字典不存在，则需要创建一条类型为genCode的数据字典
         SysDict dict = null;
         if(!dicts.iterator().hasNext()){
             dict = new SysDict();
@@ -103,6 +80,7 @@ public class RedisIdGenerator {
         else {
             dict = dicts.iterator().next();
         }
+        //查询数据字典类型为genCode，名称为cacheName+prefix的数据字典值
         Specification<SysDictValue> dictValueCondition = Specifications.<SysDictValue>and()
                 .eq("dictType", "genCode").eq("name", rediskey)
                 .build();
@@ -114,7 +92,7 @@ public class RedisIdGenerator {
             dictValue.setDictType(dict.getDictType());
             dictValue.setDisplayOrder(dict.getDisplayOrder());
             dictValue.setName(rediskey);
-            dictValue.setValue("0");
+            dictValue.setValue("0"); //从0开始，自增后实际从1开始
             dictValueService.insert(dictValue);
         }
         //如果存在，则取当前当前值集值，用来递增
@@ -123,6 +101,7 @@ public class RedisIdGenerator {
         }
         //将当前值集值作为起始编号
         RedisUtil.setBean(rediskey, Long.parseLong(dictValue.getValue()));
+        String orderId = null;
         try {
             //进行递增
             Long index = RedisUtil.incrBy(rediskey);
@@ -136,12 +115,29 @@ public class RedisIdGenerator {
             log.error("Generate distributited id by redis catch an exception.");
             Exceptions.printException(ex);
         }
-        if (Strings.isNullOrEmpty(orderId)) return null;
-        return Long.parseLong(orderId);
+        return Strings.isNullOrEmpty(orderId) ? null : orderId;
     }
 
     /**
-     *
+     * @param prefix
+     * @return cumtom001
+     */
+    public String getCustomPrefixId(String prefix) {
+        // 转成数字类型，可排序
+        return incrId(prefix, prefix, DEFAULT_FORMAT_ADD_LENGTH);
+    }
+
+    /**
+     * @param prefix
+     * @param length
+     * @return cumtom001, 001的位数取决于传参length
+     */
+    public String getCustomPrefixId(String prefix, int length) {
+        // 转成数字类型，可排序
+        return incrId(prefix, prefix, length);
+    }
+
+    /**
      * @return 1836517001
      */
     public Long getDateHourId() {
@@ -150,7 +146,6 @@ public class RedisIdGenerator {
     }
 
     /**
-     *
      * @param cacheName
      * @return 1836517001
      */
@@ -160,17 +155,15 @@ public class RedisIdGenerator {
     }
 
     /**
-     *
      * @param cacheName
      * @return 1836517001, 001的位数取决于传参length
      */
     public Long getDateHourId(String cacheName, int length) {
         // 转成数字类型，可排序
-        return incrId(cacheName, getDateHourPrefix(new Date()), length);
+        return Long.parseLong(incrId(cacheName, DateUtil.getDateHourPrefix(new Date()), length));
     }
 
     /**
-     *
      * @return 181231001
      */
     public Long getDateId() {
@@ -179,7 +172,6 @@ public class RedisIdGenerator {
     }
 
     /**
-     *
      * @param cacheName
      * @return 181231001
      */
@@ -189,13 +181,12 @@ public class RedisIdGenerator {
     }
 
     /**
-     *
      * @param cacheName
      * @return 181231001, 001的位数取决于传参length
      */
     public Long getDateId(String cacheName, int length) {
         // 转成数字类型，可排序
-        return incrId(cacheName, getDatePrefix(new Date()), length);
+        return Long.parseLong(incrId(cacheName, DateUtil.getDatePrefix(new Date()), length));
     }
 
 }
