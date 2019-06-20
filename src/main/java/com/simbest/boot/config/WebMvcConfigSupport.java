@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -28,6 +29,9 @@ import static org.springframework.web.cors.CorsConfiguration.ALL;
  */
 @Configuration
 public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
+
+    @Autowired
+    private AppConfig appConfig;
 
     /**
      * 统一使用JacksonConfiguration的ObjectMapper
@@ -65,8 +69,8 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(ALL)
-                .allowedMethods(ALL)
+                .allowedOrigins(appConfig.getAppHostPort())
+                .allowedMethods(HttpMethod.OPTIONS.name(), HttpMethod.GET.name(), HttpMethod.POST.name())
                 .allowedHeaders(ALL)
                 .allowCredentials(true)
                 .maxAge(3600);
