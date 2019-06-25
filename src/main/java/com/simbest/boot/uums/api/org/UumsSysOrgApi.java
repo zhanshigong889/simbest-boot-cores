@@ -147,6 +147,25 @@ public class UumsSysOrgApi {
     }
 
     /**
+     * 查看某个父组织的子组织,返回树形结构UserOrgTree
+     * @param appcode
+     * @param mapOrg
+     * @return
+     */
+    public  List<UserOrgTree> findSonByParentOrgIdTree(String appcode,Map<String,Object> mapOrg) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(mapOrg);
+        String username1=encryptor.encrypt(username);
+        String username2=UriEncoder.encode( username1 );
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findSonByParentOrgIdTree"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        return userOrgTreeApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<UserOrgTree>>(){});
+    }
+
+
+    /**
      * 查看某个父组织的全部子组织
      * @param appcode
      * @param orgCode

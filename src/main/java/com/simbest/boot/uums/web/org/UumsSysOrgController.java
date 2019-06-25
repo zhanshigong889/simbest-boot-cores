@@ -53,6 +53,21 @@ public class UumsSysOrgController {
     }
 
     /**
+     * 查看某个父组织的子组织,返回树形结构UserOrgTree
+     * @param appcode
+     * @param mapOrg
+     * @return
+     */
+    @ApiOperation (value = "查看某个父组织的子组织,返回树形结构UserOrgTree", notes = "查看某个父组织的子组织,返回树形结构UserOrgTree")
+    @ApiImplicitParams( {
+            @ApiImplicitParam(name = "appcode", value = "应用code", dataType = "String", paramType = "query")
+    } )
+    @PostMapping ("/findSonByParentOrgIdTree")
+    public JsonResponse findSonByParentOrgIdTree( @RequestParam  String appcode,@RequestBody Map<String,Object> mapOrg) {
+        return JsonResponse.success(uumsSysOrgApi.findSonByParentOrgIdTree( appcode,mapOrg ));
+    }
+
+    /**
      *页面初始化时获取根组织以及根组织下一级组织
      * @param appcode
      * @return
