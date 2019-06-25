@@ -136,7 +136,9 @@ public class SysFileController extends LogicController<SysFile, String> {
     private JsonResponse doUploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
         MultipartHttpServletRequest mureq = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
-        List<SysFile> sysFiles = fileService.uploadProcessFiles(multipartFiles.values(), request.getParameter("pmInsType"), request.getParameter("pmInsId"),
+        List<SysFile> sysFiles = fileService.uploadProcessFiles(multipartFiles.values(),
+                request.getParameter("pmInsType"),
+                request.getParameter("pmInsId"),
                 request.getParameter("pmInsTypePart"));
         JsonResponse jsonResponse;
         if(!sysFiles.isEmpty()) {

@@ -11,6 +11,7 @@ import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.model.SysFile;
 import com.simbest.boot.sys.web.SysFileController;
+import com.simbest.boot.util.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -172,6 +173,8 @@ public class AppFileUtil {
             }
             String filePath = null;
             String filename = getFileName(multipartFile.getOriginalFilename());
+            //特殊字符过滤，防止XSS漏洞
+            filename = JacksonUtils.escapeString(filename);
             if(validateUploadFileType(filename)) {
                 log.debug("Will upload file {} to {}", filename, serverUploadLocation);
                 switch (serverUploadLocation) {

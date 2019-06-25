@@ -175,13 +175,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .and().headers().frameOptions().sameOrigin()
                 .and().csrf().disable().cors().and()
 
-                .sessionManagement().invalidSessionUrl(ApplicationConstants.LOGIN_PAGE).maximumSessions(5)
+                .sessionManagement().sessionFixation().newSession().invalidSessionUrl(ApplicationConstants.LOGIN_PAGE).maximumSessions(1)
+//                .sessionManagement().invalidSessionUrl(ApplicationConstants.LOGIN_PAGE).maximumSessions(5)
                 .maxSessionsPreventsLogin(true)
                 .sessionRegistry(sessionRegistry())
                 .expiredUrl(ApplicationConstants.LOGIN_PAGE);
-
-        //.sessionFixation().newSession()  Session Fixation protection
-        //Your servlet container did not change the session ID when a new session was created. You will not be adequately protected against session-fixation attacks
 
         Map<String, CustomAbstractAuthenticationProcessingFilter> auths = appContext.getBeansOfType(CustomAbstractAuthenticationProcessingFilter.class);
         for(CustomAbstractAuthenticationProcessingFilter filter : auths.values()){
