@@ -18,6 +18,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
@@ -584,6 +585,29 @@ public class AppFileUtil {
 
     public static void setServerUploadLocation(StoreLocation serverUploadLocation) {
         AppFileUtil.serverUploadLocation = serverUploadLocation;
+    }
+
+    /**
+     * 读取放置在项目resource目录下的文件，以二进制流的方式方法，
+     *  因为项目打包后在读取项目里面的文件必须用流的方式获取，否则用其他方式获取会提示找不到文件
+     * @param filePath
+     * @return
+     */
+    public static byte[] getFileByte(String filePath){
+        byte[] fileByte = null;
+        try {
+            if ( StringUtils.isEmpty( filePath ) ){
+                return null;
+            }
+            ClassPathResource classPathResource = new ClassPathResource( filePath );
+            BufferedInputStream bufferedInputStream = new BufferedInputStream( classPathResource.getInputStream() );
+            fileByte = new byte[bufferedInputStream.available()];
+            bufferedInputStream.read(fileByte);
+            bufferedInputStream.close();
+        } catch ( IOException e ) {
+            Exceptions.printException(e);
+        }
+        return fileByte;
     }
 
     public static void main(String[] args) throws Exception {
