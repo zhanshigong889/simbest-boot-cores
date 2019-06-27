@@ -99,6 +99,37 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         return null;
     }
 
+    /**
+     * 导入Excel文件--指定某个sheet页，从指定行数开始读取
+     * @param multipartFile 上传文件
+     * @param pmInsType 流程类型
+     * @param pmInsId 流程ID
+     * @param pmInsTypePart 流程区块
+     * @param clazz 导入对象类
+     * @param inputRow  从指定行数开始读取
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> UploadFileResponse importExcel ( MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName, int inputRow ) {
+        SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
+        if (sysFile != null) {
+            ExcelUtil<T> importUtil = new ExcelUtil<>(clazz);
+            File tempFile = AppFileUtil.createTempFile();
+            try {
+                multipartFile.transferTo(tempFile);
+                List<T> listData = importUtil.importExcel(sheetName, new FileInputStream(tempFile),inputRow);
+                UploadFileResponse<T> uploadFileResponse = new UploadFileResponse<>();
+                uploadFileResponse.setListData(listData);
+                uploadFileResponse.setSysFiles(Arrays.asList(sysFile));
+                return uploadFileResponse;
+            } catch (IOException e) {
+                Exceptions.printException(e);
+            }
+        }
+        return null;
+    }
+
     @Override
     public <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz) {
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
