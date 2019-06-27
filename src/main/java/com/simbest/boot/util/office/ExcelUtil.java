@@ -7,41 +7,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.simbest.boot.base.annotations.ExcelVOAttribute;
 import com.simbest.boot.base.exception.Exceptions;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.util.CellRangeAddressList;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
+import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.CellRangeAddressList;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-
-import com.google.common.collect.Lists;
-import org.springframework.util.Assert;
+import java.util.*;
 
 /**
  * 用途：Excel导入导出工具类
@@ -163,7 +143,11 @@ public class ExcelUtil<T> {
         return list;
     }
 
-    // 导入Excel文件，支持多个sheet页
+    /**
+     * 导入Excel文件，支持多个sheet页
+     * @param input
+     * @return
+     */
     public Map<String,List<T>> importExcel(InputStream input) {
         Assert.notNull(input, "导入的Excel文件InputStream不能为空！");
         Map<String,List<T>> retMap = Maps.newHashMap();
@@ -173,7 +157,7 @@ public class ExcelUtil<T> {
             for(int i=0; i<sheetNumber; i++){
                 HSSFSheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
-                List<T> list = importExcel(workbook, sheet);
+                List<T> list = importExcel(workbook, sheet,1);
                 retMap.put(sheetName, list);
             }
         } catch (IOException e) {
@@ -182,7 +166,12 @@ public class ExcelUtil<T> {
         return retMap;
     }
 
-    //导入指定sheet页
+    /**
+     * 导入指定sheet页
+     * @param sheetName
+     * @param input
+     * @return
+     */
     public List<T> importExcel(String sheetName, InputStream input) {
         Assert.notNull(input, "导入的Excel文件InputStream不能为空！");
         HSSFWorkbook workbook = null;
@@ -198,11 +187,41 @@ public class ExcelUtil<T> {
         } catch (Exception e) {
             Exceptions.printException(e);
         }
-        return importExcel(workbook, sheet);
+        return importExcel(workbook,sheet,1);
     }
 
-    /*excel2003*/
-    private List<T> importExcel(HSSFWorkbook workbook, HSSFSheet sheet) {
+    /**
+     * 从指定行数开始读取数据
+     * @param sheetName     工作区
+     * @param input         输入流
+     * @param inputRow      指定行数
+     * @return
+     */
+    public List<T> importExcel(String sheetName, InputStream input,int inputRow) {
+        Assert.notNull(input, "导入的Excel文件InputStream不能为空！");
+        HSSFWorkbook workbook = null;
+        HSSFSheet sheet = null;
+        try {
+            workbook = new HSSFWorkbook(input);
+            sheet = workbook.getSheet(sheetName);
+            if (StringUtils.isEmpty(sheetName)) {
+                sheet = workbook.getSheet(sheetName);// 如果指定sheet名,则取指定sheet中的内容.
+            } else{
+                sheet = workbook.getSheetAt(0); // 如果传入的sheet名不存在则默认指向第1个sheet.
+            }
+        } catch (Exception e) {
+            Exceptions.printException(e);
+        }
+        return importExcel(workbook,sheet,inputRow);
+    }
+
+    /**
+     * excel2003
+     * @param workbook
+     * @param sheet
+     * @return
+     */
+    private List<T> importExcel(HSSFWorkbook workbook, HSSFSheet sheet,int inputRow) {
         int maxCol = 0;
         List<T> list = Lists.newArrayList();
         try {
@@ -210,13 +229,11 @@ public class ExcelUtil<T> {
             if (rows > 0) {// 有数据时才处理
                 // Field[] allFields = clazz.getDeclaredFields();// 得到类的所有field.
                 Collection<Field> allFields = getMappedFiled(clazz, null, null);
-
                 Map<Integer, Field> fieldsMap = new HashMap<Integer, Field>();// 定义一个map用于存放列的序号和field.
                 for (Field field : allFields) {
                     // 将有注解的field存放到map中.
                     if (field.isAnnotationPresent(ExcelVOAttribute.class)) {
-                        ExcelVOAttribute attr = field
-                                .getAnnotation(ExcelVOAttribute.class);
+                        ExcelVOAttribute attr = field.getAnnotation(ExcelVOAttribute.class);
                         int col = getExcelCol(attr.column());// 获得列号
                         maxCol = Math.max(col, maxCol);
                         // log.info(col + "====" + field.getName());
@@ -224,8 +241,11 @@ public class ExcelUtil<T> {
                         fieldsMap.put(col, field);
                     }
                 }
-                for (int i = 1; i < rows; i++) {// 从第2行开始取数据,默认第一行是表头.
+                for (int i = inputRow; i < rows; i++) {// 从第2行开始取数据,默认第一行是表头,从0开始算
                     HSSFRow row = sheet.getRow(i);
+                    if ( row == null ){    //空行
+                        continue;
+                    }
                     // int cellNum = row.getPhysicalNumberOfCells();
                     // int cellNum = row.getLastCellNum();
                     int cellNum = maxCol;
