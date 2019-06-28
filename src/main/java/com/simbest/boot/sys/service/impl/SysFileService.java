@@ -10,6 +10,7 @@ import com.simbest.boot.sys.model.UploadFileResponse;
 import com.simbest.boot.sys.repository.SysFileRepository;
 import com.simbest.boot.sys.service.ISysFileService;
 import com.simbest.boot.util.AppFileUtil;
+import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     private AppConfig config;
 
     @Autowired
+    private SpringContextUtil springContextUtil;
+
+    @Autowired
     public SysFileService(SysFileRepository repository) {
         super(repository);
         this.repository = repository;
@@ -64,7 +68,12 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
-                sysFile.setMobileFilePath( config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath());
+                String profile = springContextUtil.getActiveProfile();
+                String mobileFilePath = config.getAppHostPort() + sysFile.getFilePath();
+                if(ApplicationConstants.PRD.equalsIgnoreCase(profile)){
+                    mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
+                }
+                sysFile.setMobileFilePath( mobileFilePath );
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
                 sysFile.setPmInsType(pmInsType);
