@@ -64,7 +64,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
-                sysFile.setMobileFilePath( config.getAppHostPort() + sysFile.getFilePath());
+                sysFile.setMobileFilePath( config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath());
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
                 sysFile.setPmInsType(pmInsType);
