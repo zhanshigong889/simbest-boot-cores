@@ -31,6 +31,10 @@ public abstract class AbstractTaskSchedule {
         this.repository = repository;
     }
 
+    /**
+     * 执行具体任务，并根据writeLog判断是否记录执行日志（需要子类使用@Scheduled明确执行周期）
+     * @param writeLog
+     */
     public void checkAndExecute(boolean writeLog) {
         if(appRuntime.getMyHost().equals(appRuntime.getMasterHost())
                 && appRuntime.getMyPort().equals(appRuntime.getMasterPort())) {
@@ -64,7 +68,7 @@ public abstract class AbstractTaskSchedule {
     }
 
     /**
-     * 需要子类主键调度器执行Scheduled
+     * 执行具体任务，并记录执行日志（需要子类使用@Scheduled明确执行周期）
      */
     public void checkAndExecute() {
         checkAndExecute(true);
