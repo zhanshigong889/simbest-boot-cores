@@ -13,9 +13,17 @@ public interface ISysDictValueService extends ILogicService<SysDictValue,String>
     List<SysDictValue> findByParentId(String parentId);
 
     /**
-     * 根据字典类型以及上级数据字典值id查询数据字典中相应值的name以及value的值
+     * 根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值
      */
     List<SysDictValue> findDictValue(SysDictValue sysDictValue);
+
+    /**
+     * 根据字典类型和字典值名称，获取字典值
+     * @param dictType
+     * @param name
+     * @return
+     */
+    SysDictValue findByDictTypeAndName(String dictType, String name);
 
     /**
      * 查看数据字典的所有值

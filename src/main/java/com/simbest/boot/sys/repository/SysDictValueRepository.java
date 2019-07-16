@@ -16,6 +16,7 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
 
     List<SysDictValue> findByEnabled(Boolean enabled);
 
+    SysDictValue findByDictTypeAndName(String dictType, String name);
 
     /**
      * 根据字典类型查询数据字典中的相应值name以及value的值

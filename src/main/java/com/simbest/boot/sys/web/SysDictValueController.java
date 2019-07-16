@@ -258,21 +258,24 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return res;
     }*/
 
-    /**
-     * 根据字典类型以及上级数据字典值id查询数据字典中相应值的name以及value的值
-     * @param sysDictValue
-     * @return
-     */
-    @ApiOperation (value = "根据字典类型以及上级数据字典值id查询数据字典中相应值的name以及value的值", notes = "根据字典类型以及上级数据字典值id查询数据字典中相应值的name以及value的值")
+
+    @ApiOperation (value = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
     @PostMapping(value = {"/findDictValue", "/findDictValue/sso"})
     public JsonResponse findDictValue(@RequestBody(required = false) SysDictValue sysDictValue){
         return JsonResponse.success(sysDictValueService.findDictValue(sysDictValue));
     }
 
-    /**
-     *查看数据字典的所有值
-     * @return
-     */
+    @ApiOperation (value = "根据字典类型和字典值名称，获取字典值")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictType", value = "字典类型", dataType = "String", paramType = "query", required = true),
+            @ApiImplicitParam(name = "name", value = "字典值名称", dataType = "String", paramType = "query", required = true)
+    })
+    @PostMapping(value = {"/findByDictTypeAndName", "/findByDictTypeAndName/sso"})
+    public JsonResponse findByDictTypeAndName(@RequestParam String dictType, @RequestParam String name){
+        return JsonResponse.success(sysDictValueService.findByDictTypeAndName(dictType, name));
+    }
+
+
     @ApiOperation(value = "查看数据字典的所有值", notes = "查看数据字典的所有值")
     @PostMapping(value = {"/findAllDictValue", "/findAllDictValue/sso"})
     public JsonResponse findAllDictValue(){
