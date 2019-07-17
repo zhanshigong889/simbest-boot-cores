@@ -192,7 +192,8 @@ public class AppFileUtil {
                         break;
                 }
                 SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename))
-                        .filePath(filePath).fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
+                        .filePath(StringUtils.replace(filePath, ApplicationConstants.SEPARATOR, ApplicationConstants.SLASH))
+                        .fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
                                 build();
                 log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
                 fileModels.add(sysFile);
