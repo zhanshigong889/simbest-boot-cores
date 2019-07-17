@@ -21,6 +21,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -76,12 +77,12 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
 
     @Override
     public SysDictValue findByDictTypeAndName(String dictType, String name){
-        String key = appConfig.getAppcode().concat(ApplicationConstants.COLON)
+        String key = "cache:key:"+appConfig.getAppcode().concat(ApplicationConstants.COLON)
                 .concat(dictType).concat(ApplicationConstants.COLON).concat(name);
         SysDictValue dv = dvRedisTemplate.opsForValue().get(key);
         if(null == dv) {
             dv = dictValueRepository.findByDictTypeAndName(dictType, name);
-            dvRedisTemplate.opsForValue().set(key, dv);
+            dvRedisTemplate.opsForValue().set(key, dv, 1, TimeUnit.HOURS);
         }
         return dv;
     }
@@ -101,9 +102,11 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
         params.add(dv.getValue());
         String hkey = StringUtils.join(params, ApplicationConstants.LINE);
         List<SysDictValue> result = (List<SysDictValue>) dvRedisTemplate.opsForHash().get(appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(CACHE_KEY), hkey);
-        if(null == result){
+        if(null == result || result.size()==0){
             result = findDictValueDatabase(dv);
-            dvRedisTemplate.opsForHash().put(appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(CACHE_KEY), hkey, result);
+            String key = "cache:key:"+appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(CACHE_KEY);
+            dvRedisTemplate.opsForHash().put(key, hkey, result);
+            dvRedisTemplate.expire(key, 1, TimeUnit.HOURS);
         }
         return result;
     }
