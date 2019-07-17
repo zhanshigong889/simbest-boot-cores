@@ -79,6 +79,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 sysFile.setPmInsType(pmInsType);
                 sysFile.setPmInsId(pmInsId);
                 sysFile.setPmInsTypePart(pmInsTypePart);
+                super.update(sysFile); //再保存一下更新的值
             }
         } catch (IOException e) {
             Exceptions.printException(e);
