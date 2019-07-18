@@ -56,4 +56,8 @@ public class SysDict extends LogicModel {
 
     @Column(length = 200)
     private String spare2;
+
+    private String blocid; //集团id
+
+    private String corpid; //企业id
 }
