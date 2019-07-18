@@ -60,6 +60,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     public final static String UPLOAD_PROCESS_FILES_URL = "/uploadProcessFiles";
     public final static String UPLOAD_PROCESS_FILES_URL_SSO = "/uploadProcessFiles/sso";
     public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest";
+    public final static String UPLOAD_PROCESS_FILES_URL_REST_SSO = "/uploadProcessFiles/rest/sso";
     public final static String DOWNLOAD_URL = "/download";
     public final static String DOWNLOAD_URL_SSO = "/download/sso";
     public final static String DOWNLOAD_URL_DATABASE = "/sys/file/download";
@@ -127,7 +128,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     }
 
     @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
-    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL_REST})
+    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL_REST, UPLOAD_PROCESS_FILES_URL_REST_SSO})
     public ResponseEntity<?> uploadFileRest(HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonResponse jsonResponse = doUploadFile(request, response);
         return new ResponseEntity(jsonResponse, HttpStatus.OK);
