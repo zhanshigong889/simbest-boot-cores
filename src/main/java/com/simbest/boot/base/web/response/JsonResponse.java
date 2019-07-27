@@ -76,8 +76,8 @@ public class JsonResponse {
      */
     public static JsonResponse defaultErrorResponse() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        return JsonResponse.builder().errcode(ERROR_CODE).timestamp(DateUtil.getCurrent())
-                .status(ERROR_STATUS).path(request.getServletPath()).message(ErrorCodeConstants.UNKNOW_ERROR).build();
+        return JsonResponse.builder().errcode(ERROR_CODE).message(ErrorCodeConstants.UNKNOW_ERROR)
+                .timestamp(DateUtil.getCurrent()).status(ERROR_STATUS).path(request.getServletPath()).build();
     }
 
     /**

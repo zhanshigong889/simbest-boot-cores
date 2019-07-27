@@ -10,6 +10,7 @@ import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.InsertExistObjectException;
 import com.simbest.boot.exceptions.UpdateNotExistObjectException;
 import com.simbest.boot.util.DateUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.TransactionException;
 import org.springframework.dao.DataAccessException;
@@ -100,8 +101,11 @@ public final class GlobalExceptionRegister {
         }
         if (response == null) {
             response = JsonResponse.defaultErrorResponse();
+            response.setError(e.getClass().getSimpleName());
         }
-        response.setError(e.getMessage());
+        if(StringUtils.isEmpty(response.getMessage())){
+            response.setMessage(e.getMessage());
+        }
         return response;
     }
 }
