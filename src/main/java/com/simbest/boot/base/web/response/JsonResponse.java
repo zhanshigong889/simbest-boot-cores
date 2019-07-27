@@ -5,6 +5,7 @@ package com.simbest.boot.base.web.response;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.util.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -76,7 +77,7 @@ public class JsonResponse {
     public static JsonResponse defaultErrorResponse() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         return JsonResponse.builder().errcode(ERROR_CODE).timestamp(DateUtil.getCurrent())
-                .status(ERROR_STATUS).path(request.getServletPath()).build();
+                .status(ERROR_STATUS).path(request.getServletPath()).message(ErrorCodeConstants.UNKNOW_ERROR).build();
     }
 
     /**
