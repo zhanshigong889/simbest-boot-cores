@@ -10,9 +10,11 @@ import com.simbest.boot.sys.model.UploadFileResponse;
 import com.simbest.boot.sys.repository.SysFileRepository;
 import com.simbest.boot.sys.service.ISysFileService;
 import com.simbest.boot.util.AppFileUtil;
+import com.simbest.boot.util.FastDfsClient;
 import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -68,17 +73,28 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
-                String profile = springContextUtil.getActiveProfile();
-                String mobileFilePath = config.getAppHostPort() + sysFile.getFilePath();
-                if(ApplicationConstants.PRD.equalsIgnoreCase(profile)){
-                    mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
-                }
-                sysFile.setMobileFilePath( mobileFilePath );
+//                String profile = springContextUtil.getActiveProfile();
+//                String mobileFilePath = config.getAppHostPort() + sysFile.getFilePath();
+//                if(ApplicationConstants.PRD.equalsIgnoreCase(profile)){
+//                    mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
+//                }
+//                sysFile.setMobileFilePath( mobileFilePath );
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
                 sysFile.setPmInsType(pmInsType);
                 sysFile.setPmInsId(pmInsId);
                 sysFile.setPmInsTypePart(pmInsTypePart);
+                String mobileFilePath = null;
+                AppFileUtil.StoreLocation serverUploadLocation = Enum.valueOf(AppFileUtil.StoreLocation.class, config.getUploadLocation());
+                switch (serverUploadLocation) {
+                    case disk:
+                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
+                        break;
+                    case fastdfs:
+                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
+                        break;
+                }
+                sysFile.setMobileFilePath( mobileFilePath );
                 super.update(sysFile); //再保存一下更新的值
             }
         } catch (IOException e) {
