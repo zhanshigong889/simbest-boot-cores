@@ -85,6 +85,7 @@ public final class GlobalExceptionRegister {
      * @return 返回JsonResponse
      */
     public static JsonResponse returnErrorResponse(Exception e) {
+        Exceptions.printException(e);
         JsonResponse response = errorMap.get(e.getClass());
         if (response == null) {
             Class superClass = e.getClass().getSuperclass();
