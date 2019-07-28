@@ -10,11 +10,9 @@ import com.simbest.boot.sys.model.UploadFileResponse;
 import com.simbest.boot.sys.repository.SysFileRepository;
 import com.simbest.boot.sys.service.ISysFileService;
 import com.simbest.boot.util.AppFileUtil;
-import com.simbest.boot.util.FastDfsClient;
 import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -24,9 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -125,17 +120,6 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         return null;
     }
 
-    /**
-     * 导入Excel文件--指定某个sheet页，从指定行数开始读取
-     * @param multipartFile 上传文件
-     * @param pmInsType 流程类型
-     * @param pmInsId 流程ID
-     * @param pmInsTypePart 流程区块
-     * @param clazz 导入对象类
-     * @param inputRow  从指定行数开始读取
-     * @param <T>
-     * @return
-     */
     @Override
     public <T> UploadFileResponse importExcel ( MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName, int inputRow ) {
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
