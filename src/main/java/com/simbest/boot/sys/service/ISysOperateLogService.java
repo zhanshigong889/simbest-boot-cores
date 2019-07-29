@@ -3,6 +3,8 @@ package com.simbest.boot.sys.service;
 import com.simbest.boot.base.service.ILogicService;
 import com.simbest.boot.sys.model.SysOperateLog;
 
+import java.util.Map;
+
 /**
  * <strong>Title : ISysOperateLogService</strong><br>
  * <strong>Description : 系统操作日志</strong><br>
@@ -24,4 +26,11 @@ public interface ISysOperateLogService extends ILogicService<SysOperateLog,Strin
      * @return
      */
     SysOperateLog saveLog(SysOperateLog sysOperateLog);
+
+    /**
+     * 保存系统操作日志
+     * @param sysOperateLog         操作日志对象
+     * @return
+     */
+    SysOperateLog saveLog( Map<String,Object> sysOperateLogParam);
 }
