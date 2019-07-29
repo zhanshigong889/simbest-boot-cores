@@ -10,13 +10,19 @@ import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.InsertExistObjectException;
 import com.simbest.boot.exceptions.UpdateNotExistObjectException;
 import com.simbest.boot.util.DateUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.HibernateException;
+import org.hibernate.TransactionException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 用途：系统中注册对应返回信息
@@ -40,8 +46,6 @@ public final class GlobalExceptionRegister {
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name())
                         .build());
         errorMap.put(AccessDeniedException.class,
-                JsonResponse.builder().errcode(HttpStatus.UNAUTHORIZED.value()).status(HttpStatus.UNAUTHORIZED.value()).error(HttpStatus.UNAUTHORIZED.name()).build());
-        errorMap.put(AccessDeniedException.class,
                 JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).build());
         errorMap.put(HttpRequestMethodNotSupportedException.class,
                 JsonResponse.builder().errcode(HttpStatus.METHOD_NOT_ALLOWED.value()).status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(HttpStatus.METHOD_NOT_ALLOWED.name())
@@ -61,6 +65,16 @@ public final class GlobalExceptionRegister {
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能更新不存在的对象")
                         .build());
 
+        errorMap.put(HibernateException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("持久化数据异常")
+                        .build());
+        errorMap.put(TransactionException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据库事务异常")
+                        .build());
+        errorMap.put(DataAccessException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据库处理异常")
+                        .build());
+
     }
 
     private GlobalExceptionRegister() {
@@ -72,13 +86,26 @@ public final class GlobalExceptionRegister {
      * @return 返回JsonResponse
      */
     public static JsonResponse returnErrorResponse(Exception e) {
+        Exceptions.printException(e);
         JsonResponse response = errorMap.get(e.getClass());
         if (response == null) {
-            response = JsonResponse.defaultErrorResponse();
+            Class superClass = e.getClass().getSuperclass();
+            while(null != superClass){
+                if(errorMap.keySet().contains(superClass)){
+                    response = errorMap.get(superClass);
+                    superClass = null;
+                } else {
+                    superClass = superClass.getSuperclass();
+                }
+            }
         }
-        response.setError(e.getMessage());
-        response.setMessage(ErrorCodeConstants.UNKNOW_ERROR);
-        response.setTimestamp(DateUtil.getCurrent());
+        if (response == null) {
+            response = JsonResponse.defaultErrorResponse();
+            response.setError(e.getClass().getSimpleName());
+        }
+        if(StringUtils.isEmpty(response.getMessage())){
+            response.setMessage(e.getMessage());
+        }
         return response;
     }
 }

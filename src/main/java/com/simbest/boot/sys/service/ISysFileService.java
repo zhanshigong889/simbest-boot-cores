@@ -43,6 +43,7 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
      * @param clazz 导入对象类
+     * @param sheetName sheet页名称
      * @param <T>
      * @return
      */
@@ -55,7 +56,8 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
      * @param clazz 导入对象类
-     * @param inputRow  从指定行数开始读取
+     * @param sheetName sheet页名称
+     * @param inputRow 起始导入行数
      * @param <T>
      * @return
      */
@@ -63,11 +65,11 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
 
     /**
      * 导入Excel文件--支持多个sheet页
-     * @param multipartFile
-     * @param pmInsType
-     * @param pmInsId
-     * @param pmInsTypePart
-     * @param clazz
+     * @param multipartFile 上传文件
+     * @param pmInsType 流程类型
+     * @param pmInsId 流程ID
+     * @param pmInsTypePart 流程区块
+     * @param clazz 导入对象类
      * @param <T>
      * @return
      */

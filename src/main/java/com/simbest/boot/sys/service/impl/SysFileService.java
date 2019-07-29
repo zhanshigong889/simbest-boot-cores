@@ -68,17 +68,28 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
-                String profile = springContextUtil.getActiveProfile();
-                String mobileFilePath = config.getAppHostPort() + sysFile.getFilePath();
-                if(ApplicationConstants.PRD.equalsIgnoreCase(profile)){
-                    mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
-                }
-                sysFile.setMobileFilePath( mobileFilePath );
+//                String profile = springContextUtil.getActiveProfile();
+//                String mobileFilePath = config.getAppHostPort() + sysFile.getFilePath();
+//                if(ApplicationConstants.PRD.equalsIgnoreCase(profile)){
+//                    mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
+//                }
+//                sysFile.setMobileFilePath( mobileFilePath );
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
                 sysFile.setPmInsType(pmInsType);
                 sysFile.setPmInsId(pmInsId);
                 sysFile.setPmInsTypePart(pmInsTypePart);
+                String mobileFilePath = null;
+                AppFileUtil.StoreLocation serverUploadLocation = Enum.valueOf(AppFileUtil.StoreLocation.class, config.getUploadLocation());
+                switch (serverUploadLocation) {
+                    case disk:
+                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
+                        break;
+                    case fastdfs:
+                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
+                        break;
+                }
+                sysFile.setMobileFilePath( mobileFilePath );
                 super.update(sysFile); //再保存一下更新的值
             }
         } catch (IOException e) {
@@ -109,17 +120,6 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         return null;
     }
 
-    /**
-     * 导入Excel文件--指定某个sheet页，从指定行数开始读取
-     * @param multipartFile 上传文件
-     * @param pmInsType 流程类型
-     * @param pmInsId 流程ID
-     * @param pmInsTypePart 流程区块
-     * @param clazz 导入对象类
-     * @param inputRow  从指定行数开始读取
-     * @param <T>
-     * @return
-     */
     @Override
     public <T> UploadFileResponse importExcel ( MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName, int inputRow ) {
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
