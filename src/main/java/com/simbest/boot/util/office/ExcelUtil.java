@@ -36,6 +36,33 @@ public class ExcelUtil<T> {
         this.clazz = clazz;
     }
 
+    private void setFieldValue(T entity, String c, Class<?> fieldType, Field field) throws IllegalAccessException {
+        if (String.class == fieldType) {
+            field.set(entity, String.valueOf(c));
+        } else if (Date.class == fieldType) {
+            field.set(entity, com.simbest.boot.util.DateUtil.parseDate(c));
+        } else if ((Integer.TYPE == fieldType)
+                || (Integer.class == fieldType)) {
+            field.set(entity, Integer.parseInt(c));
+        } else if ((Long.TYPE == fieldType)
+                || (Long.class == fieldType)) {
+            field.set(entity, Long.valueOf(c));
+        } else if ((Float.TYPE == fieldType)
+                || (Float.class == fieldType)) {
+            field.set(entity, Float.valueOf(c));
+        } else if ((Short.TYPE == fieldType)
+                || (Short.class == fieldType)) {
+            field.set(entity, Short.valueOf(c));
+        } else if ((Double.TYPE == fieldType)
+                || (Double.class == fieldType)) {
+            field.set(entity, Double.valueOf(c));
+        } else if (Character.TYPE == fieldType) {
+            if ((c != null) && (c.length() > 0)) {
+                field.set(entity,
+                        Character.valueOf(c.charAt(0)));
+            }
+        }
+    }
 
     public List<T> importExcel0307(String sheetName, InputStream input) throws InvalidFormatException {
         int maxCol = 0;
@@ -100,29 +127,30 @@ public class ExcelUtil<T> {
                         }
                         // 取得类型,并根据对象类型设置值.
                         Class<?> fieldType = field.getType();
-                        if (String.class == fieldType) {
-                            field.set(entity, String.valueOf(c));
-                        } else if ((Integer.TYPE == fieldType)
-                                || (Integer.class == fieldType)) {
-                            field.set(entity, Integer.parseInt(c));
-                        } else if ((Long.TYPE == fieldType)
-                                || (Long.class == fieldType)) {
-                            field.set(entity, Long.valueOf(c));
-                        } else if ((Float.TYPE == fieldType)
-                                || (Float.class == fieldType)) {
-                            field.set(entity, Float.valueOf(c));
-                        } else if ((Short.TYPE == fieldType)
-                                || (Short.class == fieldType)) {
-                            field.set(entity, Short.valueOf(c));
-                        } else if ((Double.TYPE == fieldType)
-                                || (Double.class == fieldType)) {
-                            field.set(entity, Double.valueOf(c));
-                        } else if (Character.TYPE == fieldType) {
-                            if ((c != null) && (c.length() > 0)) {
-                                field.set(entity,
-                                        Character.valueOf(c.charAt(0)));
-                            }
-                        }
+                        setFieldValue(entity, c, fieldType, field);
+//                        if (String.class == fieldType) {
+//                            field.set(entity, String.valueOf(c));
+//                        } else if ((Integer.TYPE == fieldType)
+//                                || (Integer.class == fieldType)) {
+//                            field.set(entity, Integer.parseInt(c));
+//                        } else if ((Long.TYPE == fieldType)
+//                                || (Long.class == fieldType)) {
+//                            field.set(entity, Long.valueOf(c));
+//                        } else if ((Float.TYPE == fieldType)
+//                                || (Float.class == fieldType)) {
+//                            field.set(entity, Float.valueOf(c));
+//                        } else if ((Short.TYPE == fieldType)
+//                                || (Short.class == fieldType)) {
+//                            field.set(entity, Short.valueOf(c));
+//                        } else if ((Double.TYPE == fieldType)
+//                                || (Double.class == fieldType)) {
+//                            field.set(entity, Double.valueOf(c));
+//                        } else if (Character.TYPE == fieldType) {
+//                            if ((c != null) && (c.length() > 0)) {
+//                                field.set(entity,
+//                                        Character.valueOf(c.charAt(0)));
+//                            }
+//                        }
 
                     }
                     if (entity != null) {
@@ -263,29 +291,30 @@ public class ExcelUtil<T> {
                         }
                         // 取得类型,并根据对象类型设置值.
                         Class fieldType = field.getType();
-                        if (String.class == fieldType) {
-                            field.set(entity, String.valueOf(c));
-                        } else if ((Integer.TYPE == fieldType)
-                                || (Integer.class == fieldType)) {
-                            field.set(entity, Integer.parseInt(c));
-                        } else if ((Long.TYPE == fieldType)
-                                || (Long.class == fieldType)) {
-                            field.set(entity, Long.valueOf(c));
-                        } else if ((Float.TYPE == fieldType)
-                                || (Float.class == fieldType)) {
-                            field.set(entity, Float.valueOf(c));
-                        } else if ((Short.TYPE == fieldType)
-                                || (Short.class == fieldType)) {
-                            field.set(entity, Short.valueOf(c));
-                        } else if ((Double.TYPE == fieldType)
-                                || (Double.class == fieldType)) {
-                            field.set(entity, Double.valueOf(c));
-                        } else if (Character.TYPE == fieldType) {
-                            if ((c != null) && (c.length() > 0)) {
-                                field.set(entity,
-                                        Character.valueOf(c.charAt(0)));
-                            }
-                        }
+                        setFieldValue(entity, c, fieldType, field);
+//                        if (String.class == fieldType) {
+//                            field.set(entity, String.valueOf(c));
+//                        } else if ((Integer.TYPE == fieldType)
+//                                || (Integer.class == fieldType)) {
+//                            field.set(entity, Integer.parseInt(c));
+//                        } else if ((Long.TYPE == fieldType)
+//                                || (Long.class == fieldType)) {
+//                            field.set(entity, Long.valueOf(c));
+//                        } else if ((Float.TYPE == fieldType)
+//                                || (Float.class == fieldType)) {
+//                            field.set(entity, Float.valueOf(c));
+//                        } else if ((Short.TYPE == fieldType)
+//                                || (Short.class == fieldType)) {
+//                            field.set(entity, Short.valueOf(c));
+//                        } else if ((Double.TYPE == fieldType)
+//                                || (Double.class == fieldType)) {
+//                            field.set(entity, Double.valueOf(c));
+//                        } else if (Character.TYPE == fieldType) {
+//                            if ((c != null) && (c.length() > 0)) {
+//                                field.set(entity,
+//                                        Character.valueOf(c.charAt(0)));
+//                            }
+//                        }
 
                     }
                     if (entity != null) {
