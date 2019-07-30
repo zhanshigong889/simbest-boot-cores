@@ -45,17 +45,11 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
 
     /**
      * 根据id判断实体是否存在
-     *
-     * @param id
-     * @return
      */
     boolean exists(PK id);
 
     /**
      * getOne取出的是实体的引用
-     *
-     * @param id
-     * @return a reference to the entity with the given identifier.
      */
     T findOne(PK id);
 
@@ -65,17 +59,8 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
 
     /**
      * 查询全部记录
-     *
-     * @param <S>
-     * @return
      */
     Page<T> findAll();
-
-    /**
-     * 查询全部记录
-     * @return
-     */
-    Iterable<T> findAllNoPage();
 
     /**
      * 分页查询（含排序功能）
@@ -92,6 +77,15 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      * @return
      */
     Page<T> findAll(Sort sort);
+    /**
+     * 查询全部记录
+     */
+    Iterable<T> findAllNoPage();
+
+    /**
+     * 查询全部记录
+     */
+    Iterable<T> findAllNoPage(Sort sort);
 
     /**
      * 根据主键查询

@@ -95,13 +95,6 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     }
 
     @Override
-    public List<T> findAllNoPage(){
-        List<T> list = logicRepository.findAllActiveNoPage();
-        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
-        return list;
-    }
-
-    @Override
     public Page<T>  findAll ( Pageable pageable ) {
         Page<T> page = logicRepository.findAllActive( pageable );
         log.debug("LogicService findAll 调用页码【{}】和页容量【{}】, 调用结果返回记录数为【{}】", pageable.getPageNumber(), pageable.getPageSize(), page.getTotalElements());
@@ -113,6 +106,20 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
         Page<T> page = logicRepository.findAllActive(PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE, sort));
         log.debug("LogicService findAll 调用结果返回记录数为【{}】", page.getTotalElements());
         return page;
+    }
+
+    @Override
+    public List<T> findAllNoPage(){
+        List<T> list = logicRepository.findAllActiveNoPage();
+        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
+        return list;
+    }
+
+    @Override
+    public List<T> findAllNoPage(Sort sort){
+        List<T> list = logicRepository.findAllActiveNoPage(sort);
+        log.debug("LogicService findAllNoPage 调用结果返回记录数为【{}】", list.size());
+        return list;
     }
 
     @Override

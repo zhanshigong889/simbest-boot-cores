@@ -103,11 +103,6 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
     }
 
     @Override
-    public List<T> findAllActiveNoPage() {
-        return super.findAll(notDeleted());
-    }
-
-    @Override
     public Page<T> findAllActive(Sort sort) {
         return super.findAll(notDeleted(), PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE, sort));
     }
@@ -118,22 +113,27 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
     }
 
     @Override
+    public List<T> findAllActiveNoPage() {
+        return super.findAll(notDeleted());
+    }
+
+    @Override
+    public List<T> findAllActiveNoPage(Sort sort) {
+        return super.findAll(notDeleted(), sort);
+    }
+
+    @Override
     public List<T> findAllActive(Iterable<ID> ids) {
         if (ids == null || !ids.iterator().hasNext())
             return Collections.emptyList();
-
         if (entityInformation.hasCompositeId()) {
             List<T> results = new ArrayList<T>();
-
             for (ID id : ids)
                 results.add(findOneActive(id));
-
             return results;
         }
-
         ByIdsSpecification<T> specification = new ByIdsSpecification<T>(entityInformation);
-        TypedQuery<T> query = getQuery(Specifications.where(specification).and(notDeleted()), (Sort) null);
-
+        TypedQuery<T> query = getQuery(Specifications.where(specification).and(notDeleted()), Sort.unsorted());
         return query.setParameter(specification.parameter, ids).getResultList();
     }
 

@@ -172,12 +172,6 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
         return genericRepository.findAll(genericRepository.getPageable());
     }
 
-    @Override
-    public Iterable<T> findAllNoPage(){
-        log.debug("@Generic Repository Service findAllNoPage");
-        return genericRepository.findAll();
-    }
-
     /**
      * @see
      */
@@ -196,6 +190,18 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
     public Page<T>  findAll ( Sort sort ) {
         log.debug("@Generic Repository Service object by Sort");
         return genericRepository.findAll(PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE, sort));
+    }
+
+    @Override
+    public Iterable<T> findAllNoPage(){
+        log.debug("@Generic Repository Service findAllNoPage");
+        return genericRepository.findAll();
+    }
+
+    @Override
+    public Iterable<T> findAllNoPage(Sort sort){
+        log.debug("@Generic Repository Service findAllNoPage");
+        return genericRepository.findAll(sort);
     }
 
     @Override
