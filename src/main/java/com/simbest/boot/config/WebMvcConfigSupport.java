@@ -69,7 +69,8 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(appConfig.getAppHostPort())
+//                .allowedOrigins(appConfig.getAppHostPort())
+                .allowedOrigins(ALL)
                 .allowedMethods(HttpMethod.OPTIONS.name(), HttpMethod.GET.name(), HttpMethod.POST.name())
                 .allowedHeaders(ALL)
                 .allowCredentials(true)
