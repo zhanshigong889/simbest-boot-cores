@@ -3,13 +3,16 @@
  */
 package com.simbest.boot.util;
 
+import com.google.common.collect.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.PropertyAccessorFactory;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,10 +40,29 @@ public class CustomBeanUtil extends BeanUtils {
         return emptyNames.toArray(result);
     }
 
+    /**
+     * 拷贝source非空的字段至target
+     */
     public static void copyPropertiesIgnoreNull(Object source, Object target) {
         BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
     }
 
+    /**
+     * 拷贝source非空的字段至target，并排除target中的持久化ID
+     */
+    public static void copyPropertiesIgnoreNullAndId(Object source, Object target) {
+        Field id = ObjectUtil.getEntityIdField(target);
+        String[] ignoreProperties = getNullPropertyNames(source);
+        List<String> ignorePropertyList = Arrays.asList(ignoreProperties);
+        List<String> ignorePropertyListMerge = Lists.newArrayList();
+        ignorePropertyListMerge.addAll(ignorePropertyList);
+        ignorePropertyListMerge.add(id.getName());
+        BeanUtils.copyProperties(source, target, ignorePropertyListMerge.toArray(new String[]{}));
+    }
+
+    /**
+     * 拷贝source非持久化字段至target
+     */
     public static void copyTransientProperties(Object source, Object target) {
         BeanWrapper srcWrap = PropertyAccessorFactory.forBeanPropertyAccess(source);
         BeanWrapper trgWrap = PropertyAccessorFactory.forBeanPropertyAccess(target);

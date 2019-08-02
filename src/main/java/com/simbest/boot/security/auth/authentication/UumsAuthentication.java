@@ -3,7 +3,6 @@
  */
 package com.simbest.boot.security.auth.authentication;
 
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 

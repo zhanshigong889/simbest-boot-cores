@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -26,6 +27,7 @@ import java.util.Date;
  * 作者: lishuyi 
  * 时间: 2017/11/4  15:43 
  */
+@Slf4j
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -140,6 +142,7 @@ public class JsonResponse {
     }
 
     public static JsonResponse unauthorized() {
+        log.error("权限不足");
         return JsonResponse.builder().
                 errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())

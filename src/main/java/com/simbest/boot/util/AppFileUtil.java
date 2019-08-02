@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
 public class AppFileUtil {
 
     private static final String UPLOAD_FILE_PATTERN =
-            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|txt|rar|zip|7z|mp4|ogg|swf|webm)$";
+            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|txt|rar|zip|7z|mp4|ogg|swf|webm)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
     @Autowired

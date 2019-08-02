@@ -13,6 +13,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.SimplePermission;
+import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
@@ -20,6 +21,7 @@ import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.SpringSecurityMessageSource;
@@ -149,4 +151,24 @@ public abstract class AbstractAuthService implements IAuthService {
         return userDetails;
     }
 
+
+    @Override
+    public void bindUserOpenid(String preferredMobile, String openid, String appcode){
+        org.springframework.util.Assert.notNull(preferredMobile, "preferredMobile不可为空");
+        org.springframework.util.Assert.notNull(openid, "openid不可为空");
+        org.springframework.util.Assert.notNull(appcode, "appcode不可为空");
+        IUser iUser = userinfoApi.findByKey(preferredMobile, KeyType.preferredMobile, appcode);
+        if(null == iUser){
+            throw new UsernameNotFoundException(String.format("在应用%s中用户不存在，手机号码%s无效", appcode, preferredMobile));
+        }
+        else {
+            //openid不等于当前用户的openid时，进行绑定更新
+            if(!openid.equalsIgnoreCase(iUser.getOpenid())){
+                SimpleUser simpleUser = new SimpleUser();
+                BeanUtils.copyProperties(iUser, simpleUser);
+                simpleUser.setOpenid(openid);
+                userinfoApi.update(preferredMobile, KeyType.preferredMobile, appcode, simpleUser);
+            }
+        }
+    }
 }

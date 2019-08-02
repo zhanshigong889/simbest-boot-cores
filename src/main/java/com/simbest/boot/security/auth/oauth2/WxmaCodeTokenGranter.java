@@ -3,11 +3,8 @@
  */
 package com.simbest.boot.security.auth.oauth2;
 
-import com.simbest.boot.security.auth.authentication.UumsAuthentication;
-import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.authentication.wxma.WxmaAuthenticationCredentials;
-import com.simbest.boot.security.auth.authentication.wxma.WxmaAuthenticationToken;
-import org.apache.commons.lang3.StringUtils;
+import com.simbest.boot.security.auth.authentication.wxma.WxmaCodeAuthenticationToken;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,24 +24,26 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 用途：基于微信小程序的认证OAUTH2方式提交的认证主体
+ * 用途：基于微信小程序的认证OAUTH2方式提交的认证主体(Token失效时使用)
  * 参考：ResourceOwnerPasswordTokenGranter http://www.voidcn.com/article/p-kkszxmkr-bqq.html
  * 作者: lishuyi
  * 时间: 2019/3/27  16:57
+ *
+ * 请求URL：http://10.87.57.23:6004/ischool/oauth/token?grant_type=wxmacode&scope=all&client_id=wxma_client&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=ischool&appid=wxa0d10b26a0d997c1&wxcode=微信换取的code
  */
-public class WxmaTokenGranter extends AbstractTokenGranter {
+public class WxmaCodeTokenGranter extends AbstractTokenGranter {
 
-    private static final String GRANT_TYPE = "wxma";
+    private static final String GRANT_TYPE = "wxmacode";
 
     private final AuthenticationManager authenticationManager;
 
-    public WxmaTokenGranter(AuthenticationManager authenticationManager,
-                            AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
+    public WxmaCodeTokenGranter(AuthenticationManager authenticationManager,
+                                AuthorizationServerTokenServices tokenServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
         this(authenticationManager, tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
     }
 
-    protected WxmaTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices,
-                               ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
+    protected WxmaCodeTokenGranter(AuthenticationManager authenticationManager, AuthorizationServerTokenServices tokenServices,
+                                   ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
         super(tokenServices, clientDetailsService, requestFactory, grantType);
         this.authenticationManager = authenticationManager;
     }
@@ -52,14 +51,12 @@ public class WxmaTokenGranter extends AbstractTokenGranter {
     @Override
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         Map<String, String> parameters = new LinkedHashMap<String, String>(tokenRequest.getRequestParameters());
-        String preferredMobile = parameters.get("preferredMobile");
         String appcode = parameters.get("appcode");
         String appid = parameters.get("appid");
-        String smscode = parameters.get("smscode");
         String wxcode = parameters.get("wxcode");
 
-        Authentication userAuth = new WxmaAuthenticationToken(preferredMobile, WxmaAuthenticationCredentials.builder()
-                .appcode(appcode).appid(appid).smscode(smscode).wxcode(wxcode).build());
+        Authentication userAuth = new WxmaCodeAuthenticationToken(appid, WxmaAuthenticationCredentials.builder()
+                .appcode(appcode).appid(appid).wxcode(wxcode).build());
         ((AbstractAuthenticationToken) userAuth).setDetails(parameters);
         try {
             userAuth = authenticationManager.authenticate(userAuth);
@@ -73,7 +70,7 @@ public class WxmaTokenGranter extends AbstractTokenGranter {
             throw new InvalidGrantException(e.getMessage());
         }
         if (userAuth == null || !userAuth.isAuthenticated()) {
-            throw new InvalidGrantException(String.format("微信小程序认证%s失败", preferredMobile));
+            throw new InvalidGrantException(String.format("微信小程序认证%s失败", wxcode));
         }
 
         OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);

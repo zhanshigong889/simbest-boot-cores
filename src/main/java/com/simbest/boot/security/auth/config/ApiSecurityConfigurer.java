@@ -9,7 +9,8 @@ import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
 import com.simbest.boot.security.auth.oauth2.CustomWebResponseExceptionTranslator;
 import com.simbest.boot.security.auth.oauth2.OauthExceptionEntryPoint;
 import com.simbest.boot.security.auth.oauth2.UumsTokenGranter;
-import com.simbest.boot.security.auth.oauth2.WxmaTokenGranter;
+import com.simbest.boot.security.auth.oauth2.WxmaBindTokenGranter;
+import com.simbest.boot.security.auth.oauth2.WxmaCodeTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -161,8 +162,11 @@ public class ApiSecurityConfigurer {
             //追加uumspassword方式的认证
             granters.add(new UumsTokenGranter(authenticationManager, endpoints.getTokenServices(),
                     endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
-            ////追加wxma方式的认证
-            granters.add(new WxmaTokenGranter(authenticationManager, endpoints.getTokenServices(),
+            //追加wxmabind方式的认证
+            granters.add(new WxmaBindTokenGranter(authenticationManager, endpoints.getTokenServices(),
+                    endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+            //追加wxmacode方式的认证
+            granters.add(new WxmaCodeTokenGranter(authenticationManager, endpoints.getTokenServices(),
                     endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
             return new CompositeTokenGranter(granters);
         }

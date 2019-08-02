@@ -58,11 +58,8 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
     protected void handleResponse(HttpServletResponse response, Exception exception) throws IOException{
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
-        JsonResponse jsonResponse = JsonResponse.builder().
-                errcode(HttpStatus.UNAUTHORIZED.value())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.name())
-                .build();
+        log.error("拒绝访问");
+        JsonResponse jsonResponse = JsonResponse.unauthorized();
         if(null != exception) {
             log.warn("登录认证发生【{}】异常，错误信息为【{}】", exception.getClass().getSimpleName(), exception.getMessage());
             if (exception instanceof UsernameNotFoundException || exception.getCause() instanceof UsernameNotFoundException) {
@@ -85,7 +82,9 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
                 jsonResponse.setError(AuthoritiesConstants.InternalAuthenticationServiceException);
             }
         }
-        response.getWriter().print(JacksonUtils.obj2json(jsonResponse));
+        String responseStr = JacksonUtils.obj2json(jsonResponse);
+        log.error("访问控制校验异常，即将返回【{}】", responseStr);
+        response.getWriter().print(responseStr);
     }
 
 }
