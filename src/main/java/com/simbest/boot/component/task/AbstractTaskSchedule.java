@@ -38,7 +38,7 @@ public abstract class AbstractTaskSchedule {
     public void checkAndExecute(boolean writeLog) {
         if(appRuntime.getMyHost().equals(appRuntime.getMasterHost())
                 && appRuntime.getMyPort().equals(appRuntime.getMasterPort())) {
-            log.debug("I'm master running {} on {}, i could execute the job", appRuntime.getMyHost(), appRuntime.getMyPort());
+            log.debug("当前主机地址【{}】运行端口【{}】是集群主控节点，即将执行定时任务", appRuntime.getMyHost(), appRuntime.getMyPort());
             Long beginTime = System.currentTimeMillis();
             Boolean executeFlag = true;
             String content = CHECK_FAILED;
@@ -62,7 +62,7 @@ public abstract class AbstractTaskSchedule {
                 repository.save(log);
             }
         } else {
-            log.debug("Master running {} on {}, I'm running {} on {}, I couldn't execute the job",
+            log.debug("集群主控节点主机地址【{}】运行端口【{}】,当前主机地址【{}】运行端口【{}】, 无法执行定时任务",
                     appRuntime.getMasterHost(), appRuntime.getMasterPort(), appRuntime.getMyHost(), appRuntime.getMyPort());
         }
     }

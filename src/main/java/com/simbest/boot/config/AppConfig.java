@@ -4,8 +4,11 @@
 package com.simbest.boot.config;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 /**
  * 用途：应用配置
@@ -38,6 +41,7 @@ import org.springframework.context.annotation.Configuration;
  * 作者: lishuyi
  * 时间: 2018/8/16  13:52
  */
+@Slf4j
 @Data
 @Configuration
 public class AppConfig {
@@ -93,4 +97,26 @@ public class AppConfig {
 
     @Value("${app.security.white.hosts}")
     private String whiteHostList;
+
+    @PostConstruct
+    public void init() {
+        log.info("Congratulations------------------------------------------------应用核心配置加载完成");
+        log.info("应用注册代码【{}】", appcode);
+        log.info("应用访问上下文【{}】", contextPath);
+        log.info("Redis节点【{}】", redisClusterNodes);
+        log.info("Redis密码【{}】", redisPassword);
+        log.info("Redis重定向次数【{}】", redisMaxRedirects);
+        log.info("Redis缓存空间前缀【{}】", redisNamespace);
+        log.info("Redis缓存Key键前缀【{}】", redisKeyPrefix);
+        log.info("应用Cookie路径【{}】", cookiePath);
+        log.info("API接口文档地址【{}】", swaggerUrl);
+        log.info("登录是否开启验证码【{}】", isOpenValidateCode);
+        log.info("主数据请求地址【{}】", uumsAddress);
+        log.info("门户单点加密令牌【{}】", mochaPortalToken);
+        log.info("应用访问地址【{}】", appHostPort);
+        log.info("应用文件上传路径【{}】", uploadPath);
+        log.info("应用文件上传方式【{}】", uploadLocation);
+        log.info("应用获准访问白名单【{}】", whiteHostList);
+    }
+
 }

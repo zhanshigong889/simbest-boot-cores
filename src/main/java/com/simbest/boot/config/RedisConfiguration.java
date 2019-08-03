@@ -67,12 +67,12 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @PostConstruct
     private void afterPropertiesSet() {
-        log.info("setting spring session with redis timeout {} seconds", config.getRedisMaxInactiveIntervalInSeconds());
+        log.info("应用超时时间设置为【{}】秒", config.getRedisMaxInactiveIntervalInSeconds());
         sessionRepository.setDefaultMaxInactiveInterval(config.getRedisMaxInactiveIntervalInSeconds());
         // 注释以下代码，配合RedisSessionConfiguration的CookiePath=/可以实现同域名应用间Cookie共享Session
         // 而目前设计必须设置，否则导致不同应用相同Cookie在检查Session到期时间时报错
         // Failed to deserialize object type; nested exception is java.lang.ClassNotFoundException: com.simbest.boot.uums.role.model.SysRole
-        log.info("setting spring session with redis namespace {} ", config.getRedisNamespace());
+        log.info("应用Redis缓存命名空间前缀为【{}】 ", config.getRedisNamespace());
         sessionRepository.setRedisKeyNamespace(config.getRedisNamespace());
     }
 
@@ -93,9 +93,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     public RedisClusterConfiguration redisClusterConfiguration(){
         Map<String, Object> source = Maps.newHashMap();
         source.put("spring.redis.cluster.nodes", config.getRedisClusterNodes());
-        log.debug("Redis cluster nodes: {}", config.getRedisClusterNodes());
+        log.debug("Redis 启动节点为【{}】", config.getRedisClusterNodes());
         source.put("spring.redis.cluster.max-redirects", config.getRedisMaxRedirects());
-        log.info("Redis cluster max redirects: {}", config.getRedisMaxRedirects());
+        log.info("Redis 最大重定向次数为为【{}】", config.getRedisMaxRedirects());
         return new RedisClusterConfiguration(new MapPropertySource("RedisClusterConfiguration", source));
     }
 
@@ -209,7 +209,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             @Override
             public void handleCacheGetError(RuntimeException e, Cache cache, Object key) {
                 if(e instanceof RedisConnectionFailureException){
-                    log.warn("redis has lose connection:",e);
+                    log.warn("redis 丢失连接 connection:",e);
                     return;
                 }
                 throw e;
@@ -225,7 +225,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             @Override
             public void handleCachePutError(RuntimeException e, Cache cache, Object key, Object value) {
                 if(e instanceof RedisConnectionFailureException){
-                    log.warn("redis has lose connection:",e);
+                    log.warn("redis 丢失连接 connection:",e);
                     return;
                 }
                 throw e;
@@ -275,7 +275,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 //                    .addNodeAddress("redis://10.92.80.70:26379", "redis://10.92.80.70:26389", "redis://10.92.80.70:26399")
 //                    .addNodeAddress("redis://10.92.80.71:26379", "redis://10.92.80.71:26389", "redis://10.92.80.71:26399");
         }
-        log.debug("--------------------------------------------RedissonClient start");
+        log.debug("Congratulations------------------------------------------------Redis 进程实例已创建成功");
         return Redisson.create(redissonConfig);
     }
 
@@ -290,7 +290,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @PreDestroy
     public void destroy() {
         //redisson.shutdown(); //交由RedisConfiguration.redissonClient()进行shutdown
-        log.debug("--------------------------------------------RedissonClient shutdown");
+        log.debug("Congratulations------------------------------------------------Redis 进程实例已销毁成功");
     }
 
 }

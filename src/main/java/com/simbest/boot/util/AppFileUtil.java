@@ -75,6 +75,7 @@ public class AppFileUtil {
     @PostConstruct
     public void init() {
         serverUploadLocation = Enum.valueOf(StoreLocation.class, config.getUploadLocation());
+        log.info("应用上传文件将基于【{}】方式保存", serverUploadLocation.name());
     }
 
     /**

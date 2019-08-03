@@ -48,17 +48,19 @@ public class AppRuntimeMaster {
     }
 
     public boolean checkMasterIsMe() {
-        if(StringUtils.isEmpty(myHost))
+        if(StringUtils.isEmpty(myHost)) {
             myHost = HostUtil.getHostAddress();
-        if(myPort == null || ApplicationConstants.ZERO==myPort)
+        }
+        if(myPort == null || ApplicationConstants.ZERO==myPort) {
             myPort = hostUtil.getRunningPort();
-        log.debug("My host is {} ", myHost);
-        log.debug("Cluster master is {} ", RedisUtil.get(ApplicationConstants.MASTER_HOST));
-        log.debug("My host port is {}", myPort);
-        log.debug("Cluster master port is {}", RedisUtil.getBean(ApplicationConstants.MASTER_PORT, Integer.class));
+        }
+        log.debug("当前主机地址【{}】 ", myHost);
+        log.debug("集群主机地址【{}】 ", RedisUtil.get(ApplicationConstants.MASTER_HOST));
+        log.debug("当前主机端口【{}】", myPort);
+        log.debug("集群主机端口【{}】", RedisUtil.getBean(ApplicationConstants.MASTER_PORT, Integer.class));
         boolean isMaster = myHost.equals(RedisUtil.get(ApplicationConstants.MASTER_HOST))
                 && myPort.equals(RedisUtil.getBean(ApplicationConstants.MASTER_PORT, Integer.class));
-        log.debug("Check master is me result is {} ", isMaster);
+        log.debug("判断当前主机是否是集群主控节点结果为【{}】", isMaster);
         return isMaster;
     }
 
@@ -76,18 +78,18 @@ public class AppRuntimeMaster {
         //1.没有Master
         if (StringUtils.isEmpty(masterHost) || null==masterPort || ApplicationConstants.ZERO==masterPort) {
             makeMeAsMaster(myHost, myPort);
-            log.debug("I'm the master, and is already running at IP: {} on port {} ...", myHost, myPort);
+            log.debug("集群没有主控节点，当前主机将成为主控节点, 主机地址【{}】运行端口【{}】", myHost, myPort);
         }
 
-        //检查应用主机端口是否存活
+        //检查集群主控节点端口是否存活
         boolean masterIsAvailable = SocketUtil.checkHeartConnection(masterHost, Integer.valueOf(masterPort));
         //2.Master不可用
         if (!masterIsAvailable) {
             myPort = hostUtil.getRunningPort();
             makeMeAsMaster(myHost, myPort);
-            log.debug("I will become cluster master with IP: {} on port {} ...", myHost, myPort);
+            log.debug("集群主控节点不可用，当前主机将成为主控节点, 主机地址【{}】运行端口【{}】", myHost, myPort);
         } else {
-            log.debug("Master is already at IP: {} on port {} ...", masterHost, masterPort);
+            log.debug("集群主控节点状态良好，主控节点主机地址【{}】运行端口【{}】", masterHost, masterPort);
         }
 
         //释放锁
