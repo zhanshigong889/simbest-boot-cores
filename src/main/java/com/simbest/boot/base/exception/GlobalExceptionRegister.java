@@ -10,6 +10,7 @@ import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.InsertExistObjectException;
 import com.simbest.boot.exceptions.UpdateNotExistObjectException;
 import com.simbest.boot.util.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.TransactionException;
@@ -29,6 +30,7 @@ import java.util.Set;
  * 作者: lishuyi
  * 时间: 2017/11/4  15:46
  */
+@Slf4j
 public final class GlobalExceptionRegister {
     private static Map<Class<? extends Exception>, JsonResponse> errorMap = Maps.newHashMap();
 
@@ -89,23 +91,34 @@ public final class GlobalExceptionRegister {
         Exceptions.printException(e);
         JsonResponse response = errorMap.get(e.getClass());
         if (response == null) {
+            log.debug("当前异常为【{}】，父类异常为【{}】，异常信息为【{}】", e.getClass().getSimpleName(), e.getClass().getSuperclass().getSimpleName(), e.getMessage());
             Class superClass = e.getClass().getSuperclass();
             while(null != superClass){
                 if(errorMap.keySet().contains(superClass)){
                     response = errorMap.get(superClass);
                     superClass = null;
                 } else {
+                    log.debug("当前父类异常为【{}】，父类的父类异常为【{}】，异常信息为【{}】", superClass.getSimpleName(), superClass.getSuperclass().getSimpleName(), e.getMessage());
                     superClass = superClass.getSuperclass();
                 }
             }
         }
+        //循环遍历完成后，依然没有找到注册异常，返回默认异常错误
         if (response == null) {
             response = JsonResponse.defaultErrorResponse();
             response.setError(e.getClass().getSimpleName());
         }
+        setCorrectErrorMessage(response, e);
+        return response;
+    }
+
+    private static void setCorrectErrorMessage(JsonResponse response, Exception e){
+        if(e.getMessage().contains("ConstraintViolationException")){
+            response.setMessage("主键或唯一索引限制异常");
+        }
         if(StringUtils.isEmpty(response.getMessage())){
             response.setMessage(e.getMessage());
         }
-        return response;
     }
+
 }

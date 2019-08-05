@@ -430,27 +430,36 @@ public class ExcelUtil<T> {
 
     public static String getExcelCellValue(Cell cell) {
         DataFormatter df = new DataFormatter();
+        String result;
         switch (cell.getCellType()) {
             case Cell.CELL_TYPE_STRING:
-                return cell.getRichStringCellValue().getString();
+                result = cell.getRichStringCellValue().getString();
+                break;
             case Cell.CELL_TYPE_NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
-                    return new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue());
+                    result = new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue());
+                    break;
                 } else {
                     String num = df.formatCellValue(cell);
-                    return !num.contains(".") ? num : num.replaceAll("0*$", "").replaceAll("\\.$", "");
+                    result = !num.contains(".") ? num : num.replaceAll("0*$", "").replaceAll("\\.$", "");
+                    break;
                 }
             case Cell.CELL_TYPE_BOOLEAN:
-                return "" + cell.getBooleanCellValue();
+                result = "" + cell.getBooleanCellValue();
+                break;
             case Cell.CELL_TYPE_FORMULA:
-                return cell.getCellFormula();
+                result = cell.getCellFormula();
+                break;
             case Cell.CELL_TYPE_BLANK:
-                return "";
+                result = "";
+                break;
             case Cell.CELL_TYPE_ERROR:
-                return Byte.valueOf(cell.getErrorCellValue()).toString();
+                result = Byte.valueOf(cell.getErrorCellValue()).toString();
+                break;
             default:
-                return "";
+                result = "";
         }
+        return result.trim();
     }
 
     /**
