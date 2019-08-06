@@ -52,6 +52,15 @@ public class AppConfig {
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
+    @Value("${spring.datasource.url}")
+    private String datasourceUrl;
+
+    @Value("${spring.datasource.username}")
+    private String datasourceUsername;
+
+    @Value("${spring.datasource.password}")
+    private String datasourcePassword;
+
     @Value("${spring.redis.cluster.nodes}")
     private String redisClusterNodes;
 
@@ -103,6 +112,9 @@ public class AppConfig {
         log.info("Congratulations------------------------------------------------应用核心配置加载完成");
         log.info("应用注册代码【{}】", appcode);
         log.info("应用访问上下文【{}】", contextPath);
+        log.info("数据库URL【{}】", datasourceUrl);
+        log.info("数据库账号【{}】", datasourceUsername);
+        log.info("数据库密码【{}】", datasourcePassword);
         log.info("Redis节点【{}】", redisClusterNodes);
         log.info("Redis密码【{}】", redisPassword);
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
