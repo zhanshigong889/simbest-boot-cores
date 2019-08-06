@@ -142,9 +142,8 @@ public class JsonResponse {
     }
 
     public static JsonResponse unauthorized() {
-        log.error("权限不足");
         return JsonResponse.builder().
-                errcode(HttpStatus.UNAUTHORIZED.value())
+                errcode(ERROR_CODE)
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error(HttpStatus.UNAUTHORIZED.name())
                 .build();
@@ -152,7 +151,7 @@ public class JsonResponse {
 
     public static JsonResponse authorized() {
         return JsonResponse.builder().
-                errcode(HttpStatus.OK.value())
+                errcode(SUCCESS_CODE)
                 .status(HttpStatus.OK.value())
                 .error(HttpStatus.OK.name())
                 .build();

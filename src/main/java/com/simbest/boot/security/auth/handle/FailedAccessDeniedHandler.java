@@ -58,7 +58,7 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
     protected void handleResponse(HttpServletResponse response, Exception exception) throws IOException{
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
-        log.error("拒绝访问");
+        log.error("警告！非法请求尝试访问，已拒绝该请求接入！");
         JsonResponse jsonResponse = JsonResponse.unauthorized();
         if(null != exception) {
             log.warn("登录认证发生【{}】异常，错误信息为【{}】", exception.getClass().getSimpleName(), exception.getMessage());
