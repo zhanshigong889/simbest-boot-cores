@@ -166,72 +166,75 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
         Root<?> root = criteriaQuery.from(entityClass);
         List<Predicate> predicates = new ArrayList<Predicate>();
 
-        //判断是否有联合主键
-        if (entityInformation.hasCompositeId()) {
-            for (String s : entityInformation.getIdAttributeNames())
-                predicates.add(criteriaBuilder.equal(root.<ID>get(s),
-                        entityInformation.getCompositeIdAttributeValue(entityInformation.getId(entity), s)));
-            //无论是逻辑删除，还是物理删除，联合主键都必须满足唯一性
-//            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get(DELETED_FIELD), LocalDateTime.now()));
-            criteriaQuery.select(root).where(predicates.toArray(new Predicate[predicates.size()]));
-            TypedQuery<Object> typedQuery = em.createQuery(criteriaQuery);
-            List<Object> resultSet = typedQuery.getResultList();
-            if (resultSet.size() > 0) {
-                S result = (S) resultSet.get(0);
-                BeanUtils.copyProperties(entity, result, getNullPropertyNames(entity));
-                return (S) super.save(result);
-            }
-        }
-        //判断是否有联合索引
-        if (entity.getClass().isAnnotationPresent(Table.class)) {
-            Annotation a = entity.getClass().getAnnotation(Table.class);
-            try {
-                UniqueConstraint[] uniqueConstraints = (UniqueConstraint[]) a.annotationType()
-                        .getMethod("uniqueConstraints").invoke(a);
-                if (uniqueConstraints != null) {
-                    for (UniqueConstraint uniqueConstraint : uniqueConstraints) {
-                        Map<String, Object> data = new HashMap<>();
-                        for (String name : uniqueConstraint.columnNames()) {
-                            //name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name );
-                            //name = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
-                            PropertyDescriptor pd = new PropertyDescriptor(name, entityClass);
-                            Object value = pd.getReadMethod().invoke(entity);
-                            if (value == null) {
-                                data.clear();
-                                break;
-                            }
-                            data.put(name, value);
-                        }
-                        if (!data.isEmpty()) {
-                            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                                predicates.add(criteriaBuilder.equal(root.get(entry.getKey()), entry.getValue()));
-                            }
-                        }
-                    }
-                    if (predicates.isEmpty()) {
-                        return super.save(entity);
-                    }
-                    //无论是逻辑删除，还是物理删除，联合索引都必须满足唯一性
-//                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get(DELETED_FIELD), LocalDateTime.now()));
-                    criteriaQuery.select(root).where(predicates.toArray(new Predicate[predicates.size()]));
-                    TypedQuery<Object> typedQuery = em.createQuery(criteriaQuery);
-                    List<Object> resultSet = typedQuery.getResultList();
-                    if (resultSet.size() > 0) {
-                        S result = (S) resultSet.get(0);
-                        BeanUtils.copyProperties(entity,
-                                result, Stream
-                                        .concat(Arrays.stream(getNullPropertyNames(entity)),
-                                                Arrays.stream(
-                                                        new String[] { entityInformation.getIdAttribute().getName() }))
-                                        .toArray(String[]::new));
-                        return (S) super.save(result);
-                    }
-                }
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                    | NoSuchMethodException | SecurityException | IntrospectionException e) {
-                e.printStackTrace();
-            }
-        }
+        //不判断联合主键，也不判断联合索引，确保违法联合主键或者联合索引约束时，数据无法插入。取消下面的代码注释后，由于typedQuery.getResultList()将会由insert变成update，
+        //这是由于SimpleJpaRepository的save方法的merge方法决定的
+        //update by lishuyi 2019-08-06
+//        //判断是否有联合主键
+//        if (entityInformation.hasCompositeId()) {
+//            for (String s : entityInformation.getIdAttributeNames())
+//                predicates.add(criteriaBuilder.equal(root.<ID>get(s),
+//                        entityInformation.getCompositeIdAttributeValue(entityInformation.getId(entity), s)));
+//            //无论是逻辑删除，还是物理删除，联合主键都必须满足唯一性
+////            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get(DELETED_FIELD), LocalDateTime.now()));
+//            criteriaQuery.select(root).where(predicates.toArray(new Predicate[predicates.size()]));
+//            TypedQuery<Object> typedQuery = em.createQuery(criteriaQuery);
+//            List<Object> resultSet = typedQuery.getResultList();
+//            if (resultSet.size() > 0) {
+//                S result = (S) resultSet.get(0);
+//                BeanUtils.copyProperties(entity, result, getNullPropertyNames(entity));
+//                return (S) super.save(result);
+//            }
+//        }
+//        //判断是否有联合索引
+//        if (entity.getClass().isAnnotationPresent(Table.class)) {
+//            Annotation a = entity.getClass().getAnnotation(Table.class);
+//            try {
+//                UniqueConstraint[] uniqueConstraints = (UniqueConstraint[]) a.annotationType()
+//                        .getMethod("uniqueConstraints").invoke(a);
+//                if (uniqueConstraints != null) {
+//                    for (UniqueConstraint uniqueConstraint : uniqueConstraints) {
+//                        Map<String, Object> data = new HashMap<>();
+//                        for (String name : uniqueConstraint.columnNames()) {
+//                            //name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name );
+//                            //name = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
+//                            PropertyDescriptor pd = new PropertyDescriptor(name, entityClass);
+//                            Object value = pd.getReadMethod().invoke(entity);
+//                            if (value == null) {
+//                                data.clear();
+//                                break;
+//                            }
+//                            data.put(name, value);
+//                        }
+//                        if (!data.isEmpty()) {
+//                            for (Map.Entry<String, Object> entry : data.entrySet()) {
+//                                predicates.add(criteriaBuilder.equal(root.get(entry.getKey()), entry.getValue()));
+//                            }
+//                        }
+//                    }
+//                    if (predicates.isEmpty()) {
+//                        return super.save(entity);
+//                    }
+//                    //无论是逻辑删除，还是物理删除，联合索引都必须满足唯一性
+////                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get(DELETED_FIELD), LocalDateTime.now()));
+//                    criteriaQuery.select(root).where(predicates.toArray(new Predicate[predicates.size()]));
+//                    TypedQuery<Object> typedQuery = em.createQuery(criteriaQuery);
+//                    List<Object> resultSet = typedQuery.getResultList();
+//                    if (resultSet.size() > 0) {
+//                        S result = (S) resultSet.get(0);
+//                        BeanUtils.copyProperties(entity,
+//                                result, Stream
+//                                        .concat(Arrays.stream(getNullPropertyNames(entity)),
+//                                                Arrays.stream(
+//                                                        new String[] { entityInformation.getIdAttribute().getName() }))
+//                                        .toArray(String[]::new));
+//                        return (S) super.save(result);
+//                    }
+//                }
+//            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+//                    | NoSuchMethodException | SecurityException | IntrospectionException e) {
+//                e.printStackTrace();
+//            }
+//        }
         //没有联合主键、没有联合索引，直接保存
         return super.save(entity);
     }

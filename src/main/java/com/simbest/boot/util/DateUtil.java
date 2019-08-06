@@ -223,18 +223,35 @@ public final class DateUtil {
 
     /**
      * 比较时间区间(只关心时间，不区分年月日)
-     * @param startTime
-     * @param endTime
+     * @param nowTime 当前时间
+     * @param startTime 开始时间
+     * @param endTime 结束时间
      * @return
      */
-    public static boolean belongTimeZone(Date nowTime, Date beginTime, Date endTime) {
+    public static boolean belongTimeZone(Date nowTime, Date startTime, Date endTime) {
         nowTime = removeDate(nowTime);
-        beginTime = removeDate(beginTime);
+        startTime = removeDate(startTime);
         endTime = removeDate(endTime);
+        return belongDate(nowTime, startTime, endTime);
+    }
+
+    /**
+     * 比较时间区间(完整时间)
+     *
+     * @param nowTime 当前时间
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return
+     */
+    public static boolean belongDate(Date nowTime, Date startTime, Date endTime) {
+        if (nowTime.getTime() == startTime.getTime()
+                || nowTime.getTime() == endTime.getTime()) {
+            return true;
+        }
         Calendar date = Calendar.getInstance();
         date.setTime(nowTime);
         Calendar begin = Calendar.getInstance();
-        begin.setTime(beginTime);
+        begin.setTime(startTime);
         Calendar end = Calendar.getInstance();
         end.setTime(endTime);
         if (date.after(begin) && date.before(end)) {
