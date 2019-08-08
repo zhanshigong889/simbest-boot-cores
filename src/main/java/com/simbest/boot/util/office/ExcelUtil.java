@@ -38,7 +38,7 @@ public class ExcelUtil<T> {
 
     private void setFieldValue(T entity, String c, Class<?> fieldType, Field field) throws IllegalAccessException {
         if (StringUtils.isNotEmpty(c) && (String.class == fieldType)) {
-            field.set(entity, c);
+            field.set(entity, StringUtils.trim(c));
         } else if (StringUtils.isNotEmpty(c) && (Date.class == fieldType)) {
             field.set(entity, com.simbest.boot.util.DateUtil.parseDate(c));
         } else if (StringUtils.isNotEmpty(c) && ((Integer.TYPE == fieldType) || (Integer.class == fieldType))) {
