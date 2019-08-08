@@ -37,29 +37,23 @@ public class ExcelUtil<T> {
     }
 
     private void setFieldValue(T entity, String c, Class<?> fieldType, Field field) throws IllegalAccessException {
-        if (String.class == fieldType) {
-            field.set(entity, String.valueOf(c));
-        } else if (Date.class == fieldType) {
+        if (StringUtils.isNotEmpty(c) && (String.class == fieldType)) {
+            field.set(entity, c);
+        } else if (StringUtils.isNotEmpty(c) && (Date.class == fieldType)) {
             field.set(entity, com.simbest.boot.util.DateUtil.parseDate(c));
-        } else if ((Integer.TYPE == fieldType)
-                || (Integer.class == fieldType)) {
+        } else if (StringUtils.isNotEmpty(c) && ((Integer.TYPE == fieldType) || (Integer.class == fieldType))) {
             field.set(entity, Integer.parseInt(c));
-        } else if ((Long.TYPE == fieldType)
-                || (Long.class == fieldType)) {
+        } else if (StringUtils.isNotEmpty(c) && ((Long.TYPE == fieldType) || (Long.class == fieldType))) {
             field.set(entity, Long.valueOf(c));
-        } else if ((Float.TYPE == fieldType)
-                || (Float.class == fieldType)) {
+        } else if (StringUtils.isNotEmpty(c) && ((Float.TYPE == fieldType) || (Float.class == fieldType))) {
             field.set(entity, Float.valueOf(c));
-        } else if ((Short.TYPE == fieldType)
-                || (Short.class == fieldType)) {
+        } else if (StringUtils.isNotEmpty(c) && ((Short.TYPE == fieldType) || (Short.class == fieldType))) {
             field.set(entity, Short.valueOf(c));
-        } else if ((Double.TYPE == fieldType)
-                || (Double.class == fieldType)) {
+        } else if (StringUtils.isNotEmpty(c) && ((Double.TYPE == fieldType) || (Double.class == fieldType))) {
             field.set(entity, Double.valueOf(c));
         } else if (Character.TYPE == fieldType) {
             if ((c != null) && (c.length() > 0)) {
-                field.set(entity,
-                        Character.valueOf(c.charAt(0)));
+                field.set(entity, Character.valueOf(c.charAt(0)));
             }
         }
     }

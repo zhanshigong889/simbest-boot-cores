@@ -1,5 +1,6 @@
 package com.simbest.boot.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
@@ -191,7 +192,10 @@ public final class DateUtil {
 
 	// ===========================字符串转换时间==================================
 	public static Date parseDate(String source){
-        return fullDateTimeFormatter.parseDateTime(source).toDate();
+	    if(StringUtils.isEmpty(source))
+	        return null;
+        else
+            return fullDateTimeFormatter.parseDateTime(source).toDate();
 	}
 
 	public static Date parseTimestamp(String source){
