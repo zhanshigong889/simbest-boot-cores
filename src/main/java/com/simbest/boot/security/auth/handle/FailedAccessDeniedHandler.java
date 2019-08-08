@@ -11,7 +11,6 @@ import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,6 +28,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import static com.simbest.boot.base.web.response.JsonResponse.ERROR_CODE;
 
 /**
  * 用途：无权限访问事件拦截
@@ -64,8 +65,10 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
             log.warn("登录认证发生【{}】异常，错误信息为【{}】", exception.getClass().getSimpleName(), exception.getMessage());
             if (exception instanceof UsernameNotFoundException || exception.getCause() instanceof UsernameNotFoundException) {
                 jsonResponse.setError(AuthoritiesConstants.UsernameNotFoundException);
+                jsonResponse.setErrcode(ERROR_CODE);
             } else if (exception instanceof BadCredentialsException || exception.getCause() instanceof BadCredentialsException) {
                 jsonResponse.setError(AuthoritiesConstants.BadCredentialsException);
+                jsonResponse.setErrcode(ERROR_CODE);
             } else if (exception instanceof AccountExpiredException || exception.getCause() instanceof AccountExpiredException) {
                 jsonResponse.setError(AuthoritiesConstants.AccountExpiredException);
             } else if (exception instanceof DisabledException || exception.getCause() instanceof DisabledException) {

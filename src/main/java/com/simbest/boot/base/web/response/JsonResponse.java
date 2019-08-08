@@ -143,7 +143,7 @@ public class JsonResponse {
 
     public static JsonResponse unauthorized() {
         return JsonResponse.builder().
-                errcode(ERROR_CODE)
+                errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error(HttpStatus.UNAUTHORIZED.name())
                 .build();
