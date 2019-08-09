@@ -1,9 +1,12 @@
 package com.simbest.boot.base.service;
 
 import com.simbest.boot.base.model.LogicModel;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <strong>Title : 业务实体通用服务层</strong><br>
@@ -42,4 +45,22 @@ public interface ILogicService<T extends LogicModel,PK extends Serializable> ext
      */
     void scheduleLogicDelete(T entity, LocalDateTime localDateTime);
 
+
+
+
+
+
+
+
+
+    //================以下将GenericService的Iterable转换为LogicService的List============//
+    List<T> findAllNoPage();
+
+    List<T> findAllNoPage(Sort sort);
+
+    List<T> findAllByIDs(Iterable<PK> ids);
+
+    List<T> findAllNoPage(Specification<T> conditions);
+
+    List<T> findAllNoPage(Specification<T> conditions, Sort sort);
 }
