@@ -30,7 +30,7 @@
   </dependencies>
 
   <!-- 通过Github管理jar包-->
-  
+  <!--
   <repositories>
 		<repository>
 			<id>simbest-boot-parent-mvn-repo</id>
@@ -49,10 +49,9 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
+	-->
 
     <!-- 通过私服管理jar包-->
-	<!--
     <repositories>
         <repository>
             <id>thirdparty</id>
@@ -70,5 +69,4 @@
             <url>http://10.87.41.250:8081/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-	-->
 </project>
