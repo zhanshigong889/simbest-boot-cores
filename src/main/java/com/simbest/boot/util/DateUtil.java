@@ -93,6 +93,8 @@ public final class DateUtil {
         System.out.println(times[1]);
         System.out.println(times[2]);
         System.out.println(times[3]);
+        System.out.println(dateToWeek(new Date()));
+        System.out.println(dateToWeek(parseDate("2019-09-19")));
     }
 
     /**
@@ -595,6 +597,21 @@ public final class DateUtil {
           long seconds = ((diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60)- minutes*(1000* 60)))/1000;
 		  return new long[]{days, hours, minutes, seconds};
 	}
+
+    /**
+     * 获取日期在一个星期的周几
+     * @param date
+     * @return
+     */
+    public static String dateToWeek(Date date) {
+        String[] weekDays = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
+        Calendar cal = Calendar.getInstance(); // 获得一个日历
+        cal.setTime(date);
+        int w = cal.get(Calendar.DAY_OF_WEEK) - 1; // 指示一个星期中的某天。
+        if (w < 0)
+            w = 0;
+        return weekDays[w];
+    }
 
 	public static DateTime getJodaDateTime (Object object){
 		DateTime in = new DateTime(object);
