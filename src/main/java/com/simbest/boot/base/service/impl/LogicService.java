@@ -267,6 +267,7 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     protected void wrapCreateInfo(T o) {
         String userName = SecurityUtils.getCurrentUserName();
         o.setCreator(userName);
+        o.setEnabled(true);
         wrapUpdateInfo(o);
     }
 

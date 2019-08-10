@@ -107,6 +107,17 @@ public class AppConfig {
     @Value("${app.security.white.hosts}")
     private String whiteHostList;
 
+
+    //简单实时短信接口配置
+    @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
+    private String smsAccount;
+    @Value("${app.sms.token:6cde887f4355445fa2c16f9fb073fbf7be}")
+    private String smsToken;
+    @Value("${app.sms.appId:8a48b5515018a0f4015046d3765c4ea3st}")
+    private String smsAppId;
+    @Value("${app.sms.templateId:408992008}")
+    private String smsTemplateId;
+
     @PostConstruct
     public void init() {
         log.info("Congratulations------------------------------------------------应用核心配置加载完成");
