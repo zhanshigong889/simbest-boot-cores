@@ -6,6 +6,7 @@ package com.simbest.boot.security.auth.oauth2;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -19,6 +20,7 @@ import java.util.Map;
  * 作者: lishuyi
  * 时间: 2018/8/29  21:50
  */
+@Slf4j
 public class CustomOauthExceptionSerializer extends StdSerializer<CustomOauthException> {
     public CustomOauthExceptionSerializer() {
         super(CustomOauthException.class);
@@ -26,14 +28,16 @@ public class CustomOauthExceptionSerializer extends StdSerializer<CustomOauthExc
 
     @Override
     public void serialize(CustomOauthException value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息");
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
         gen.writeStartObject();
-        gen.writeStringField("error", String.valueOf(value.getHttpErrorCode()));
-        gen.writeStringField("message错误", value.getMessage());
-//        gen.writeStringField("message", "用户名或密码错误");
-        gen.writeStringField("path", request.getServletPath());
+        gen.writeStringField("errcode", String.valueOf(value.getHttpErrorCode()));
         gen.writeStringField("timestamp", String.valueOf(new Date().getTime()));
+        gen.writeStringField("status", String.valueOf(value.getHttpErrorCode()));
+        gen.writeStringField("error", String.valueOf(value.getHttpErrorCode()));
+        gen.writeStringField("message", value.getMessage());
+        gen.writeStringField("path", request.getServletPath());
+
         if (value.getAdditionalInformation()!=null) {
             for (Map.Entry<String, String> entry : value.getAdditionalInformation().entrySet()) {
                 String key = entry.getKey();

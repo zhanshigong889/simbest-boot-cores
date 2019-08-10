@@ -22,6 +22,15 @@ import java.util.Date;
  */
 @Slf4j
 public class OauthExceptionEntryPoint extends OAuth2AuthenticationEntryPoint {
+
+    /**
+     * 与CustomOauthException配合
+     *
+     * @param request
+     * @param response
+     * @param authException
+     * @throws ServletException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException)
