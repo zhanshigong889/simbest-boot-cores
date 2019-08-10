@@ -37,32 +37,6 @@ public interface ISimpleSmsService {
     boolean sendRandomCode(String phone, String randomCode, int minutes, Object configs);
 
     /**
-     * 使用默认配置（模板），发送验证码，并保存至Redis持久化
-     * @param phone
-     * @param randomCode
-     * @param minutes
-     * @return
-     */
-    boolean sendRandomCodeToRedis(String phone, String randomCode, int minutes);
-
-    /**
-     * 使用特定配置（模板），发送验证码，并保存至Redis持久化
-     * @param phone
-     * @param randomCode
-     * @param minutes
-     * @return
-     */
-    boolean sendRandomCodeToRedis(String phone, String randomCode, int minutes, Object configs);
-
-    /**
-     * 从Redis中验证短信验证码
-     * @param phone
-     * @param code
-     * @return
-     */
-    boolean validateRandomCodeFromRedis(String phone, String randomCode);
-
-    /**
      * 使用特定模板发送短信内容
      *
      * @param phone 接收手机号

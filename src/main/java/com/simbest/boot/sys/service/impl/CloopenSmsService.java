@@ -10,7 +10,6 @@ import com.simbest.boot.util.CodeGenerator;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.http.LocalHttpClient;
 import com.simbest.boot.util.json.JacksonUtils;
-import com.simbest.boot.util.redis.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -39,10 +37,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CloopenSmsService implements ISimpleSmsService {
 
-    public static final String SMS_TOKEN_KEY = "sms:code:%s:%s";
-
-    private String appcode;
-
     private String account;
 
     private String token;
@@ -51,8 +45,7 @@ public class CloopenSmsService implements ISimpleSmsService {
 
     private String templateId;
 
-    public CloopenSmsService(String appcode, String account, String token, String appId, String templateId) {
-        this.appcode = appcode;
+    public CloopenSmsService(String account, String token, String appId, String templateId) {
         this.account = account;
         this.token = token;
         this.appId = appId;
@@ -80,37 +73,6 @@ public class CloopenSmsService implements ISimpleSmsService {
     @Override
     public boolean sendRandomCode(String phone, String randomCode, int minutes, Object configs) {
         return sendContents(phone, new String[]{randomCode, String.valueOf(minutes)}, this.account, this.token, this.appId, configs.toString());
-    }
-
-    @Override
-    public boolean sendRandomCodeToRedis(String phone, String randomCode, int minutes){
-        boolean isSend = sendRandomCode(phone, randomCode, minutes);
-        if(isSend){
-            RedisUtil.setEx(String.format(SMS_TOKEN_KEY, appcode, phone), randomCode, minutes, TimeUnit.MINUTES);
-        }
-        return isSend;
-    }
-
-    @Override
-    public boolean sendRandomCodeToRedis(String phone, String randomCode, int minutes, Object configs) {
-        boolean isSend = sendRandomCode(phone, randomCode, minutes, configs);
-        if(isSend){
-            RedisUtil.setEx(String.format(SMS_TOKEN_KEY, appcode, phone), randomCode, minutes, TimeUnit.MINUTES);
-        }
-        return isSend;
-    }
-
-    @Override
-    public boolean validateRandomCodeFromRedis(String phone, String randomCode){
-        String key = String.format(SMS_TOKEN_KEY, appcode, phone);
-        String dbCode = RedisUtil.get(key);
-        if(randomCode.equalsIgnoreCase(dbCode)){
-            RedisUtil.delete(key);
-            return true;
-        }
-        else{
-            return false;
-        }
     }
 
     @Override

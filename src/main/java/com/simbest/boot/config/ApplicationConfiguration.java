@@ -26,7 +26,7 @@ public class ApplicationConfiguration {
     @Bean
     @ConditionalOnMissingBean(value = ISimpleSmsService.class)
     public ISimpleSmsService cloopenSmsService() {
-        return new CloopenSmsService(config.getAppcode(), config.getSmsAccount(), config.getSmsToken(), config.getSmsAppId(), config.getSmsTemplateId());
+        return new CloopenSmsService(config.getSmsAccount(), config.getSmsToken(), config.getSmsAppId(), config.getSmsTemplateId());
     }
 
 }
