@@ -38,12 +38,12 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         this.service = service;
     }
 
-    @PostMapping(value = "/findById")
+    @PostMapping(value = {"/findById", "/sso/findById", "/api/findById"})
     public JsonResponse findById(@RequestParam PK id) {
         return JsonResponse.success(service.findById(id));
     }
 
-    @PostMapping(value = "/findAll")
+    @PostMapping(value = {"/findAll", "/sso/findAll", "/api/findAll"})
     public JsonResponse findAll(@RequestParam(required = false, defaultValue = "1") int page, //
                                 @RequestParam(required = false, defaultValue = "10") int size, //
                                 @RequestParam(required = false) String direction, //
@@ -63,7 +63,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         return JsonResponse.success(pages);
     }
 
-    @PostMapping(value = "/findAllNoPage")
+    @PostMapping(value = {"/findAllNoPage", "/sso/findAllNoPage", "/api/findAllNoPage"})
     public JsonResponse findAllNoPage(@RequestBody T o) {
         // 获取查询条件
         Condition condition = new Condition();
@@ -76,7 +76,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         return JsonResponse.success(datas);
     }
 
-    @PostMapping(value = "/create")
+    @PostMapping(value = {"/create", "/sso/create", "/api/create"})
     public JsonResponse create(@RequestBody T o) {
         try {
             o = service.insert(o);
@@ -86,7 +86,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         }
     }
 
-    @PostMapping(value = "/update")
+    @PostMapping(value = {"/update", "/sso/update", "/api/update"})
     public JsonResponse update(@RequestBody T newObj) {
         T oldObj = service.findById((PK) ObjectUtil.getEntityIdVaue(newObj));
         CustomBeanUtil.copyPropertiesIgnoreNull(newObj, oldObj);
@@ -98,7 +98,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         }
     }
 
-    @PostMapping(value = "/deleteById")
+    @PostMapping(value = {"/deleteById", "/sso/deleteById", "/api/deleteById"})
     public JsonResponse deleteById(@RequestParam PK id) {
         try {
             service.deleteById(id);
@@ -108,7 +108,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         }
     }
 
-    @PostMapping(value = "/delete")
+    @PostMapping(value = {"/delete", "/sso/delete", "/api/delete"})
     public JsonResponse delete(@RequestBody T o) {
         try {
             service.delete(o);
@@ -118,7 +118,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         }
     }
 
-    @PostMapping(value = "/deleteAllByIds")
+    @PostMapping(value = {"/deleteAllByIds", "/sso/deleteAllByIds", "/api/deleteAllByIds"})
     public JsonResponse deleteAllByIds(@RequestBody PK[] ids) {
         try {
             service.deleteAllByIds(Arrays.asList(ids));

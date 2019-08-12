@@ -118,7 +118,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      */
     @ApiOperation(value = "根据id查询字典值", notes = "根据id查询字典值")
     @ApiImplicitParam(name = "id", value = "字典类型ID", dataType = "Integer", paramType = "query")
-    @PostMapping(value = {"/findById","/findById/sso"})
+    @PostMapping(value = {"/findById","/findById/sso","/findById/api"})
     public JsonResponse findById(@RequestParam(required = false) String id) {
         return super.findById( id );
     }
@@ -143,7 +143,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
             @ApiImplicitParam(name = "properties", value = "排序规则（属性名称）", dataType = "String", //
                     paramType = "query") //
     })
-    @PostMapping(value = {"/findAll","/findAll/sso"})
+    @PostMapping(value = {"/findAll","/findAll/sso","/findAll/api"})
     public JsonResponse findAll( @RequestParam(required = false, defaultValue = "1") int page, //
                                  @RequestParam(required = false, defaultValue = "10") int size, //
                                  @RequestParam(required = false) String direction, //
@@ -260,7 +260,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
 
 
     @ApiOperation (value = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
-    @PostMapping(value = {"/findDictValue", "/findDictValue/sso"})
+    @PostMapping(value = {"/findDictValue", "/findDictValue/sso", "/findDictValue/api"})
     public JsonResponse findDictValue(@RequestBody(required = false) SysDictValue sysDictValue){
         return JsonResponse.success(sysDictValueService.findDictValue(sysDictValue));
     }
@@ -270,14 +270,14 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
             @ApiImplicitParam(name = "dictType", value = "字典类型", dataType = "String", paramType = "query", required = true),
             @ApiImplicitParam(name = "name", value = "字典值名称", dataType = "String", paramType = "query", required = true)
     })
-    @PostMapping(value = {"/findByDictTypeAndName", "/findByDictTypeAndName/sso"})
+    @PostMapping(value = {"/findByDictTypeAndName", "/findByDictTypeAndName/sso", "/findByDictTypeAndName/api"})
     public JsonResponse findByDictTypeAndName(@RequestParam String dictType, @RequestParam String name){
         return JsonResponse.success(sysDictValueService.findByDictTypeAndName(dictType, name));
     }
 
 
     @ApiOperation(value = "查看数据字典的所有值", notes = "查看数据字典的所有值")
-    @PostMapping(value = {"/findAllDictValue", "/findAllDictValue/sso"})
+    @PostMapping(value = {"/findAllDictValue", "/findAllDictValue/sso", "/findAllDictValue/api"})
     public JsonResponse findAllDictValue(){
         return JsonResponse.success(sysDictValueService.findAllDictValue());
     }
