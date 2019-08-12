@@ -35,11 +35,12 @@ public class OauthExceptionEntryPoint extends OAuth2AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException)
             throws ServletException {
-        log.error("OAUTH2认证错误，即将返回FORBIDDEN错误，状态码403");
+        log.warn("OAUTH2方式无权限访问，即将返回HttpStatus.FORBIDDEN，状态码【{}】", HttpStatus.FORBIDDEN.value());
         JsonResponse jsonResponse = JsonResponse.builder()
                 .errcode(HttpStatus.FORBIDDEN.value())
-                .message(authException.getMessage())
                 .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.name())
+                .message(authException.getMessage())
                 .timestamp(new Date())
                 .path(request.getServletPath())
                 .build();

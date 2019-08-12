@@ -11,6 +11,7 @@ import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -43,7 +44,7 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException {
-        handleResponse(response, exception);
+        handleResponse(request, response, exception);
     }
 
     @Override
@@ -53,14 +54,14 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
         if(StringUtils.isNotEmpty(username)){
             RedisRetryLoginCache.addTryTimes(username);
         }
-        handleResponse(response, exception);
+        handleResponse(request, response, exception);
     }
 
-    protected void handleResponse(HttpServletResponse response, Exception exception) throws IOException{
+    protected void handleResponse(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException{
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
-        log.error("警告！非法请求尝试访问，已拒绝该请求接入！");
-        JsonResponse jsonResponse = JsonResponse.unauthorized();
+        log.warn("无权限访问，即将返回HttpStatus.UNAUTHORIZED，状态码【{}】", HttpStatus.UNAUTHORIZED.value());
+        JsonResponse jsonResponse = JsonResponse.unauthorized(request, exception);
         if(null != exception) {
             log.warn("登录认证发生【{}】异常，错误信息为【{}】", exception.getClass().getSimpleName(), exception.getMessage());
             if (exception instanceof UsernameNotFoundException || exception.getCause() instanceof UsernameNotFoundException) {

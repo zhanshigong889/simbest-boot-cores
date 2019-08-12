@@ -5,6 +5,8 @@ package com.simbest.boot.security.auth.entryPoint;
 
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.util.json.JacksonUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
@@ -17,6 +19,7 @@ import java.io.IOException;
  * 作者: lishuyi
  * 时间: 2018/12/7  20:02
  */
+@Slf4j
 public class AccessDeniedEntryPoint implements AuthenticationEntryPoint {
 
     @Override
@@ -24,6 +27,7 @@ public class AccessDeniedEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException) throws IOException {
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
-        response.getWriter().print(JacksonUtils.obj2json(JsonResponse.unauthorized()));
+        log.warn("无权限访问，即将返回HttpStatus.UNAUTHORIZED，状态码【{}】", HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().print(JacksonUtils.obj2json(JsonResponse.unauthorized(request, authException)));
     }
 }

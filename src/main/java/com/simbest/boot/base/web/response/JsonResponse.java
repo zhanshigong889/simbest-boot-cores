@@ -7,6 +7,7 @@ package com.simbest.boot.base.web.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.util.DateUtil;
+import com.simbest.boot.util.json.JacksonUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -142,11 +143,22 @@ public class JsonResponse {
     }
 
     public static JsonResponse unauthorized() {
-        return JsonResponse.builder().
+        JsonResponse response =  JsonResponse.builder().
                 errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error(HttpStatus.UNAUTHORIZED.name())
                 .build();
+        log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));
+        return response;
+    }
+
+    public static JsonResponse unauthorized(HttpServletRequest request, Exception exception) {
+        JsonResponse response = unauthorized();
+        response.setMessage(exception.getMessage());
+        response.setTimestamp(new Date());
+        response.setPath(request.getServletPath());
+        log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));
+        return response;
     }
 
     public static JsonResponse authorized() {
