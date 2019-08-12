@@ -34,7 +34,8 @@ public abstract class LogicModel extends SystemModel {
 
     @Setter
     @Getter
-    @Column(nullable = false, updatable = false)
+//    @Column(nullable = false, updatable = false)
+    @Column(nullable = false) //确保可以更新，在逻辑删除数据后，再次恢复数据有可能创建人不一样
     //创建人 CREATOR
     private String creator;
 

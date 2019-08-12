@@ -8,6 +8,7 @@ import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.exceptions.InsertExistObjectException;
 import com.simbest.boot.exceptions.UpdateNotExistObjectException;
 import com.simbest.boot.util.CustomBeanUtil;
+import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.ObjectUtil;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -268,6 +270,7 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
         String userName = SecurityUtils.getCurrentUserName();
         o.setCreator(userName);
         o.setEnabled(true);
+        o.setCreatedTime(DateUtil.date2LocalDateTime(new Date()));
         wrapUpdateInfo(o);
     }
 

@@ -48,7 +48,8 @@ public abstract class SystemModel extends GenericModel {
     //创建时间
     @Setter
     @Getter
-    @Column(nullable = false, updatable = false)
+//    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)//确保可以更新，在逻辑删除数据后，再次恢复数据有可能创建时间不一样
     @CreationTimestamp// 创建时自动更新时间
     @JsonFormat(pattern = ApplicationConstants.FORMAT_DATE_TIME, timezone = ApplicationConstants.FORMAT_TIME_ZONE)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
