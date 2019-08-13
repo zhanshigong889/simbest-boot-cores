@@ -113,10 +113,10 @@ public final class GlobalExceptionRegister {
     }
 
     private static void setCorrectErrorMessage(JsonResponse response, Exception e){
-        if(e.getMessage().contains("ConstraintViolationException")){
+        if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains("ConstraintViolationException")){
             response.setMessage("主键或唯一索引限制异常");
         }
-        if(StringUtils.isEmpty(response.getMessage())){
+        else if(StringUtils.isEmpty(response.getMessage())){
             response.setMessage(e.getMessage());
         }
     }

@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -68,14 +69,26 @@ public class AppFileUtil {
     @Autowired
     private AppConfig config;
 
+    @Autowired
+    private SpringContextUtil springContextUtil;
+
+    private AppFileSftpUtil sftpUtil;
+
     public static StoreLocation serverUploadLocation = null;
 
-    public enum StoreLocation {disk, fastdfs, baidubos}
+    public enum StoreLocation {disk, fastdfs, sftp}
 
     @PostConstruct
     public void init() {
         serverUploadLocation = Enum.valueOf(StoreLocation.class, config.getUploadLocation());
         log.info("应用上传文件将基于【{}】方式保存", serverUploadLocation.name());
+        if(StoreLocation.sftp.equals(serverUploadLocation)) {
+            try {
+                sftpUtil = springContextUtil.getBean(AppFileSftpUtil.class);
+            } catch (NoSuchBeanDefinitionException e) {
+                Exceptions.printException(e);
+            }
+        }
     }
 
     /**
@@ -178,10 +191,10 @@ public class AppFileUtil {
             //特殊字符过滤，防止XSS漏洞
             filename = JacksonUtils.escapeString(filename);
             if(validateUploadFileType(filename)) {
-                log.debug("Will upload file {} to {}", filename, serverUploadLocation);
+                log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, filename);
                 switch (serverUploadLocation) {
                     case disk:
-                        File targetFileDirectory = createUploadStorePath(directory);
+                        File targetFileDirectory = createUploadDirectory(directory);
                         byte[] bytes = multipartFile.getBytes();
                         Path path = Paths.get(targetFileDirectory.getPath() + ApplicationConstants.SLASH + filename);
                         Files.write(path, bytes);
@@ -191,15 +204,20 @@ public class AppFileUtil {
                         filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(multipartFile.getInputStream()),
                                 filename, getFileSuffix(filename));
                         break;
+                    case sftp:
+                        sftpUtil.upload(createUploadDirectoryPath(directory), filename, multipartFile.getBytes());
+                        filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + filename;
+                        break;
                 }
+                Assert.notNull(filePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
                 SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename))
                         .filePath(StringUtils.replace(filePath, ApplicationConstants.SEPARATOR, ApplicationConstants.SLASH))
                         .fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
                                 build();
-                log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
+                log.debug("【{}】上传成功，具体信息如下: 【{}】", filename, sysFile.toString());
                 fileModels.add(sysFile);
             } else {
-                log.error("File {} upload is forbidden type, can not upload to server!", filename);
+                log.warn("【{}】文件类型受限，不允许上传！", filename);
             }
         }
         return fileModels;
@@ -228,9 +246,8 @@ public class AppFileUtil {
             fileName = fileName + ApplicationConstants.DOT + urlFile.getFileSuffix();
             switch (serverUploadLocation) {
                 case disk:
-                    File targetFileDirectory = createUploadStorePath(directory);
-                    File storeFile = new File(targetFileDirectory.getAbsolutePath()
-                            + ApplicationConstants.SLASH + fileName);
+                    File targetFileDirectory = createUploadDirectory(directory);
+                    File storeFile = new File(targetFileDirectory.getAbsolutePath() + ApplicationConstants.SLASH + fileName);
                     FileUtils.touch(storeFile); //覆盖文件
                     FileUtils.copyURLToFile(urlFile.getConnUrl(), storeFile);
                     filePath = storeFile.getAbsolutePath();
@@ -242,6 +259,12 @@ public class AppFileUtil {
                     filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(new FileInputStream(tmpFile)),
                             fileName, getFileSuffix(fileName));
                     fileSize = tmpFile.length();
+                    break;
+                case sftp:
+                    File tmpFile1 = createTempFile();
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile1);
+                    sftpUtil.upload(createUploadDirectoryPath(directory), fileName, tmpFile1);
+                    filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + fileName;
                     break;
             }
             urlConnection.disconnect();
@@ -276,13 +299,17 @@ public class AppFileUtil {
         try {
             switch (serverUploadLocation) {
                 case disk:
-                    File targetFileDirectory = createUploadStorePath(directory);
+                    File targetFileDirectory = createUploadDirectory(directory);
                     Path path = Paths.get(targetFileDirectory.getPath() + ApplicationConstants.SLASH + localFile.getName());
                     Files.write(path, Files.readAllBytes(Paths.get(localFile.getAbsolutePath())));
                     filePath = path.toString();
                     break;
                 case fastdfs:
                     filePath = FastDfsClient.uploadLocalFile(localFile.getAbsolutePath());
+                    break;
+                case sftp:
+                    sftpUtil.upload(createUploadDirectoryPath(directory), fileName, localFile);
+                    filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + fileName;
                     break;
                 default:
                     break;
@@ -363,7 +390,7 @@ public class AppFileUtil {
             baos = new ByteArrayOutputStream(32768);
             switch (serverUploadLocation) {
                 case disk:
-                    File targetFileDirectory = createUploadStorePath(directory);
+                    File targetFileDirectory = createUploadDirectory(directory);
                     File compressedFile = new File(targetFileDirectory.getAbsolutePath() + ApplicationConstants.SLASH + imageFile.getName());
                     log.debug("压缩图片保存路径为 :" + compressedFile.getPath());
                     ios = ImageIO.createImageOutputStream(baos);
@@ -399,6 +426,25 @@ public class AppFileUtil {
                     filePath = FastDfsClient.uploadLocalFile(tmpFile.getAbsolutePath());
                     tmpFile.deleteOnExit();
                     break;
+                case sftp:
+                    ios = ImageIO.createImageOutputStream(baos);
+                    tmpFile = createTempFile(getFileSuffix(imageFile.getName()));
+                    output = new FileImageOutputStream(tmpFile);
+                    writer.setOutput(output);
+                    writer.write(null, new IIOImage(image, null, null), param);
+                    output.flush();
+                    writer.dispose();
+                    ios.flush();
+                    ios.close();
+                    baos.close();
+                    output = null;
+                    writer = null;
+                    ios = null;
+                    baos = null;
+                    sftpUtil.upload(createUploadDirectoryPath(directory), fileName, tmpFile);
+                    filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + fileName;
+                    tmpFile.deleteOnExit();
+                    break;
                 default:
                     break;
             }
@@ -431,11 +477,21 @@ public class AppFileUtil {
         return uploadCompressImage(imageFile, quality, directory);
     }
 
-    public File createUploadStorePath(String directory) throws IOException {
-        String storePath = config.getUploadPath()
-                + ApplicationConstants.SLASH + directory
-                + ApplicationConstants.SLASH + DateUtil.getCurrentStr();
-                //+ ApplicationConstants.SLASH + CodeGenerator.randomInt(4);
+    /**
+     * 设置文件上传路径
+     */
+    public String createUploadDirectoryPath(String directory) {
+        return ApplicationConstants.SLASH + DateUtil.getDateStr("yyyy")
+                + ApplicationConstants.SLASH + DateUtil.getDateStr("MM")
+                + ApplicationConstants.SLASH + config.getAppcode()
+                + ApplicationConstants.SLASH + directory;
+    }
+
+    /**
+     * 设置本地文件上传目录（适用于disk方式）
+     */
+    public File createUploadDirectory(String directory) throws IOException {
+        String storePath = config.getUploadPath() + createUploadDirectoryPath(directory);
         File targetFileDirectory = new File(storePath);
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);
@@ -482,6 +538,11 @@ public class AppFileUtil {
                 break;
             case fastdfs:
                 realFile = downloadFromUrl(getFileUrlFromFastDfs(filePath));
+                break;
+            case sftp:
+                String dir = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SLASH);
+                String filepath = StringUtils.substringAfterLast(filePath, ApplicationConstants.SLASH);
+                realFile = sftpUtil.download2File(dir, filepath, createTempFile(getFileSuffix(filePath)));
                 break;
         }
         return realFile;
@@ -573,6 +634,14 @@ public class AppFileUtil {
                 case fastdfs:
                     try {
                         FastDfsClient.deleteFile(filePath);
+                    } catch (Exception e) {
+                        result = -1;
+                        Exceptions.printException(e);
+                    }
+                    break;
+                case sftp:
+                    try {
+                        sftpUtil.delFile(filePath);
                     } catch (Exception e) {
                         result = -1;
                         Exceptions.printException(e);

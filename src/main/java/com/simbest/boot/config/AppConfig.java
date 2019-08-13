@@ -123,6 +123,7 @@ public class AppConfig {
         log.info("Congratulations------------------------------------------------应用核心配置加载完成");
         log.info("应用注册代码【{}】", appcode);
         log.info("应用访问上下文【{}】", contextPath);
+        log.info("应用获准访问白名单【{}】", whiteHostList);
         log.info("数据库URL【{}】", datasourceUrl);
         log.info("数据库账号【{}】", datasourceUsername);
         log.info("数据库密码【{}】", datasourcePassword);
@@ -137,9 +138,8 @@ public class AppConfig {
         log.info("主数据请求地址【{}】", uumsAddress);
         log.info("门户单点加密令牌【{}】", mochaPortalToken);
         log.info("应用访问地址【{}】", appHostPort);
-        log.info("应用文件上传路径【{}】", uploadPath);
         log.info("应用文件上传方式【{}】", uploadLocation);
-        log.info("应用获准访问白名单【{}】", whiteHostList);
+        log.info("应用文件上传路径【{}】", uploadPath);
     }
 
 }
