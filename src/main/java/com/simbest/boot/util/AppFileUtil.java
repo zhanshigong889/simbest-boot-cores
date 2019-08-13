@@ -53,6 +53,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL;
+import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_ANONYMOUS;
+import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
+
 /**
  * 用途：文件工具类
  * 作者: lishuyi
@@ -212,8 +216,8 @@ public class AppFileUtil {
                 Assert.notNull(filePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
                 SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename))
                         .filePath(StringUtils.replace(filePath, ApplicationConstants.SEPARATOR, ApplicationConstants.SLASH))
-                        .fileSize(multipartFile.getSize()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
-                                build();
+                        .fileSize(multipartFile.getSize()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
+                        .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
                 log.debug("【{}】上传成功，具体信息如下: 【{}】", filename, sysFile.toString());
                 fileModels.add(sysFile);
             } else {
@@ -281,8 +285,8 @@ public class AppFileUtil {
             }
         }
         SysFile sysFile = SysFile.builder().fileName(fileName).fileType(urlFile.getFileSuffix())
-                .filePath(filePath).fileSize(fileSize).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
-                        build();
+                .filePath(filePath).fileSize(fileSize).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
+                .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
         log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
         return sysFile;
     }
@@ -318,8 +322,8 @@ public class AppFileUtil {
             Exceptions.printException(e);
         }
         SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(localFile.getAbsolutePath()))
-                .filePath(filePath).fileSize(localFile.length()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
-                        build();
+                .filePath(filePath).fileSize(localFile.length()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
+                .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
         log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
         return sysFile;
     }
@@ -459,8 +463,8 @@ public class AppFileUtil {
                 }
         }
         SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(imageFile.getAbsolutePath()))
-                .filePath(filePath).fileSize(imageFile.length()).downLoadUrl(SysFileController.DOWNLOAD_URL_DATABASE).
-                        build();
+                .filePath(filePath).fileSize(imageFile.length()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
+                .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
         log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
         return sysFile;
     }

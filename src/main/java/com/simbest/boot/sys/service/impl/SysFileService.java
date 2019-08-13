@@ -68,28 +68,37 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
-//                String profile = springContextUtil.getActiveProfile();
-//                String mobileFilePath = config.getAppHostPort() + sysFile.getFilePath();
-//                if(ApplicationConstants.PRD.equalsIgnoreCase(profile)){
-//                    mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
-//                }
-//                sysFile.setMobileFilePath( mobileFilePath );
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
+                sysFile.setApiFilePath(sysFile.getApiFilePath().concat("?id="+sysFile.getId()));
+                sysFile.setAnonymousFilePath(sysFile.getAnonymousFilePath().concat("?id="+sysFile.getId()));
                 sysFile.setPmInsType(pmInsType);
                 sysFile.setPmInsId(pmInsId);
                 sysFile.setPmInsTypePart(pmInsTypePart);
                 String mobileFilePath = null;
+                String apiFilePath = null;
+                String anonymousFilePath = null;
                 AppFileUtil.StoreLocation serverUploadLocation = Enum.valueOf(AppFileUtil.StoreLocation.class, config.getUploadLocation());
                 switch (serverUploadLocation) {
                     case disk:
                         mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
+                        apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
+                        anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
                         break;
                     case fastdfs:
                         mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
+                        apiFilePath = mobileFilePath;
+                        anonymousFilePath = mobileFilePath;
+                        break;
+                    case sftp:
+                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
+                        apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
+                        anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
                         break;
                 }
                 sysFile.setMobileFilePath( mobileFilePath );
+                sysFile.setApiFilePath(apiFilePath);
+                sysFile.setAnonymousFilePath(anonymousFilePath);
                 super.update(sysFile); //再保存一下更新的值
             }
         } catch (IOException e) {

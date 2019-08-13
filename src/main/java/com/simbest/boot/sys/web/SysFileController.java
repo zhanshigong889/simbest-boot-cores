@@ -66,7 +66,10 @@ public class SysFileController extends LogicController<SysFile, String> {
     public final static String DOWNLOAD_URL = "/download";
     public final static String DOWNLOAD_URL_SSO = "/download/sso";
     public final static String DOWNLOAD_URL_API = "/download/api";
-    public final static String DOWNLOAD_URL_DATABASE = "/sys/file/download";
+    public final static String DOWNLOAD_URL_ANONYMOUSI = "/download/anonymous";
+    public final static String DOWNLOAD_FULL_URL = "/sys/file/download";
+    public final static String DOWNLOAD_FULL_URL_API = "/sys/file/download/api";
+    public final static String DOWNLOAD_FULL_URL_ANONYMOUS = "/sys/file/download/anonymous";
     public final static String OPEN_URL = "/open";
     public final static String OPEN_URL_SSO = "/open/sso";
     public final static String OPEN_URL_API = "/open/api";
@@ -165,7 +168,7 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @throws UnsupportedEncodingException
      */
     @ApiOperation(value = "下载文件")
-    @GetMapping(value = {DOWNLOAD_URL, DOWNLOAD_URL_SSO, DOWNLOAD_URL_API})
+    @GetMapping(value = {DOWNLOAD_URL, DOWNLOAD_URL_SSO, DOWNLOAD_URL_API, DOWNLOAD_URL_ANONYMOUSI})
     public ResponseEntity<?> download(HttpServletRequest request, @RequestParam("id") String id) throws FileNotFoundException, UnsupportedEncodingException {
         SysFile sysFile = fileService.findById(id);
         HttpHeaders headers = new HttpHeaders();

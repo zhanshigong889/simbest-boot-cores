@@ -80,4 +80,13 @@ public class SysFile extends LogicModel {
     @Column(length = 500)
     private String mobileFilePath;
 
+    //api端使用
+    @Column(length = 500)
+    private String apiFilePath;
+
+    //匿名端使用
+    @Column(length = 500)
+    private String anonymousFilePath;
+
+
 }
