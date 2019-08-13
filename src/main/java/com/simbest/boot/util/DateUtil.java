@@ -305,7 +305,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前日31
+     * @return 当前日28
      */
     public static String getCurrSimpleDay() {
         Calendar cal = Calendar.getInstance();
@@ -398,6 +398,44 @@ public final class DateUtil {
         DateTime lastday = dt.dayOfMonth().withMaximumValue();
         return lastday.toString(datePattern1);
 	}
+
+    /**
+     * 本周周第一天
+     */
+    public static String getCurrWeekFirstDay() {
+        DateTime dt = new DateTime();
+        DateTime firstday = dt.dayOfWeek().withMinimumValue();
+        return firstday.toString(datePattern1);
+    }
+
+    /**
+     * 本周最后一天
+     */
+    public static String getCurrWeekLastDay() {
+        DateTime dt = new DateTime();
+        DateTime lastday = dt.dayOfWeek().withMaximumValue();
+        return lastday.toString(datePattern1);
+    }
+
+    /**
+     * 下周第一天
+     */
+    public static String getNextWeekFirstDay() {
+        DateTime dt = new DateTime();
+        dt = dt.plusWeeks(1);
+        DateTime firstday = dt.dayOfWeek().withMinimumValue();
+        return firstday.toString(datePattern1);
+    }
+
+    /**
+     * 下周最后一天
+     */
+    public static String getNextWeekLastDay() {
+        DateTime dt = new DateTime();
+        dt = dt.plusWeeks(1);
+        DateTime lastday = dt.dayOfWeek().withMaximumValue();
+        return lastday.toString(datePattern1);
+    }
 
 	/**
 	 * 当前时间向前增加天数
