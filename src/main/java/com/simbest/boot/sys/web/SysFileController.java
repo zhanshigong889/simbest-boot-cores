@@ -59,13 +59,17 @@ public class SysFileController extends LogicController<SysFile, String> {
 
     public final static String UPLOAD_PROCESS_FILES_URL = "/uploadProcessFiles";
     public final static String UPLOAD_PROCESS_FILES_URL_SSO = "/uploadProcessFiles/sso";
+    public final static String UPLOAD_PROCESS_FILES_URL_API = "/uploadProcessFiles/api";
     public final static String UPLOAD_PROCESS_FILES_URL_REST = "/uploadProcessFiles/rest";
     public final static String UPLOAD_PROCESS_FILES_URL_REST_SSO = "/uploadProcessFiles/rest/sso";
+    public final static String UPLOAD_PROCESS_FILES_URL_REST_API = "/uploadProcessFiles/rest/api";
     public final static String DOWNLOAD_URL = "/download";
     public final static String DOWNLOAD_URL_SSO = "/download/sso";
+    public final static String DOWNLOAD_URL_API = "/download/api";
     public final static String DOWNLOAD_URL_DATABASE = "/sys/file/download";
     public final static String OPEN_URL = "/open";
     public final static String OPEN_URL_SSO = "/open/sso";
+    public final static String OPEN_URL_API = "/open/api";
     public final static String DELETE_URL = "/deleteById";
 
     @Autowired
@@ -116,7 +120,7 @@ public class SysFileController extends LogicController<SysFile, String> {
 //    }
 
     @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
-    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO})
+    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO, UPLOAD_PROCESS_FILES_URL_API})
     public void uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonResponse jsonResponse = doUploadFile(request, response);
         String result = "<script type=\"text/javascript\">parent.result="+JacksonUtils.obj2json(jsonResponse)+"</script>";
@@ -128,7 +132,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     }
 
     @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
-    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL_REST, UPLOAD_PROCESS_FILES_URL_REST_SSO})
+    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL_REST, UPLOAD_PROCESS_FILES_URL_REST_SSO, UPLOAD_PROCESS_FILES_URL_REST_API})
     public ResponseEntity<?> uploadFileRest(HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonResponse jsonResponse = doUploadFile(request, response);
         return new ResponseEntity(jsonResponse, HttpStatus.OK);
@@ -161,7 +165,7 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @throws UnsupportedEncodingException
      */
     @ApiOperation(value = "下载文件")
-    @GetMapping(value = {DOWNLOAD_URL, DOWNLOAD_URL_SSO})
+    @GetMapping(value = {DOWNLOAD_URL, DOWNLOAD_URL_SSO, DOWNLOAD_URL_API})
     public ResponseEntity<?> download(HttpServletRequest request, @RequestParam("id") String id) throws FileNotFoundException, UnsupportedEncodingException {
         SysFile sysFile = fileService.findById(id);
         HttpHeaders headers = new HttpHeaders();
@@ -196,7 +200,7 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @return
      * @throws Exception
      */
-    @GetMapping(value = {OPEN_URL, OPEN_URL_SSO})
+    @GetMapping(value = {OPEN_URL, OPEN_URL_SSO, OPEN_URL_API})
     public String open(@RequestParam("id") String id) throws Exception{
         SysFile sysFile = fileService.findById(id);
         log.debug("Want access file online url is {}", sysFile.getFilePath());
