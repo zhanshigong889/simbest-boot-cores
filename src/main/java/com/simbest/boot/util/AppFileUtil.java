@@ -535,7 +535,7 @@ public class AppFileUtil {
      */
     public File getFileFromSystem(String filePath){
         File realFile = null;
-        log.debug("Want to get file {} from {}", filePath, serverUploadLocation);
+        log.debug("即将以【{}】方式读取文件【{}】",serverUploadLocation, filePath);
         switch (serverUploadLocation) {
             case disk:
                 realFile = new File(filePath);

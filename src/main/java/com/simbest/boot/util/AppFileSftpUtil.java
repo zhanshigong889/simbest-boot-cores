@@ -17,17 +17,22 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 /**
@@ -83,13 +88,15 @@ public class AppFileSftpUtil {
     public void connect() {
         try {
             JSch jsch = new JSch();
+            log.debug("即将通过用户名【{}】、密码【{}】、私钥文件【{}】、私钥密码【{}】连接SFTP服务器主机【{}】端口【{}】", username,password,keyFilePath,passphrase,host,port);
             if (StringUtils.isNotEmpty(keyFilePath)) {
+                log.debug("即将尝试通过【{}】读取私钥", keyFilePath);
                 if (StringUtils.isNotEmpty(passphrase)) {
-                    jsch.addIdentity(keyFilePath, passphrase);// 设置私钥
+                    // 设置私钥
+                    jsch.addIdentity(null, BootAppFileReader.getClasspathFileToString(keyFilePath).getBytes(), null, passphrase.getBytes());
                 } else {
-                    jsch.addIdentity(ResourceUtils.getFile(keyFilePath).getAbsolutePath());// 设置私钥
+                    jsch.addIdentity(null, BootAppFileReader.getClasspathFileToString(keyFilePath).getBytes(), null, null);
                 }
-                log.debug("连接sftp，私钥文件路径：" + keyFilePath);
             }
             log.debug("SFTP 主机: " + host + "; 用户名:" + username);
             sshSession = jsch.getSession(username, host, port);
