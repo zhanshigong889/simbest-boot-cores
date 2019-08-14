@@ -30,6 +30,10 @@ public class WxmaAuthenticationCredentials implements Serializable {
 
     private String wxcode;  //小程序登录code
 
+    private String encryptedData;  //小程序登录encryptedData
+
+    private String iv;  //小程序登录iv
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
