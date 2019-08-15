@@ -556,5 +556,21 @@ public class UumsSysUserInfoController {
                                                 @RequestParam(required = false) String searchFields ) {
         return uumsSysUserinfoApi.findUserOrgDim(page,size,direction,properties,appcode,orgCode,searchFields);
     }
+
+    /**
+     * 半展出人所在的组织树，除了人所在的组织是展开的，其他都是闭合的
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    @ApiOperation(value = "半展出人所在的组织树，除了人所在的组织是展开的，其他都是闭合的", notes = "半展出人所在的组织树，除了人所在的组织是展开的，其他都是闭合的",tags={"人员api 根据组织查"})
+    @ApiImplicitParams ({
+            @ApiImplicitParam (name = "appcode", value = "应用编码", dataType = "String", paramType = "query")
+    })
+    @PostMapping("/findUserTreeBz")
+    public JsonResponse findUserTreeBz( @RequestBody(required = false) Map<String,Object> mapParam,
+                                        @RequestParam(required = false) String appcode) {
+        return JsonResponse.success( uumsSysUserinfoApi.findUserTreeBz(mapParam,appcode) );
+    }
 }
 

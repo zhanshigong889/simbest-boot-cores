@@ -4,8 +4,9 @@ package com.simbest.boot.security.auth.controller;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.IUser;
+import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -44,6 +45,9 @@ public class UumsHttpValidationAuthenticationController {
     @Autowired
     private IAuthService authService;
 
+    @Autowired
+    private UumsSysUserinfoApi uumsSysUserinfoApi;
+
     @ApiOperation(value = "从UUMS认证登录", notes = "应用向远程UUMS发起认证请求")
     @ApiImplicitParams({@ApiImplicitParam(name = "username", value = "用户账号关键字", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String", paramType = "query"),
@@ -56,6 +60,10 @@ public class UumsHttpValidationAuthenticationController {
                 UsernamePasswordAuthenticationToken passwordToken = new UsernamePasswordAuthenticationToken(username, rsaEncryptor.decrypt(password));
                 Authentication authentication = authenticationManager.authenticate(passwordToken);
                 if(authentication.isAuthenticated()) {
+                    SimpleUser simpleUser = new SimpleUser();
+                    simpleUser.setUsername( username );
+                    simpleUser.setReserve4( password );
+                    uumsSysUserinfoApi.update( username,IAuthService.KeyType.username, "uums",simpleUser);
                     return JsonResponse.success(authentication.getPrincipal());
                 }
                 else {

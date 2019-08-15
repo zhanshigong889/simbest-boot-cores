@@ -56,6 +56,24 @@ public class UumsSysUserinfoApi {
     @Autowired
     private ApiRequestHandle<SimpleUser> simpleUserApiHandle;
 
+    @Autowired
+    private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
+
+    /**
+     * 插入reserve4
+     * @param password
+     * @return
+     */
+    public JsonResponse insertReserve4(String username,String password){
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "insertReserve4")
+                .param(username, encryptor.encrypt(username))
+                .param("password",password)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+
     /**
      * 不登录更新用户信息
      * @param keyword
@@ -853,6 +871,24 @@ public class UumsSysUserinfoApi {
                 .param("searchFields", searchFields)
                 .asBean(JsonResponse.class);
         return response;
+    }
+
+    /**
+     * 半展出人所在的组织树，除了人所在的组织是展开的，其他都是闭合的
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public List<UserOrgTree> findUserTreeBz(Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserTreeBz"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return userOrgTreeApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<UserOrgTree>>(){});
     }
 
 }
