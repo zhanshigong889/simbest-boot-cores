@@ -11,6 +11,7 @@ import com.simbest.boot.security.auth.oauth2.OauthExceptionEntryPoint;
 import com.simbest.boot.security.auth.oauth2.UumsTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaBindTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaCodeTokenGranter;
+import com.simbest.boot.security.auth.oauth2.WxmaMiniTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -167,6 +168,9 @@ public class ApiSecurityConfigurer {
                     endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
             //追加wxmacode方式的认证
             granters.add(new WxmaCodeTokenGranter(authenticationManager, endpoints.getTokenServices(),
+                    endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+            //追加wxmamini方式的认证
+            granters.add(new WxmaMiniTokenGranter(authenticationManager, endpoints.getTokenServices(),
                     endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
             return new CompositeTokenGranter(granters);
         }
