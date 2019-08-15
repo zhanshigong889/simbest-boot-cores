@@ -1,6 +1,7 @@
 package com.simbest.boot.security.auth.controller;
 
 
+import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.security.IAuthService;
@@ -63,7 +64,12 @@ public class UumsHttpValidationAuthenticationController {
                     SimpleUser simpleUser = new SimpleUser();
                     simpleUser.setUsername( username );
                     simpleUser.setReserve4( password );
-                    uumsSysUserinfoApi.update( username,IAuthService.KeyType.username, "uums",simpleUser);
+                    try{
+                        uumsSysUserinfoApi.update( username,IAuthService.KeyType.username, appcode,simpleUser);
+                    }catch ( Exception e ){
+                        log.error( "修改密码失败!" );
+                        Exceptions.printException( e );
+                    }
                     return JsonResponse.success(authentication.getPrincipal());
                 }
                 else {
