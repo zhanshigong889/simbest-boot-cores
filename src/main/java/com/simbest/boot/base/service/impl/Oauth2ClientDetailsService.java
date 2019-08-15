@@ -29,6 +29,11 @@ public class Oauth2ClientDetailsService extends GenericService<Oauth2ClientDetai
 
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-        return repository.findByClientId(clientId);
+        ClientDetails clientDetails = repository.findByClientId(clientId);
+        if(null == clientDetails){
+            log.error("无法获取到OAuth2的信息，目前接收的clientId为【{}】，请检查数据库oauth2client_details配置和请求参数", clientId);
+        }
+        return clientDetails;
     }
+
 }

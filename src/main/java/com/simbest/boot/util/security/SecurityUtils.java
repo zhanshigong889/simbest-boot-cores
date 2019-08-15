@@ -8,6 +8,7 @@ import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.util.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * 作者: lishuyi
  * 时间: 2018/1/31  15:49
  */
+@Slf4j
 public final class SecurityUtils {
 
     private SecurityUtils() {
@@ -57,9 +59,13 @@ public final class SecurityUtils {
         if (authentication != null) {
             if (authentication.getPrincipal() instanceof IUser) {
                 return (IUser) authentication.getPrincipal();
-            } else
+            }
+            else {
+                log.error("认证通过，但返回认证主体不是IUser，请检查Redis缓存，目前返回的主题类型为【{}】", authentication.getPrincipal().getClass());
                 return null;
+            }
         }
+        log.error("认证未通过，无法获取认证主体，请检查代码Session或API的access_token");
         return null;
     }
 
