@@ -29,7 +29,8 @@ import java.util.Map;
  * 作者: lishuyi
  * 时间: 2019/3/27  16:57
  *
- * 请求URL：http://10.87.57.23:6004/ischool/oauth/token?grant_type=wxmacode&scope=all&client_id=wxma_client&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=ischool&appid=wxa0d10b26a0d997c1&wxcode=微信code&encryptedData=微信encryptedData&iv=微信iv
+ * 请求URL：http://10.87.57.23:6004/ischool/oauth/token?grant_type=wxmamini&scope=all&client_id=wxma_client&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=ischool&appid=wxa0d10b26a0d997c1&wxcode=微信换取的code&encryptedData=微信encryptedData&iv=微信iv&forceCreate=false
+ *
  */
 public class WxmaMiniTokenGranter extends AbstractTokenGranter {
 
@@ -56,9 +57,10 @@ public class WxmaMiniTokenGranter extends AbstractTokenGranter {
         String wxcode = parameters.get("wxcode");
         String encryptedData = parameters.get("encryptedData");
         String iv = parameters.get("iv");
+        Boolean forceCreate = Boolean.valueOf(parameters.get("forceCreate"));
 
         Authentication userAuth = new WxmaMiniAuthenticationToken(appid, WxmaAuthenticationCredentials.builder()
-                .appcode(appcode).appid(appid).wxcode(wxcode).encryptedData(encryptedData).iv(iv).build());
+                .appcode(appcode).appid(appid).wxcode(wxcode).encryptedData(encryptedData).iv(iv).forceCreate(forceCreate).build());
         ((AbstractAuthenticationToken) userAuth).setDetails(parameters);
         try {
             userAuth = authenticationManager.authenticate(userAuth);

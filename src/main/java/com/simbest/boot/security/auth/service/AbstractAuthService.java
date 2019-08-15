@@ -151,7 +151,6 @@ public abstract class AbstractAuthService implements IAuthService {
         return userDetails;
     }
 
-
     @Override
     public void bindUserOpenid(String preferredMobile, String openid, String appcode){
         org.springframework.util.Assert.notNull(preferredMobile, "preferredMobile不可为空");
@@ -171,4 +170,16 @@ public abstract class AbstractAuthService implements IAuthService {
             }
         }
     }
+
+    @Override
+    public IUser createUser(String keyword, IAuthService.KeyType keytype ,String appcode, SimpleUser user){
+        return null;
+    }
+
+    @Override
+    public
+    IUser updateUser(String keyword, IAuthService.KeyType keytype, String appcode, SimpleUser user){
+        return userinfoApi.update(keyword, keytype, appcode, user);
+    }
+
 }

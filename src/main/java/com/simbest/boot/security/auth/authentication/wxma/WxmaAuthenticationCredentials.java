@@ -34,6 +34,8 @@ public class WxmaAuthenticationCredentials implements Serializable {
 
     private String iv;  //小程序登录iv
 
+    private Boolean forceCreate; //是否为未登记手机号码用户创建账号
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);

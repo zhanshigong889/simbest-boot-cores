@@ -29,7 +29,8 @@ import java.util.Map;
  * 作者: lishuyi
  * 时间: 2019/3/27  16:57
  *
- * 请求URL：http://10.87.57.23:6004/ischool/oauth/token?grant_type=wxmabind&scope=all&client_id=wxma_client&client_secret=e10adc3949ba59abbe56e057f20f883e&preferredMobile=13111111111&appcode=ischool&appid=wxa0d10b26a0d997c1&smscode=测试环境固定1111&wxcode=微信换取的code
+ * 请求URL：http://10.87.57.23:6004/ischool/oauth/token?grant_type=wxmabind&scope=all&client_id=wxma_client&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=ischool&appid=wxa0d10b26a0d997c1&wxcode=微信换取的code&preferredMobile=13111111111&smscode=测试环境固定1111
+ *
  */
 public class WxmaBindTokenGranter extends AbstractTokenGranter {
 

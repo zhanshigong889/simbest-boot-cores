@@ -16,6 +16,8 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 @JsonSerialize(using = CustomOauthExceptionSerializer.class)
 public class CustomOauthException extends OAuth2Exception {
 
+    public static final int OAUTH2_ERROR = 520;
+
     public CustomOauthException(String msg) {
         super(msg);
     }
@@ -30,12 +32,12 @@ public class CustomOauthException extends OAuth2Exception {
      */
     @Override
     public int getHttpErrorCode() {
-        return 520;
+        return OAUTH2_ERROR;
     }
 
     @Override
     public String getSummary() {
-        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码520");
+        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】", OAUTH2_ERROR);
         return super.getSummary();
     }
 
