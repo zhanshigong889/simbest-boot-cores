@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.oauth2;
 
 import com.simbest.boot.security.auth.authentication.wxma.WxmaAuthenticationCredentials;
 import com.simbest.boot.security.auth.authentication.wxma.WxmaBindAuthenticationToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +33,7 @@ import java.util.Map;
  * 请求URL：http://10.87.57.23:6004/ischool/oauth/token?grant_type=wxmabind&scope=all&client_id=wxma_client&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=ischool&appid=wxa0d10b26a0d997c1&wxcode=微信换取的code&preferredMobile=13111111111&smscode=测试环境固定1111
  *
  */
+@Slf4j
 public class WxmaBindTokenGranter extends AbstractTokenGranter {
 
     private static final String GRANT_TYPE = "wxmabind";
@@ -65,15 +67,20 @@ public class WxmaBindTokenGranter extends AbstractTokenGranter {
             userAuth = authenticationManager.authenticate(userAuth);
         }
         catch (AccountStatusException ase) {
-            //covers expired, locked, disabled cases (mentioned in section 5.2, draft 31)
+            log.error("Token认证发生异常【{}】", ase.getMessage());
             throw new InvalidGrantException(ase.getMessage());
         }
-        catch (BadCredentialsException e) {
-            // If the username/password are wrong the spec says we should send 400/invalid grant
+        catch (BadCredentialsException be) {
+            log.error("Token认证发生异常【{}】", be.getMessage());
+            throw new InvalidGrantException(be.getMessage());
+        }
+        catch (Exception e) {
+            log.error("Token认证发生异常【{}】", e.getMessage());
             throw new InvalidGrantException(e.getMessage());
         }
         if (userAuth == null || !userAuth.isAuthenticated()) {
-            throw new InvalidGrantException(String.format("微信小程序认证%s失败", preferredMobile));
+            log.error("认证主体为空或校验失败【{}】", userAuth);
+            throw new InvalidGrantException(String.format("微信小程序认证%s失败", wxcode));
         }
 
         OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
