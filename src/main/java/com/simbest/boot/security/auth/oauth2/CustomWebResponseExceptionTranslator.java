@@ -4,6 +4,7 @@
 package com.simbest.boot.security.auth.oauth2;
 
 import com.simbest.boot.constants.ApplicationConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,18 @@ import org.springframework.stereotype.Component;
  * 作者: lishuyi
  * 时间: 2018/8/29  21:28
  */
+@Slf4j
 @Component
 public class CustomWebResponseExceptionTranslator extends DefaultWebResponseExceptionTranslator {
 
+    /**
+     * 异常将由CustomOauthExceptionSerializer进行处理
+     * @param e
+     * @return
+     */
     @Override
     public ResponseEntity<OAuth2Exception> translate(Exception e) {
+        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息【{}】", e.getMessage());
         if(e instanceof OAuth2Exception) {
             OAuth2Exception oAuth2Exception = (OAuth2Exception) e;
             if(StringUtils.isNotEmpty(oAuth2Exception.getMessage())){

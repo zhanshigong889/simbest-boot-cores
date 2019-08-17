@@ -51,6 +51,12 @@ public class WxmaMiniTokenGranter extends AbstractTokenGranter {
         this.authenticationManager = authenticationManager;
     }
 
+    /**
+     * 抛出的异常将在CustomWebResponseExceptionTranslator进行处理
+     * @param client
+     * @param tokenRequest
+     * @return
+     */
     @Override
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         Map<String, String> parameters = new LinkedHashMap<String, String>(tokenRequest.getRequestParameters());

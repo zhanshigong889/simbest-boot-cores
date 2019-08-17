@@ -4,8 +4,6 @@
 package com.simbest.boot.security.auth.oauth2;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.simbest.boot.base.web.response.JsonResponse;
-import com.simbest.boot.util.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -19,15 +17,15 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 @JsonSerialize(using = CustomOauthExceptionSerializer.class)
 public class CustomOauthException extends OAuth2Exception {
 
-    public static final String OAUTH2_LOGIN_ERROR = "520"; //登录失败默认返回码，小程序使用SessionKey解密用户手机号失败
+    public static final String OAUTH2_LOGIN_ERROR = "520"; //1、小程序code获取openid失败返回码，2、小程序使用SessionKey解密用户手机号失败返回码
 
-    public static final String OAUTH2_MINI_ERROR = "530"; //微信小程序，小程序解析手机号成功后，没有注册用户可以绑定
+    public static final String OAUTH2_MINI_ERROR = "530"; //小程序解析手机号成功后，手机号数据库用户不存在返回码
 
     private String httpErrorCode;
 
     public CustomOauthException(String msg) {
         super(msg);
-        this.httpErrorCode = OAUTH2_LOGIN_ERROR;
+        this.httpErrorCode = String.valueOf(HttpStatus.FORBIDDEN.value());
     }
 
     public CustomOauthException(String msg, String httpErrorCode) {
@@ -40,8 +38,8 @@ public class CustomOauthException extends OAuth2Exception {
      *
      * 1、没有access_token访问API时，返回403
      * 2、微信token过期，返回403
-     * 3、小程序使用SessionKey解密用户手机号失败，返回520
-     * 4、小程序解析手机号成功后，没有注册用户可以绑定，返回530
+     * 3、小程序code获取openid失败，或者使用SessionKey解密用户手机号失败，返回520
+     * 4、小程序解析手机号成功后，手机号数据库用户不存在返回码，返回530
      * @return
      */
     @Override
@@ -51,14 +49,9 @@ public class CustomOauthException extends OAuth2Exception {
 
     @Override
     public String getSummary() {
-        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】", httpErrorCode);
-//        return super.getSummary();
-        JsonResponse response =  JsonResponse.builder().
-                errcode(Integer.valueOf(httpErrorCode))
-                .status(HttpStatus.FORBIDDEN.value())
-                .error(HttpStatus.FORBIDDEN.name())
-                .build();
-        return JacksonUtils.obj2json(response);
+        String result = super.getSummary();
+        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】，错误信息【{}】", httpErrorCode, result);
+        return result;
     }
 
 }
