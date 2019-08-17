@@ -12,6 +12,8 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.stereotype.Component;
 
+import static com.simbest.boot.security.auth.oauth2.CustomOauthException.OAUTH2_FORBIDDEN;
+
 /**
  * 用途：自定义OAUTH2受保护的资源请求异常
  * 作者: lishuyi
@@ -45,7 +47,7 @@ public class CustomWebResponseExceptionTranslator extends DefaultWebResponseExce
         }
         else {
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(Integer.parseInt(OAUTH2_FORBIDDEN))
                     .body(new OAuth2Exception(e.getMessage()));
         }
     }

@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
+import static com.simbest.boot.security.auth.oauth2.CustomOauthException.OAUTH2_FORBIDDEN;
+
 /**
  * 用途：自定义OAUTH2受保护的资源请求错误入口
  * 作者: lishuyi
@@ -35,9 +37,9 @@ public class OauthExceptionEntryPoint extends OAuth2AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException)
             throws ServletException {
-        log.warn("OAUTH2方式无权限访问，即将返回HttpStatus.FORBIDDEN，状态码【{}】，错误信息【{}】", HttpStatus.FORBIDDEN.value(), authException.getMessage());
+        log.warn("OAUTH2方式无权限访问，即将返回HttpStatus.FORBIDDEN，状态码【{}】，错误信息【{}】", OAUTH2_FORBIDDEN, authException.getMessage());
         JsonResponse jsonResponse = JsonResponse.builder()
-                .errcode(HttpStatus.FORBIDDEN.value())
+                .errcode(Integer.parseInt(OAUTH2_FORBIDDEN))
                 .status(HttpStatus.FORBIDDEN.value())
                 .error(HttpStatus.FORBIDDEN.name())
                 .message(authException.getMessage())

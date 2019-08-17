@@ -5,7 +5,6 @@ package com.simbest.boot.security.auth.oauth2;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 
 /**
@@ -17,15 +16,23 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 @JsonSerialize(using = CustomOauthExceptionSerializer.class)
 public class CustomOauthException extends OAuth2Exception {
 
-    public static final String OAUTH2_LOGIN_ERROR = "520"; //1、小程序code获取openid失败返回码，2、小程序使用SessionKey解密用户手机号失败返回码
+    //1、小程序code获取openid失败返回码
+    //2、小程序通过openid获取用户信息失败
+    //3、小程序使用SessionKey解密用户手机号失败返回码
+    public static final String OAUTH2_LOGIN_ERROR = "520";
 
-    public static final String OAUTH2_MINI_ERROR = "530"; //小程序解析手机号成功后，手机号数据库用户不存在返回码
+    //小程序解析手机号成功后，手机号数据库用户不存在返回码
+    public static final String OAUTH2_MINI_ERROR = "530";
+
+    //没有access_token访问API时，返回403
+    //access_token过期时，返回403
+    public static final String OAUTH2_FORBIDDEN = "403";
 
     private String httpErrorCode;
 
     public CustomOauthException(String msg) {
         super(msg);
-        this.httpErrorCode = String.valueOf(HttpStatus.FORBIDDEN.value());
+        this.httpErrorCode = OAUTH2_FORBIDDEN;
     }
 
     public CustomOauthException(String msg, String httpErrorCode) {
@@ -35,11 +42,6 @@ public class CustomOauthException extends OAuth2Exception {
 
     /**
      * 与OauthExceptionEntryPoint配合
-     *
-     * 1、没有access_token访问API时，返回403
-     * 2、微信token过期，返回403
-     * 3、小程序code获取openid失败，或者使用SessionKey解密用户手机号失败，返回520
-     * 4、小程序解析手机号成功后，手机号数据库用户不存在返回码，返回530
      * @return
      */
     @Override
