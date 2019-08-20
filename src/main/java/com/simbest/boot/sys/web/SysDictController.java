@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.simbest.boot.base.web.response.JsonResponse.SUCCESS_CODE;
+import static com.simbest.boot.constants.ApplicationConstants.MSG_ERRO;
+import static com.simbest.boot.constants.ApplicationConstants.MSG_SUCCESS;
+
 /**
  * 用途：数据字典控制器
  * 作者: zlxtk
@@ -47,7 +51,13 @@ public class SysDictController extends LogicController<SysDict, String> {
     //@PreAuthorize ("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @ApiOperation(value = "新增一个字典类型", notes = "新增一个字典类型")
     public JsonResponse create(@RequestBody(required = false) SysDict sysDict) {
-        return super.create( sysDict );
+        JsonResponse response = super.create( sysDict );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -59,7 +69,13 @@ public class SysDictController extends LogicController<SysDict, String> {
     //@PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @ApiOperation(value = "修改一个字典类型", notes = "修改一个字典类型")
     public JsonResponse update( @RequestBody(required = false) SysDict sysDict) {
-        return super.update(sysDict );
+        JsonResponse response = super.update(sysDict );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -71,7 +87,13 @@ public class SysDictController extends LogicController<SysDict, String> {
     @ApiOperation(value = "根据id删除字典类型", notes = "根据id删除字典类型")
     @ApiImplicitParam(name = "id", value = "字典类型ID",  dataType = "String", paramType = "query")
     public JsonResponse deleteById(@RequestParam(required = false) String id) {
-        return super.deleteById( id );
+        JsonResponse response = super.deleteById( id );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -81,7 +103,13 @@ public class SysDictController extends LogicController<SysDict, String> {
      */
     @ApiOperation(value = "先修改再逻辑删除字典类型", notes = "先修改再逻辑删除字典类型")
     public JsonResponse delete(@RequestBody(required = false) SysDict sysDict) {
-        return super.delete(sysDict);
+        JsonResponse response = super.delete(sysDict);
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -92,7 +120,13 @@ public class SysDictController extends LogicController<SysDict, String> {
     //@PreAuthorize("hasAuthority('ROLE_SUPER')")  // 指定角色权限才能操作方法
     @ApiOperation(value = "批量逻辑删除字典类型", notes = "批量逻辑删除字典类型")
     public JsonResponse deleteAllByIds(@RequestBody(required = false) String[] ids) {
-        return  super.deleteAllByIds(ids);
+        JsonResponse response = super.deleteAllByIds(ids);
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -106,7 +140,13 @@ public class SysDictController extends LogicController<SysDict, String> {
             @ApiImplicitParam(name = "enabled", value = "是否可用", required = true, dataType = "Boolean", paramType = "query")
     })
     public JsonResponse updateEnable(@RequestParam(required = false) String id, @RequestParam(required = false) Boolean enabled) {
-        return  super.updateEnable( id,enabled );
+        JsonResponse response = super.updateEnable( id,enabled );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     //批量修改可见
@@ -120,7 +160,13 @@ public class SysDictController extends LogicController<SysDict, String> {
     @ApiImplicitParam(name = "id", value = "字典类型ID", dataType = "String", paramType = "query")
     @PostMapping(value = {"/findById","/findById/sso"})
     public JsonResponse findById(@RequestParam(required = false) String id) {
-        return super.findById( id );
+        JsonResponse response = super.findById( id );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -182,7 +228,7 @@ public class SysDictController extends LogicController<SysDict, String> {
         dict.setParentId(dict.getId());
         dict.setId(null);
         SysDict newDict = sysDictService.insert(dict);
-        return JsonResponse.defaultSuccessResponse();
+        return JsonResponse.success(null, MSG_SUCCESS);
     }
 
 
@@ -194,7 +240,7 @@ public class SysDictController extends LogicController<SysDict, String> {
     @PostMapping(value = "/listJson")
     public JsonResponse listJson() {
         List<SysDict> list = sysDictService.findByEnabled(true);
-        return JsonResponse.builder().errcode(JsonResponse.SUCCESS_CODE).message("OK").data(list).build();
+        return JsonResponse.builder().errcode(SUCCESS_CODE).message(MSG_SUCCESS).data(list).build();
     }
 
 

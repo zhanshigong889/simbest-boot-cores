@@ -93,4 +93,7 @@ public class ApplicationConstants {
     public final static String  MASTER_LOCK = "master_lock";
 
     public static final String ADMINISTRATOR = "hadmin";
+
+    public static final String MSG_SUCCESS = "操作成功";
+    public static final String MSG_ERRO = "操作失败";
 }

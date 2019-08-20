@@ -13,9 +13,16 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
+import static com.simbest.boot.base.web.response.JsonResponse.SUCCESS_CODE;
+import static com.simbest.boot.constants.ApplicationConstants.MSG_ERRO;
+import static com.simbest.boot.constants.ApplicationConstants.MSG_SUCCESS;
 
 /**
  * 用途：数据字典值控制器
@@ -47,7 +54,13 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     //@PreAuthorize ("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @ApiOperation(value = "新增一个字典值", notes = "新增一个字典值")
     public JsonResponse create(@RequestBody(required = false) SysDictValue sysDictValue) {
-        return super.create( sysDictValue );
+        JsonResponse response = super.create( sysDictValue );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -59,7 +72,13 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     //@PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @ApiOperation(value = "修改一个字典值", notes = "修改一个字典值")
     public JsonResponse update( @RequestBody(required = false) SysDictValue sysDictValue) {
-        return super.update(sysDictValue );
+        JsonResponse response = super.update(sysDictValue );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -71,7 +90,13 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     @ApiOperation(value = "根据id删除字典值", notes = "根据id删除字典值")
     @ApiImplicitParam (name = "id", value = "字典值ID",  dataType = "Integer", paramType = "query")
     public JsonResponse deleteById(@RequestParam(required = false) String id) {
-        return super.deleteById( id );
+        JsonResponse response = super.deleteById( id );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -81,7 +106,13 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      */
     @ApiOperation(value = "先修改再逻辑删除字典值", notes = "先修改再逻辑删除字典值")
     public JsonResponse delete(SysDictValue sysDictValue) {
-        return super.delete(sysDictValue);
+        JsonResponse response = super.delete(sysDictValue);
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -92,7 +123,13 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     //@PreAuthorize("hasAuthority('ROLE_SUPER')")  // 指定角色权限才能操作方法
     @ApiOperation(value = "批量逻辑删除字典值", notes = "批量逻辑删除字典值")
     public JsonResponse deleteAllByIds(@RequestBody(required = false) String[] ids) {
-        return  super.deleteAllByIds(ids);
+        JsonResponse response = super.deleteAllByIds(ids);
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     /**
@@ -106,7 +143,13 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
             @ApiImplicitParam(name = "enabled", value = "是否可用", required = true, dataType = "Boolean", paramType = "query")
     })
     public JsonResponse updateEnable(@RequestParam(required = false) String id, @RequestParam(required = false) Boolean enabled) {
-        return  super.updateEnable( id,enabled );
+        JsonResponse response = super.updateEnable( id,enabled );
+        if(response.getErrcode().equals(SUCCESS_CODE)) {
+            response.setMessage(MSG_SUCCESS);
+        } else {
+            response.setMessage(MSG_ERRO);
+        }
+        return response;
     }
 
     //批量修改可见
