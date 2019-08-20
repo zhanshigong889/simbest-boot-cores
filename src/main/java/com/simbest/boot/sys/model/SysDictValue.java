@@ -5,6 +5,7 @@ package com.simbest.boot.sys.model;
 
 import com.simbest.boot.base.annotations.EntityIdPrefix;
 import com.simbest.boot.base.model.LogicModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,9 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "sys_dict_value", uniqueConstraints = {
+        @UniqueConstraint(name="blocid_corpid_dictType_name", columnNames = {"blocid", "corpid", "dictType", "name"})
+})
 public class SysDictValue extends LogicModel {
 
     public final static String VALUE_TYPE_INT = "int";
@@ -37,41 +41,56 @@ public class SysDictValue extends LogicModel {
     @EntityIdPrefix(prefix = "V") //主键前缀，此为可选项注解
     private String id;
 
+    @ApiModelProperty(value = "字典值名称")
     @Column(nullable = false, length = 50)
     private String name;
 
+    @ApiModelProperty(value = "字典值")
     @Column(nullable = false, length = 100)
     private String value;
 
+    @ApiModelProperty(value = "字典值描述")
     @Column
     private String description;
 
+    @ApiModelProperty(value = "字典值排序")
     @Column
     private Integer displayOrder;
 
+    @ApiModelProperty(value = "父亲节点外键")
     @Column
     private String parentId;
 
+    @ApiModelProperty(value = "字典类型")
     @Column(nullable = false)
     private String dictType;
 
+    @ApiModelProperty(value = "字典值类型")
     @Column
     private String valueType;
 
+    @ApiModelProperty(value = "是否默认选择")
     @Column
     private Boolean isDefault;
 
+    @ApiModelProperty(value = "流程类型标识")
     @Column(length = 50)
     private String flag;
 
+    @ApiModelProperty(value = "扩展字段1")
     @Column(length = 200)
     private String spare1;
 
+    @ApiModelProperty(value = "扩展字段2")
     @Column(length = 200)
     private String spare2;
 
-    private String blocid; //集团id
+    @ApiModelProperty(value = "集团id")
+    @Column(length = 40)
+    private String blocid;
 
-    private String corpid; //企业id
+    @ApiModelProperty(value = "企业id")
+    @Column(length = 40)
+    private String corpid;
 
 }
