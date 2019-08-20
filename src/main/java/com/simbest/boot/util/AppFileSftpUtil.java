@@ -33,6 +33,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.Properties;
 
 /**
@@ -112,6 +113,12 @@ public class AppFileSftpUtil {
             Channel channel = sshSession.openChannel("sftp");
             channel.connect();
             sftp = (ChannelSftp) channel;
+            //设置编码 https://blog.csdn.net/liuhenghui5201/article/details/50970492
+            Class cl = ChannelSftp.class;
+            Field f1 = cl.getDeclaredField("server_version");
+            f1.setAccessible(true);
+            f1.set(sftp, 2);
+            sftp.setFilenameEncoding(ApplicationConstants.UTF_8);
             log.debug("连接到SFTP成功.Host: " + host);
         } catch (Exception e) {
             log.error("连接SFTP失败：" + e.getMessage());
