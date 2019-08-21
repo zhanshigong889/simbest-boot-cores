@@ -122,14 +122,30 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
             String orderBySQL = " order by dv.display_order asc";
             Map<String, Object> paramMap = ObjectUtil.getEntityPersistentFieldValueExceptId(sysDictValue);
             for(String param : paramMap.keySet()){
+                if(param.equals("dictType")){
+                    whereSQL += "AND d.dict_type=:dictType ";
+                }
+                if(param.equals("isPublic")){
+                    whereSQL += "AND d.isPublic=:isPublic ";
+                }
+                if(param.equals("flag")){
+                    whereSQL += "AND d.flag=:flag ";
+                }
+
                 if(param.equals("name")){
                     whereSQL += "AND dv.name=:name ";
                 }
                 if(param.equals("value")){
                     whereSQL += "AND dv.value=:value ";
                 }
+                if(param.equals("flag")){
+                    whereSQL += "AND dv.flag=:flag ";
+                }
                 if(param.equals("dictType")){
-                    whereSQL += "AND d.dict_type=:dictType ";
+                    whereSQL += "AND dv.dict_type=:dictType ";
+                }
+                if(param.equals("isPublic")){
+                    whereSQL += "AND dv.isPublic=:isPublic ";
                 }
                 if(param.equals("blocid")){
                     whereSQL += "AND dv.blocid=:blocid ";
@@ -147,8 +163,14 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
                 if(param.equals("value")){
                     dataQuery.setParameter("value", paramMap.get(param));
                 }
+                if(param.equals("flag")){
+                    dataQuery.setParameter("flag", paramMap.get(param));
+                }
                 if(param.equals("dictType")){
                     dataQuery.setParameter("dictType", paramMap.get(param));
+                }
+                if(param.equals("isPublic")){
+                    dataQuery.setParameter("isPublic", paramMap.get(param));
                 }
                 if(param.equals("blocid")){
                     dataQuery.setParameter("blocid", paramMap.get(param));
