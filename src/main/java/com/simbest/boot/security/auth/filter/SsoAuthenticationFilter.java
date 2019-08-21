@@ -80,13 +80,14 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throws AuthenticationException {
         Principal principal = obtainPrincipal(request);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
+        log.error("SSO 认证主体Principal【{}】及名称【{}】即将访问应用【{}】的URL路径【{}】！", principal, principal.getName(), appcode, request.getRequestURI());
         if (null == principal || StringUtils.isEmpty(appcode) || StringUtils.isEmpty(principal.getName())) {
             log.error("SSO 认证主体Principal【{}】及名称【{}】在访问应用【{}】时不能为空，请求路径为【{}】！", principal, principal.getName(), appcode, request.getRequestURI());
             throw new BadCredentialsException(
                     "SSO 认证主体Principal【"+principal+"】及名称【"+principal.getName()+"】在访问应用【"+appcode+"】不能为空，请求路径为【"+request.getRequestURI()+"】！");
         }
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-        if (authenticationIsRequired(request, existingAuth, principal, appcode)) {
+        if (authenticationIsRequired(existingAuth, principal)) {
             SsoUsernameAuthentication ssoUsernameAuthentication = new SsoUsernameAuthentication(principal, appcode);
             return this.getAuthenticationManager().authenticate(ssoUsernameAuthentication);
         }
@@ -95,11 +96,8 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
 
     /**
      * 判断单点用户名是否需要验证
-     *
-     * @param username 用户名
-     * @return true/false
      */
-    private boolean authenticationIsRequired(HttpServletRequest request, Authentication existingAuth, Principal principal, String appcode) {
+    private boolean authenticationIsRequired(Authentication existingAuth, Principal principal) {
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
             return true;
         }
