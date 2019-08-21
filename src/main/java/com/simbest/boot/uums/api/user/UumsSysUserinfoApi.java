@@ -59,6 +59,9 @@ public class UumsSysUserinfoApi {
     @Autowired
     private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
 
+    @Autowired
+    private ApiRequestHandle<Map<String,Object>> mapApiHandle;
+
     /**
      * 插入reserve4
      * @param password
@@ -889,6 +892,24 @@ public class UumsSysUserinfoApi {
                 .json( json0 )
                 .asBean(JsonResponse.class);
         return userOrgTreeApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<UserOrgTree>>(){});
+    }
+
+    /**
+     * 组织查人之根据orgCode获取组织下的人,包含这些人的组织、职务、角色等扩展属性，分页
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public Map<String,Object> findUserIncludeExtensionByOrgCode(Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserIncludeExtensionByOrgCode/paging"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return mapApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Map<String,Object>>(){});
     }
 
 }

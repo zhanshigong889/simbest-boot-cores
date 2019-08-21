@@ -13,6 +13,7 @@ import com.simbest.boot.security.SimpleRole;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
+import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,8 @@ public class UumsSysRoleApi {
     //private String uumsAddress="http://localhost:8080/uums";
     @Autowired
     private RsaEncryptor encryptor;
+    @Autowired
+    private ApiRequestHandle<List<SimpleRole>> simpleRoleApiHandle;
 
 
     /**
@@ -151,6 +154,17 @@ public class UumsSysRoleApi {
     }
 
     /**
+     * 查看指定人下的全部角色
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public List<SimpleRole> findRoleAppointByUsername (Map<String,Object> mapParam,String appcode) {
+        String username = (String)mapParam.get( "username" );
+        return findRoleByUsernameNormal ( username, appcode);
+    }
+
+    /**
      * 查看当前人下的全部角色
      * @param appcode
      * @return
@@ -158,23 +172,24 @@ public class UumsSysRoleApi {
     public List<SimpleRole> findRoleByUsername (String appcode) {
         String username = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", username);
+        return findRoleByUsernameNormal ( username, appcode);
+    }
+
+    /**
+     * 通用查询
+     * @param username
+     * @param appcode
+     * @return
+     */
+    private List<SimpleRole> findRoleByUsernameNormal (String username,String appcode){
         JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findRoleByUsername"+SSO)
                 .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
                 .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode )
                 .param("username",username)
                 .asBean(JsonResponse.class);
-        if(response==null){
-            log.error("--response对象为空!--");
-            return null;
-        }
-        if(!(response.getData() instanceof ArrayList )){
-            log.error("--uums接口返回的类型不为ArrayList--");
-            return null;
-        }
-        String json = JacksonUtils.obj2json(response.getData());
-        List<SimpleRole> roleList=JacksonUtils.json2Type(json, new TypeReference<List<SimpleRole>>(){});
-        return roleList;
+        return  simpleRoleApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<SimpleRole>>(){});
     }
+
 
     /**
      * 查看职务下的角色
