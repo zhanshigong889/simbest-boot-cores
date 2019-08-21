@@ -17,6 +17,7 @@ import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
+import com.simbest.boot.util.PhoneCheckUtil;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
@@ -143,7 +144,17 @@ public abstract class AbstractAuthService implements IAuthService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails userDetails = userinfoApi.findByUsername(username, appConfig.getAppcode());
+        UserDetails userDetails = null;
+        try {
+            userDetails = userinfoApi.findByUsername(username, appConfig.getAppcode());
+        } catch (Exception e){
+            log.debug("通过SSO单点调用findByUsername获取用户认证主体信息发生异常【{}】", e.getMessage());
+        }
+        //用户名，可能是手机号码，所以再尝试一次
+        if(null == userDetails && PhoneCheckUtil.isPhoneLegal(username)){
+            log.debug("通过SSO单点调用findByUsername获取用户认证主体信息发生异常，但由于用户名是手机号，即将尝试通过手机号码提取用户认证主体信息【{}】", username);
+            userDetails = userinfoApi.findByKey(username, KeyType.preferredMobile, appConfig.getAppcode());
+        }
         log.debug("通过用户名【{}】和应用代码【{}】提取到的用户信息为【{}】", username, appConfig.getAppcode(), userDetails);
         if(null == userDetails){
             throw new UsernameNotFoundException(AuthoritiesConstants.UsernameNotFoundException);

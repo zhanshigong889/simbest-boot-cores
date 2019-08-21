@@ -51,19 +51,11 @@ public class GenericAuthenticationChecker {
         try {
             if (authentication instanceof UsernamePasswordAuthenticationToken || authentication instanceof UumsAuthentication) {
                 authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.username);
-                //用户名，可能是手机号码，所以再尝试一次
-                if(null == authUser){
-                    authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.preferredMobile);
-                }
             }
             else if (authentication instanceof SsoUsernameAuthentication) {
                 if (authentication.getPrincipal() instanceof UsernamePrincipal) {
                     UsernamePrincipal principal = (UsernamePrincipal) authentication.getPrincipal();
                     authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.username);
-                    //用户名，可能是手机号码，所以再尝试一次
-//                    if(null == authUser){
-//                        authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.preferredMobile);
-//                    }
                 } else if (authentication.getPrincipal() instanceof KeyTypePrincipal) {
                     KeyTypePrincipal principal = (KeyTypePrincipal) authentication.getPrincipal();
                     authUser = authService.findByKey(principal.getKeyword(), principal.getKeyType());
