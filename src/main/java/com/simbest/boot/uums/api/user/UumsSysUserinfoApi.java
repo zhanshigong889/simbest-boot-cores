@@ -900,13 +900,14 @@ public class UumsSysUserinfoApi {
      * @param appcode
      * @return
      */
-    public Map<String,Object> findUserIncludeExtensionByOrgCode(Map<String,Object> mapParam, String appcode) {
+    public Map<String,Object> findUserIncludeExtensionByOrgCode(int page,  int size, String direction,  String properties,Map<String,Object> mapParam, String appcode) {
         String loginUser = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", loginUser);
         String json0=JacksonUtils.obj2json(mapParam);
         String username1=encryptor.encrypt(loginUser);
         String username2=username1.replace("+","%2B");
-        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserIncludeExtensionByOrgCode/paging"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserIncludeExtensionByOrgCode/paging"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                +"&page="+page+"&size="+size+"&direction="+direction+"&properties="+properties)
                 .json( json0 )
                 .asBean(JsonResponse.class);
         return mapApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Map<String,Object>>(){});
