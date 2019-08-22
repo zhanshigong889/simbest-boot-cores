@@ -89,7 +89,7 @@ public class SysDictValue extends LogicModel {
     //非公共字段，blocid和corpid不能为空
     //默认公共，即isPublic=true，数据库字段值=1
     @ApiModelProperty(value = "是否公共字典")
-    @Column(nullable = false)
+    @Column
     private Boolean isPublic;
 
     @ApiModelProperty(value = "集团id")
