@@ -25,7 +25,7 @@ public abstract class LogicModel extends SystemModel {
     @Getter
     @Column(nullable = false)
     //是否可用
-    private Boolean enabled = true;
+    private Boolean enabled;
 
     @Setter
     @Getter
