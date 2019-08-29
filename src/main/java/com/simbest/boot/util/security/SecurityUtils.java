@@ -70,7 +70,7 @@ public final class SecurityUtils {
                 return null;
             }
         }
-        log.error("SecurityContextHolder包含Authentication为空，无法获取认证主体Principal，请检查代码Session或API的access_token");
+        log.error("SecurityContextHolder的Authentication为空，无法获取认证主体Principal，请检查代码Session或API的access_token");
         return null;
     }
 

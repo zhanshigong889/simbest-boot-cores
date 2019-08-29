@@ -23,6 +23,10 @@ public class ApplicationConfiguration {
     @Autowired
     private AppConfig config;
 
+    /**
+     * 配置缺省的简单短信接口
+     * @return
+     */
     @Bean
     @ConditionalOnMissingBean(value = ISimpleSmsService.class)
     public ISimpleSmsService cloopenSmsService() {

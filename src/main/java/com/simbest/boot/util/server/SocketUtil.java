@@ -30,7 +30,8 @@ public class SocketUtil {
         Socket socket = null;
         try {
             socket = new Socket();
-            socket.connect(new InetSocketAddress(host, port), 5000);
+            //心跳等待1000毫秒
+            socket.connect(new InetSocketAddress(host, port), 1000);
             return true;
         } catch (Exception ex) {
             return false;

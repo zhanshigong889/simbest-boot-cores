@@ -5,6 +5,8 @@ package com.simbest.boot.component.task;
 
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.component.distributed.lock.AppRuntimeMaster;
+import com.simbest.boot.component.distributed.lock.DistributedRedisLock;
+import com.simbest.boot.component.distributed.lock.DistributedRedissonLock;
 import com.simbest.boot.sys.model.SysTaskExecutedLog;
 import com.simbest.boot.sys.repository.SysTaskExecutedLogRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -38,28 +40,42 @@ public abstract class AbstractTaskSchedule {
     public void checkAndExecute(boolean writeLog) {
         if(appRuntime.getMyHost().equals(appRuntime.getMasterHost())
                 && appRuntime.getMyPort().equals(appRuntime.getMasterPort())) {
-            log.debug("当前主机地址【{}】运行端口【{}】是集群主控节点，即将执行定时任务", appRuntime.getMyHost(), appRuntime.getMyPort());
+            log.debug("当前主机地址【{}】运行端口【{}】是集群主控节点，可以执行定时任务", appRuntime.getMyHost(), appRuntime.getMyPort());
             Long beginTime = System.currentTimeMillis();
             Boolean executeFlag = true;
             String content = CHECK_FAILED;
-            try {
-                content = this.execute();
-            } catch (Exception e) {
-                executeFlag = false;
-                log.error("Execute taskName with {} failed.", this.getClass().getSimpleName());
-                Exceptions.printException(e);
-            }
-            if(writeLog) {
-                Long endTime = System.currentTimeMillis();
-                SysTaskExecutedLog log = SysTaskExecutedLog.builder()
-                        .taskName(this.getClass().getSimpleName())
-                        .hostname(appRuntime.getMyHost())
-                        .port(appRuntime.getMyPort())
-                        .durationTime(endTime - beginTime)
-                        .content(StringUtils.substring(content, 0, 2000))
-                        .executeFlag(executeFlag)
-                        .build();
-                repository.save(log);
+            //获取锁, 默认最多等待3秒，获得锁后120分钟释放。确保长周期任务执行超时，不会死锁
+            DistributedRedissonLock lock = DistributedRedisLock.tryLock(this.getClass().getSimpleName(),
+                    appRuntime.getRedisLockWaitSeconds(), appRuntime.getRedisLockReleaseSeconds());
+            if(lock.isLocked()) {
+                try {
+                    //执行子类特定的定时任务
+                    log.warn("------------------------------【{}】上锁成功，即将执行定时任务", this.getClass().getSimpleName());
+                    content = this.execute();
+                } catch (Exception e) {
+                    executeFlag = false;
+                    log.error("------------------------------【{}】上锁成功，但执行任务发生异常", this.getClass().getSimpleName());
+                    Exceptions.printException(e);
+                } finally {
+                    try {
+                        //释放锁
+                        lock.getRLock().unlock();
+                    } catch (IllegalMonitorStateException emse) {
+                        log.trace(emse.getMessage());
+                    }
+                }
+                if(writeLog) {
+                    Long endTime = System.currentTimeMillis();
+                    SysTaskExecutedLog log = SysTaskExecutedLog.builder()
+                            .taskName(this.getClass().getSimpleName())
+                            .hostname(appRuntime.getMyHost())
+                            .port(appRuntime.getMyPort())
+                            .durationTime(endTime - beginTime)
+                            .content(StringUtils.substring(content, 0, 2000))
+                            .executeFlag(executeFlag)
+                            .build();
+                    repository.save(log);
+                }
             }
         } else {
             log.debug("集群主控节点主机地址【{}】运行端口【{}】,当前主机地址【{}】运行端口【{}】, 无法执行定时任务",

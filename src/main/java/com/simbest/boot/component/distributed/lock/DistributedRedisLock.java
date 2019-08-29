@@ -3,9 +3,10 @@
  */
 package com.simbest.boot.component.distributed.lock;
 
-import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.RedissonShutdownException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,13 @@ import javax.annotation.PostConstruct;
  * 作者: lishuyi
  * 时间: 2018/6/22  17:40
  */
+@Slf4j
 @Component
 public class DistributedRedisLock {
+
+    public final static String REDISSON_LOCK = "redisson_lock_";
+
+    public final static String TASK_SCHEDULE_LOCK = "TASK_SCHEDULE_LOCK:";
 
     private static long WAITING_FOR_LOCK_SECONDES = 10;
     
@@ -38,7 +44,7 @@ public class DistributedRedisLock {
     public void init() {
         lockUtils = this;
         lockUtils.redisson = this.redisson;
-        lockUtils.redisKeyPrefix = config.getRedisKeyPrefix();
+        lockUtils.redisKeyPrefix = config.getRedisKeyPrefix() + TASK_SCHEDULE_LOCK;
     }
 
     /**
@@ -85,7 +91,7 @@ public class DistributedRedisLock {
     }
 
     /**
-     * 尝试获得锁
+     * 尝试获得锁后执行回调
      * @param lockName
      * @param waitSeconds
      * @param releaseSeconds
@@ -98,16 +104,45 @@ public class DistributedRedisLock {
         String key = redisKeyPrefix + lockName;
         RLock mylock = lockUtils.redisson.getFairLock(key);
         try {
-            //最多等待60秒，获得锁后10秒自动解锁
+            //最多等待waitSeconds秒，获得锁后releaseSeconds秒自动解锁
             boolean locked = mylock.tryLock(waitSeconds, releaseSeconds, ApplicationConstants.REDIS_LOCK_DEFAULT_TIME_UNIT);
             if(locked){
                 returnObj = callback.process();
             }
-        } catch (InterruptedException e) {
-            Exceptions.printException(e);
+        }
+        catch (RedissonShutdownException e) {
+            log.warn("尝试加锁失败，发生【{}】异常", e.getMessage());
+        }
+        catch (InterruptedException e) {
+            log.warn("尝试加锁失败，发生【{}】异常", e.getMessage());
         } finally {
             mylock.unlock();
         }
         return returnObj;
     }
+
+    /**
+     * 仅尝试获得锁， 需要获得锁的业务手动释放锁
+     * @param lockName
+     * @param waitSeconds
+     * @param releaseSeconds
+     * @return
+     */
+    public static DistributedRedissonLock tryLock(String lockName, long waitSeconds, long releaseSeconds){
+        String key = redisKeyPrefix + lockName;
+        RLock mylock = lockUtils.redisson.getFairLock(key);
+        try {
+            //最多等待waitSeconds秒，获得锁后releaseSeconds秒自动解锁
+            boolean locked = mylock.tryLock(waitSeconds, releaseSeconds, ApplicationConstants.REDIS_LOCK_DEFAULT_TIME_UNIT);
+            return DistributedRedissonLock.builder().rLock(mylock).isLocked(locked).build();
+        }
+        catch (RedissonShutdownException e) {
+            log.warn("尝试加锁失败，发生【{}】异常", e.getMessage());
+        }
+        catch (InterruptedException e) {
+            log.warn("尝试加锁失败，发生【{}】异常", e.getMessage());
+        }
+        return DistributedRedissonLock.builder().rLock(mylock).isLocked(false).build();
+    }
+
 }

@@ -3,15 +3,16 @@
  */
 package com.simbest.boot.config;
 
+import com.simbest.boot.component.GracefulShutdown;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Connector;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 
 /**
@@ -26,13 +27,21 @@ public class EmbeddedServletConfiguration {
     public static int serverPort;
 
     @Autowired
+    private AppConfig appConfig;
+
+    @Autowired
     private Environment env;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private String maxFileSize;
 
     @Bean
-    public TomcatServletWebServerFactory containerFactory() {
+    public GracefulShutdown gracefulShutdown() {
+        return new GracefulShutdown();
+    }
+
+    @Bean
+    public TomcatServletWebServerFactory containerFactory(final GracefulShutdown gracefulShutdown) {
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
             protected void customizeConnector(Connector connector) {
                 super.customizeConnector(connector);
@@ -51,9 +60,16 @@ public class EmbeddedServletConfiguration {
                 }
             }
         };
+
+        //判断是否需要强制启动一个http监听端口
         if(StringUtils.isNotEmpty(env.getProperty("force.another.http.port"))) {
             tomcat.addAdditionalTomcatConnectors(createStandardConnector());
         }
+
+        //根据kill PID信号，执行应用关闭销毁前的动作
+        log.debug("【{}】即将被关闭，开始销毁前清理工作................................", appConfig.getAppcode());
+        tomcat.addConnectorCustomizers(gracefulShutdown);
+
         return tomcat;
     }
 

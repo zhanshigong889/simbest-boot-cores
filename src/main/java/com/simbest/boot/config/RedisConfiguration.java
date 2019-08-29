@@ -6,6 +6,7 @@ package com.simbest.boot.config;
 import com.google.common.collect.Maps;
 import com.simbest.boot.component.distributed.lock.DistributedLockFactoryBean;
 import com.simbest.boot.constants.ApplicationConstants;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -46,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 用途：Redis 配置信息
+ * 用途：Redis 和 RedissonClient 配置信息
  * 作者: lishuyi
  * 时间: 2018/5/1  18:56
  */
@@ -64,6 +65,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @Autowired
     private RedisOperationsSessionRepository sessionRepository;
+
+    @Getter
+    private RedissonClient redissonClient;
 
     @PostConstruct
     private void afterPropertiesSet() {
@@ -275,8 +279,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 //                    .addNodeAddress("redis://10.92.80.70:26379", "redis://10.92.80.70:26389", "redis://10.92.80.70:26399")
 //                    .addNodeAddress("redis://10.92.80.71:26379", "redis://10.92.80.71:26389", "redis://10.92.80.71:26399");
         }
+        redissonClient = Redisson.create(redissonConfig);
         log.debug("Congratulations------------------------------------------------Redis 进程实例已创建成功");
-        return Redisson.create(redissonConfig);
+        return redissonClient;
     }
 
     @Bean
@@ -289,8 +294,10 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @PreDestroy
     public void destroy() {
-        //redisson.shutdown(); //交由RedisConfiguration.redissonClient()进行shutdown
-        log.debug("Congratulations------------------------------------------------Redis 进程实例已销毁成功");
+        if(null != redissonClient) {
+            redissonClient.shutdown(); //RedisConfiguration.redissonClient()申明创建出来的RedissonClient的shutdown执行真正的销毁redissonClient
+            log.debug("Congratulations------------------------------------------------Redis 进程实例已销毁成功");
+        }
     }
 
 }

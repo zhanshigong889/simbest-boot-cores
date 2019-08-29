@@ -8,7 +8,6 @@ import com.simbest.boot.util.json.JacksonUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.Cursor;
@@ -38,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtil {
 
     @Autowired
+    @Getter
     private RedisTemplate<String, String> redisTemplate;
 
     private static RedisUtil cacheUtils;

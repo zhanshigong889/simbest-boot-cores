@@ -79,6 +79,12 @@ public class AppConfig {
     @Value("${spring.cache.redis.key-prefix}")
     private String redisKeyPrefix;
 
+    @Value("${spring.cache.redis.lock.wait.seconds:3}")
+    private int redisLockWaitSeconds;
+
+    @Value("${spring.cache.redis.lock.release.seconds:7200}")
+    private int redisLockReleaseSeconds;
+
     @Value("${spring.session.cookie.path:}")
     private String cookiePath;
 
@@ -132,6 +138,8 @@ public class AppConfig {
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
         log.info("Redis缓存空间前缀【{}】", redisNamespace);
         log.info("Redis缓存Key键前缀【{}】", redisKeyPrefix);
+        log.info("Redis缓存默认等待加锁时间【{}】秒", redisLockWaitSeconds);
+        log.info("Redis缓存默认加锁后释放时间【{}】秒", redisLockReleaseSeconds);
         log.info("应用Cookie路径【{}】", cookiePath);
         log.info("API接口文档地址【{}】", swaggerUrl);
         log.info("登录是否开启验证码【{}】", isOpenValidateCode);

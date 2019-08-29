@@ -62,11 +62,13 @@ public class SysCustomFieldService extends LogicService<SysCustomField, String> 
     @Override
     public SysCustomField insert(SysCustomField field) {
         if (field.getId() == null) {
+            field.setEnabled(true);
             field.setCreator(SecurityUtils.getCurrentUserName());
             field.setModifier(SecurityUtils.getCurrentUserName());
             return fieldRepository.save(field);
         } else {
             SysCustomField dbFiled = findById(field.getId());
+            dbFiled.setEnabled(true);
             dbFiled.setFieldName(field.getFieldName());
             dbFiled.setModifier(SecurityUtils.getCurrentUserName());
             return fieldRepository.save(dbFiled);
