@@ -80,7 +80,7 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
             throws AuthenticationException {
         Principal principal = obtainPrincipal(request);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
-        log.error("SSO 认证主体Principal【{}】及名称【{}】即将访问应用【{}】的URL路径【{}】！", principal, principal.getName(), appcode, request.getRequestURI());
+        log.debug("SSO 认证主体Principal【{}】及名称【{}】即将访问应用【{}】的URL路径【{}】！", principal, principal.getName(), appcode, request.getRequestURI());
         if (null == principal || StringUtils.isEmpty(appcode) || StringUtils.isEmpty(principal.getName())) {
             log.error("SSO 认证主体Principal【{}】及名称【{}】在访问应用【{}】时不能为空，请求路径为【{}】！", principal, principal.getName(), appcode, request.getRequestURI());
             throw new BadCredentialsException(

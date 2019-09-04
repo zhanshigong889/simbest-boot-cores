@@ -33,6 +33,7 @@ public abstract class AbstractTaskSchedule {
         this.repository = repository;
     }
 
+//    int times = 0;
     /**
      * 执行具体任务，并根据writeLog判断是否记录执行日志（需要子类使用@Scheduled明确执行周期）
      * @param writeLog
@@ -50,6 +51,7 @@ public abstract class AbstractTaskSchedule {
             if(lock.isLocked()) {
                 try {
                     //执行子类特定的定时任务
+//                    log.debug("定时任务开始执行，目前运行第【{}】次", times++);
                     log.warn("------------------------------【{}】上锁成功，即将执行定时任务", this.getClass().getSimpleName());
                     content = this.execute();
                 } catch (Exception e) {

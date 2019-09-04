@@ -10,12 +10,16 @@ import com.simbest.boot.util.security.SecurityUtils;
 import com.simbest.boot.uums.api.bloc.UumsSysBlocApi;
 import com.simbest.boot.uums.api.corp.UumsSysCorpApi;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -45,8 +49,12 @@ public class MultiCorpBlocController {
      * 用户切换企业
      * @return login
      */
-    @PostMapping(value={"/changeCorp","/sso/getCurrentUser","/api/changeCorp"})
-    public JsonResponse changeCorp(String corpid) {
+    @ApiOperation(value = "用户切换企业")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "corpid", value = "企业id", dataType = "String", paramType = "query", required = true)
+    })
+    @PostMapping(value={"/changeCorp","/sso/changeCorp","/api/changeCorp"})
+    public JsonResponse changeCorp(@RequestParam String corpid) {
         ICorp corp = corpApi.findById(corpid, config.getAppcode());
         IUser currentUser = SecurityUtils.getCurrentUser();
         currentUser.setCurrentCorp(corp.getId());
