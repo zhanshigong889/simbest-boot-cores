@@ -27,8 +27,6 @@ public class DistributedRedisLock {
     public final static String REDISSON_LOCK = "redisson_lock_";
 
     public final static String TASK_SCHEDULE_LOCK = "TASK_SCHEDULE_LOCK:";
-
-    private static long WAITING_FOR_LOCK_SECONDES = 10;
     
     @Autowired
     private RedissonClient redisson;
@@ -87,7 +85,7 @@ public class DistributedRedisLock {
      * @return
      */
     public static <T> T tryLock(String lockName, DistributedLockCallback<T> callback){
-        return tryLock(lockName, ApplicationConstants.REDIS_LOCK_RELEASE_TIMEOUT, ApplicationConstants.REDIS_LOCK_WAIT_TIMEOUT, callback);
+        return tryLock(lockName, ApplicationConstants.REDIS_LOCK_WAIT_TIMEOUT, ApplicationConstants.REDIS_LOCK_RELEASE_TIMEOUT, callback);
     }
 
     /**
