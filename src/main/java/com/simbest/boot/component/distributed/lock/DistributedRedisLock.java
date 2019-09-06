@@ -17,6 +17,8 @@ import javax.annotation.PostConstruct;
 /**
  * 用途：Redisson分布式锁和同步器
  * 参考：https://github.com/redisson/redisson/wiki/8.-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E5%92%8C%E5%90%8C%E6%AD%A5%E5%99%A8
+ *      http://developer.51cto.com/art/201812/588335.htm
+ *      https://zhuanlan.zhihu.com/p/42056183
  * 作者: lishuyi
  * 时间: 2018/6/22  17:40
  */
@@ -24,9 +26,9 @@ import javax.annotation.PostConstruct;
 @Component
 public class DistributedRedisLock {
 
-    public final static String REDISSON_LOCK = "redisson_lock_";
+    public final static String REDISSON_REDIS_LOCK = "redisson_lock_";
 
-    public final static String TASK_SCHEDULE_LOCK = "TASK_SCHEDULE_LOCK:";
+    public final static String REDISSON_LOCK_KEY_PREFIX = "redisson_lock_key_prefix:";
     
     @Autowired
     private RedissonClient redisson;
@@ -42,7 +44,7 @@ public class DistributedRedisLock {
     public void init() {
         lockUtils = this;
         lockUtils.redisson = this.redisson;
-        lockUtils.redisKeyPrefix = config.getRedisKeyPrefix() + TASK_SCHEDULE_LOCK;
+        lockUtils.redisKeyPrefix = config.getRedisKeyPrefix() + REDISSON_LOCK_KEY_PREFIX;
     }
 
     /**
@@ -59,11 +61,11 @@ public class DistributedRedisLock {
      * 强制获取锁
      * @param lockName
      */
-    public static void lock(String lockName, int seconds){
+    public static void lock(String lockName, int timeoutSeconds){
         String key = redisKeyPrefix + lockName;
         RLock mylock = lockUtils.redisson.getFairLock(key);
         //lock提供带timeout参数，timeout结束强制解锁，防止死锁
-        mylock.lock(seconds, ApplicationConstants.REDIS_LOCK_DEFAULT_TIME_UNIT);
+        mylock.lock(timeoutSeconds, ApplicationConstants.REDIS_LOCK_DEFAULT_TIME_UNIT);
     }
 
     /**

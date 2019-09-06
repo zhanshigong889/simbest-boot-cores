@@ -16,8 +16,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_LOCK;
-import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.TASK_SCHEDULE_LOCK;
+import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_REDIS_LOCK;
+import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_LOCK_KEY_PREFIX;
 
 /**
  * 用途：
@@ -39,8 +39,8 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         log.debug("应用即将被关闭，开始销毁前清理工作................................");
-        RedisUtil.mulDelete(TASK_SCHEDULE_LOCK);
-        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys( REDISSON_LOCK + ApplicationConstants.STAR);
+        RedisUtil.mulDelete(REDISSON_LOCK_KEY_PREFIX);
+        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys( REDISSON_REDIS_LOCK + ApplicationConstants.STAR);
         RedisUtil.getRedisTemplate().delete(lockKeys);
 
         this.connector.pause();

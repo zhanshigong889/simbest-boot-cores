@@ -113,6 +113,14 @@ public class AppConfig {
     @Value("${app.security.white.hosts}")
     private String whiteHostList;
 
+    @Value("${thread.core.pool.size:10}")
+    private int threadCorePoolSize;
+    @Value("${thread.max.pool.size:20}")
+    private int threadMaxPoolSize;
+    @Value("${thread.queue.capacity:200}")
+    private int threadQueueCapacity;
+    @Value("${thread.keep.alive.seconds:60}")
+    private int threadKeepAliveSeconds;
 
     //简单实时短信接口配置
     @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
@@ -148,6 +156,11 @@ public class AppConfig {
         log.info("应用访问地址【{}】", appHostPort);
         log.info("应用文件上传方式【{}】", uploadLocation);
         log.info("应用文件上传路径【{}】", uploadPath);
+        log.info("多线程核心线程数【{}】", threadCorePoolSize);
+        log.info("多线程最大线程数【{}】", threadMaxPoolSize);
+        log.info("多线程缓冲队列【{}】", threadQueueCapacity);
+        log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
+
     }
 
 }
