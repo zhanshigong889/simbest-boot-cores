@@ -5,7 +5,6 @@ package com.simbest.boot.util.distribution.id;
 
 import com.github.wenhao.jpa.Specifications;
 import com.google.common.base.Strings;
-import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.component.distributed.lock.DistributedRedisLock;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -59,68 +57,65 @@ public class RedisIdGenerator {
      * @return
      */
     private String incrId(String cacheName, String prefix, int length) {
-        String orderId = null;
-        String distributedKey = this.getClass().getSimpleName() + ApplicationConstants.COLON+ cacheName + ApplicationConstants.COLON + prefix;
-        try {
-            DistributedRedisLock.lock(distributedKey, ApplicationConstants.REDIS_LOCK_TIMEOUT);
-            IUser currentUser = SecurityUtils.getCurrentUser();
-            if (null == currentUser) {
-                loginUtils.adminLogin();
-            }
-            String rediskey = appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(cacheName).concat(ApplicationConstants.COLON).concat(prefix);
-            //查询数据字典类型为genCode的数据字典
-            Specification<SysDict> dictCondition = Specifications.<SysDict>and()
-                    .eq("dictType", "genCode").build();
-            Iterable<SysDict> dicts = dictService.findAllNoPage(dictCondition);
-            //如果类型为genCode的数据字典不存在，则需要创建一条类型为genCode的数据字典
-            SysDict dict = null;
-            if (!dicts.iterator().hasNext()) {
-                dict = new SysDict();
-                dict.setDictType("genCode");
-                dict.setName("工单编号值集");
-                dict.setDisplayOrder(1);
-                dictService.insert(dict);
-            }
-            // 如果存在工单编号值集genCode，则不需要新建记录
-            else {
-                dict = dicts.iterator().next();
-            }
-            //查询数据字典类型为genCode，名称为cacheName+prefix的数据字典值
-            Specification<SysDictValue> dictValueCondition = Specifications.<SysDictValue>and()
-                    .eq("dictType", "genCode").eq("name", rediskey)
-                    .build();
-            Iterable<SysDictValue> dictValues = dictValueService.findAllNoPage(dictValueCondition);
-            //如果应用的数据字典值集不存在代码生成的字典值的值集，则需要创建一条记录
-            SysDictValue dictValue = null;
-            if (!dictValues.iterator().hasNext()) {
-                dictValue = new SysDictValue();
-                dictValue.setDictType(dict.getDictType());
-                dictValue.setDisplayOrder(dict.getDisplayOrder());
-                dictValue.setName(rediskey);
-                dictValue.setValue("0"); //从0开始，自增后实际从1开始
-                dictValueService.insert(dictValue);
-            }
-            //如果存在，则取当前当前值集值，用来递增
-            else {
-                dictValue = dictValues.iterator().next();
-            }
-            //将当前值集值作为起始编号
-            RedisUtil.setBean(rediskey, Long.parseLong(dictValue.getValue()));
-            //进行递增
-            Long index = RedisUtil.incrBy(rediskey);
-            dictValue.setValue(String.valueOf(index));
-            //递增结果保存持久化到数据库
-            dictValueService.update(dictValue);
-            // 字符串补位操作，length会通过format函数会自动加位数
-            String formatter = "%1$0xd".replace("x", String.valueOf(length));
-            orderId = prefix.concat(String.format(formatter, index));
-
-        } catch (Exception e){
-            log.error("Redis生成序列发生异常【{}】", e.getMessage());
-            Exceptions.printException(e);
-        } finally {
-            DistributedRedisLock.unlock(distributedKey);
+        IUser currentUser = SecurityUtils.getCurrentUser();
+        if (null == currentUser) {
+            loginUtils.adminLogin();
         }
+        //分布式加锁
+        String distributedKey = this.getClass().getSimpleName() + ApplicationConstants.COLON+ cacheName + ApplicationConstants.COLON + prefix;
+        DistributedRedisLock.lock(distributedKey);
+
+
+        String rediskey = appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(cacheName).concat(ApplicationConstants.COLON).concat(prefix);
+        //查询数据字典类型为genCode的数据字典
+        Specification<SysDict> dictCondition = Specifications.<SysDict>and()
+                .eq("dictType", "genCode").build();
+        Iterable<SysDict> dicts = dictService.findAllNoPage(dictCondition);
+        //如果类型为genCode的数据字典不存在，则需要创建一条类型为genCode的数据字典
+        SysDict dict = null;
+        if (!dicts.iterator().hasNext()) {
+            dict = new SysDict();
+            dict.setDictType("genCode");
+            dict.setName("工单编号值集");
+            dict.setDisplayOrder(1);
+            dictService.insert(dict);
+        }
+        // 如果存在工单编号值集genCode，则不需要新建记录
+        else {
+            dict = dicts.iterator().next();
+        }
+        //查询数据字典类型为genCode，名称为cacheName+prefix的数据字典值
+        Specification<SysDictValue> dictValueCondition = Specifications.<SysDictValue>and()
+                .eq("dictType", "genCode").eq("name", rediskey)
+                .build();
+        Iterable<SysDictValue> dictValues = dictValueService.findAllNoPage(dictValueCondition);
+        //如果应用的数据字典值集不存在代码生成的字典值的值集，则需要创建一条记录
+        SysDictValue dictValue = null;
+        if (!dictValues.iterator().hasNext()) {
+            dictValue = new SysDictValue();
+            dictValue.setDictType(dict.getDictType());
+            dictValue.setDisplayOrder(dict.getDisplayOrder());
+            dictValue.setName(rediskey);
+            dictValue.setValue("0"); //从0开始，自增后实际从1开始
+            dictValueService.insert(dictValue);
+        }
+        //如果存在，则取当前当前值集值，用来递增
+        else {
+            dictValue = dictValues.iterator().next();
+        }
+        //将当前值集值作为起始编号
+        RedisUtil.setBean(rediskey, Long.parseLong(dictValue.getValue()));
+        //进行递增
+        Long index = RedisUtil.incrBy(rediskey);
+        dictValue.setValue(String.valueOf(index));
+        //递增结果保存持久化到数据库
+        dictValueService.update(dictValue);
+        // 字符串补位操作，length会通过format函数会自动加位数
+        String formatter = "%1$0xd".replace("x", String.valueOf(length));
+        String orderId = prefix.concat(String.format(formatter, index));
+
+        //分布式释放锁
+        DistributedRedisLock.unlock(distributedKey);
         return Strings.isNullOrEmpty(orderId) ? null : orderId;
     }
 
