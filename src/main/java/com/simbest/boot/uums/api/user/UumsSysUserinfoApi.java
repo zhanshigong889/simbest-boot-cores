@@ -20,6 +20,7 @@ import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +61,7 @@ public class UumsSysUserinfoApi {
     private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
 
     @Autowired
-    private ApiRequestHandle<Map<String,Object>> mapApiHandle;
+    private ApiRequestHandle<Page<SimpleUser>> pageUserApiHandle;
 
     /**
      * 插入reserve4
@@ -900,7 +901,7 @@ public class UumsSysUserinfoApi {
      * @param appcode
      * @return
      */
-    public Map<String,Object> findUserIncludeExtensionByOrgCode(int page,  int size, String direction,  String properties,Map<String,Object> mapParam, String appcode) {
+    public Page<SimpleUser> findUserIncludeExtensionByOrgCode(int page,  int size, String direction,  String properties,Map<String,Object> mapParam, String appcode) {
         String loginUser = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", loginUser);
         String json0=JacksonUtils.obj2json(mapParam);
@@ -910,7 +911,7 @@ public class UumsSysUserinfoApi {
                 +"&page="+page+"&size="+size+"&direction="+direction+"&properties="+properties)
                 .json( json0 )
                 .asBean(JsonResponse.class);
-        return mapApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Map<String,Object>>(){});
+        return pageUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Page<SimpleUser>>(){});
     }
 
 }
