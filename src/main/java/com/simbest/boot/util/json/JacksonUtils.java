@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.JacksonConfiguration;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -22,6 +23,8 @@ import java.io.IOException;
  */
 @Slf4j
 public class JacksonUtils {
+
+    @Getter
     private static ObjectMapper mapper = null;
 
     static {
