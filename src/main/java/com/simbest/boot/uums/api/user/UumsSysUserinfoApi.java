@@ -914,5 +914,19 @@ public class UumsSysUserinfoApi {
         return pageUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Page<SimpleUser>>(){});
     }
 
+    /**
+     * 获取管理层
+     * @return
+     */
+    public JsonResponse findLeaderShip (String appcode ) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING +"findLeaderShip" + SSO)
+                .param( AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
 }
 
