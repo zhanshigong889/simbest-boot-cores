@@ -9,6 +9,8 @@ import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.util.redis.RedisUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -58,6 +61,9 @@ public class SessionController {
     @ApiOperation(value = "查询当前应用-指定登录用户的在线实例", notes = "注意指定的用户必须在线")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/listIndicatedOnlineUsers")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
+    })
     public JsonResponse listIndicatedOnlineUsers(String username) {
         List<SessionInformation> principals = sessionRegistry.getAllSessions(authService.loadUserByUsername(username), true);
         return JsonResponse.success(principals);
@@ -66,6 +72,9 @@ public class SessionController {
     @ApiOperation(value = "删除用户登录Session回话", notes = "注意此接口将清理所有应用的登录信息")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/cleanupPrincipal")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
+    })
     public JsonResponse cleanupPrincipal(String username) {
         Map<String, Long> delPrincipal = Maps.newHashMap();
         Set<String> keys = RedisUtil.globalKeys(ApplicationConstants.STAR+":org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:"+username);
@@ -85,13 +94,24 @@ public class SessionController {
 
     @ApiOperation(value = "删除用户Cookie", notes = "注意此接口将清理所有应用的cookie")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
-    @PostMapping("/cleanupCookie")
-    public JsonResponse cleanupCookie(String cookie) {
+    @PostMapping("/cleanCookie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cookie", value = "用户cookie", dataType = "String", paramType = "query", required = true)
+    })
+    public JsonResponse cleanCookie(@RequestParam String cookie) {
         Long number2 = RedisUtil.mulDelete(cookie);
         log.debug("try to remove {} return {}", cookie, number2);
         Map<String, Long> delCache = Maps.newHashMap();
         delCache.put("cookie", number2);
         return JsonResponse.success(delCache);
+    }
+
+    @ApiOperation(value = "清理分布式事务锁", notes = "注意此接口将清理所有应用的分布式锁")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/cleanRedisLock")
+    public JsonResponse cleanRedisLock() {
+        Long ret = RedisUtil.cleanRedisLock();
+        return JsonResponse.success(String.format("共计清理%s个", String.valueOf(ret)));
     }
 
 }

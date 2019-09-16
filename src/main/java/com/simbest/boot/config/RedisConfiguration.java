@@ -6,6 +6,7 @@ package com.simbest.boot.config;
 import com.google.common.collect.Maps;
 import com.simbest.boot.component.distributed.lock.DistributedLockFactoryBean;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.util.redis.RedisUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
@@ -295,7 +296,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @PreDestroy
     public void destroy() {
         if(null != redissonClient) {
-            redissonClient.shutdown(); //RedisConfiguration.redissonClient()申明创建出来的RedissonClient的shutdown执行真正的销毁redissonClient
+            Long ret = RedisUtil.cleanRedisLock();
+            log.debug("共计清理Redis分布式事务锁【{}】个", ret);
+//            redissonClient.shutdown(); //RedisConfiguration.redissonClient()申明创建出来的RedissonClient的shutdown执行真正的销毁redissonClient
             log.debug("Congratulations------------------------------------------------Redis 进程实例已销毁成功");
         }
     }

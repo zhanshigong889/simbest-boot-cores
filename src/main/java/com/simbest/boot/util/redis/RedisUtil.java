@@ -7,6 +7,7 @@ import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.redis.connection.DataType;
@@ -25,6 +26,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_LOCK_KEY_PREFIX;
+import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_REDIS_LOCK;
 
 /**
  * 用途：Redis客户端工具类
@@ -1521,4 +1525,15 @@ public class RedisUtil {
 	public static Cursor<TypedTuple<String>> zScan(String key, ScanOptions options) {
 		return cacheUtils.redisTemplate.opsForZSet().scan(prefix+key, options);
 	}
+
+
+	public static Long cleanRedisLock(){
+        log.debug("清理分布式事务锁................................");
+        Long ret1 = RedisUtil.mulDelete(REDISSON_LOCK_KEY_PREFIX);
+        log.debug("累计删除Key键【{}】共计【{}】个", REDISSON_LOCK_KEY_PREFIX, ret1);
+        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys( REDISSON_REDIS_LOCK + ApplicationConstants.STAR);
+        Long ret2 = RedisUtil.getRedisTemplate().delete(lockKeys);
+        log.debug("计划删除锁键共计【{}】个，锁键分别是【{}】，共计成功【{}】个", lockKeys.size(), StringUtils.joinWith(ApplicationConstants.COMMA, lockKeys), ret2);
+        return ret1 + ret2;
+    }
 }
