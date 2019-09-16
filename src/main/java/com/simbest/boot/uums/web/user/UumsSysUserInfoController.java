@@ -572,5 +572,15 @@ public class UumsSysUserInfoController {
                                         @RequestParam(required = false) String appcode) {
         return JsonResponse.success( uumsSysUserinfoApi.findUserTreeBz(mapParam,appcode) );
     }
+
+    /**
+     * 获取管理层
+     * @return
+     */
+    @ApiOperation(value = "获取管理层", notes = "获取管理层", tags = {"获取管理层"})
+    @PostMapping(value = {"/findLeaderShip","/sso/findLeaderShip"})
+    public JsonResponse findManagement(@RequestParam(required = false) String appcode) {
+        return uumsSysUserinfoApi.findLeaderShip(appcode);
+    }
 }
 
