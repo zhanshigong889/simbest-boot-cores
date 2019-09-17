@@ -58,6 +58,9 @@ public class UumsSysUserinfoApi {
     private ApiRequestHandle<SimpleUser> simpleUserApiHandle;
 
     @Autowired
+    private ApiRequestHandle<Set<SimpleUser>> setSimpleUserApiHandle;
+
+    @Autowired
     private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
 
     @Autowired
@@ -926,6 +929,24 @@ public class UumsSysUserinfoApi {
                 .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
                 .asBean(JsonResponse.class);
         return response;
+    }
+
+    /**
+     * 根据corpId和userType出人员
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public Set<SimpleUser> findUserFromCorpType(Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserFromCorpType"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return setSimpleUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<SimpleUser>>(){});
     }
 
 }
