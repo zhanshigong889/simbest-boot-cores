@@ -582,5 +582,19 @@ public class UumsSysUserInfoController {
     public JsonResponse findManagement(@RequestParam(required = false) String appcode) {
         return uumsSysUserinfoApi.findLeaderShip(appcode);
     }
+
+    /**
+     * 组织查人之根据orgCode获取组织下的人,包含这些人的组织、职务、角色等扩展属性，分页
+     * @param page
+     * @param size
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    @ApiOperation(value = "组织查人之根据orgCode获取组织下的人,包含这些人的组织、职务、角色等扩展属性，分页", notes = "组织查人之根据orgCode获取组织下的人,包含这些人的组织、职务、角色等扩展属性，分页", tags = {"人员api 组织查人"})
+    @PostMapping(value = {"/findUserIncludeExtensionByOrgCode","/sso/findUserIncludeExtensionByOrgCode"})
+    public JsonResponse findUserIncludeExtensionByOrgCode(@RequestParam(required = false) int page,@RequestParam(required = false)  int size,@RequestBody(required = false)Map<String,Object> mapParam,@RequestParam(required = false) String appcode) {
+        return JsonResponse.success( uumsSysUserinfoApi.findUserIncludeExtensionByOrgCode( page,   size,  null,   null,mapParam,  appcode) );
+    }
 }
 
