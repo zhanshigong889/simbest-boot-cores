@@ -146,6 +146,8 @@ public class UumsSysOrgApi {
         return orgList;
     }
 
+
+
     /**
      * 查看某个父组织的子组织,返回树形结构UserOrgTree
      * @param appcode
