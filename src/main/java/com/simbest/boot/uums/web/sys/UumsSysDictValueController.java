@@ -7,8 +7,6 @@ import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.sys.model.SysDictValue;
 import com.simbest.boot.uums.api.sys.UumsSysDictValueApi;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,16 +31,11 @@ public class UumsSysDictValueController {
 
 
     /**
-     * 获取全部应用职位列表无分页
-     * @param appcode
-     * @param sysAppMap
+     * pc单表条件查询
+     * @param sysDictValue
      * @return
      */
-    @ApiOperation(value = "单表条件查询", notes = "单表条件查询")
-    @ApiImplicitParams ({ //
-            @ApiImplicitParam(name = "appcode", value = "应用编码", dataType = "String", paramType = "query", //
-                    required = true, example = "1")
-    })
+    @ApiOperation(value = "pc单表条件查询", notes = "pc单表条件查询")
     @PostMapping("/findDictValue")
     public JsonResponse findDictValue(@RequestBody SysDictValue sysDictValue) {
         List<SysDictValue> list =uumsSysDictValueApi.findDictValue(sysDictValue);
