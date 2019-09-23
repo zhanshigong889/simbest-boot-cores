@@ -227,7 +227,7 @@ public class UumsSysRoleApi {
     public SimpleRole findRoleByRoleCode (String appcode,String roleCode) {
         String username = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", username);
-        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findById"+SSO)
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findRoleByRoleCode"+SSO)
                 .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
                 .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode )
                 .param("roleCode", roleCode)
