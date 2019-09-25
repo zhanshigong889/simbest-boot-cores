@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.poi.ss.formula.functions.T;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;

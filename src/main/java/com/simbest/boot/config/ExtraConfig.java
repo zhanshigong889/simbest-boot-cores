@@ -15,8 +15,9 @@ import org.springframework.core.env.Environment;
  * 时间: 2018/5/28  18:04
  */
 @Configuration
-@PropertySources(value = {@PropertySource("classpath:extra.properties")})
+@PropertySources(value = {@PropertySource(value = {"classpath:extra.properties", "classpath:application.properties"})})
 public class ExtraConfig {
+
     @Autowired
     private Environment environment;
 

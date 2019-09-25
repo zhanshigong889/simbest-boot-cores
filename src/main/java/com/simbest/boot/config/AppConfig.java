@@ -160,7 +160,6 @@ public class AppConfig {
         log.info("多线程最大线程数【{}】", threadMaxPoolSize);
         log.info("多线程缓冲队列【{}】", threadQueueCapacity);
         log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
-
     }
 
 }
