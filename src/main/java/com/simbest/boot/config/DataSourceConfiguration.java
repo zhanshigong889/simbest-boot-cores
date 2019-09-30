@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 
@@ -27,6 +28,16 @@ public class DataSourceConfiguration {
     @ConfigurationProperties(prefix = "spring.datasource.druid")
     public DataSource defaultDataSource() {
         return DruidDataSourceBuilder.create().build();
+    }
+
+    @Bean(name = "jdbcTemplate")
+    public JdbcTemplate jdbcTemplate(@Qualifier("dataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
+    @Bean(name = "namedParameterJdbcTemplate")
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate( @Qualifier("dataSource") DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 
     /**
