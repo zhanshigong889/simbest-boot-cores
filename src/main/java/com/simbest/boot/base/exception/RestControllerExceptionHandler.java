@@ -49,7 +49,7 @@ public class RestControllerExceptionHandler {
      * @return JsonResponse
      */
     private JsonResponse handleException(HttpServletRequest req, Exception e) {
-        log.warn("执行请求【{}】发生异常", req.getRequestURL().toString());
+        log.error("执行请求【{}】发生异常", req.getRequestURL().toString());
         Exceptions.printException(e);
         JsonResponse response = GlobalExceptionRegister.returnErrorResponse(e);
         response.setPath(req.getRequestURL().toString());
