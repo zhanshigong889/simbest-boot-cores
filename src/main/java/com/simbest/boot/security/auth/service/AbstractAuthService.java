@@ -18,6 +18,7 @@ import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
 import com.simbest.boot.util.PhoneCheckUtil;
+import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
@@ -49,6 +50,10 @@ public abstract class AbstractAuthService implements IAuthService {
 
     protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
+    protected SpringContextUtil springContextUtil;
+
+    protected IAuthUserCacheService authUserCacheService;
+
     protected AppConfig appConfig;
 
     protected UumsSysUserinfoApi userinfoApi;
@@ -57,7 +62,11 @@ public abstract class AbstractAuthService implements IAuthService {
 
     private Oauth2RedisTokenStore oauth2RedisTokenStore;
 
-    public AbstractAuthService(AppConfig appConfig, UumsSysUserinfoApi userinfoApi, RedisOperationsSessionRepository redisOperationsSessionRepository, Oauth2RedisTokenStore oauth2RedisTokenStore){
+    public AbstractAuthService(SpringContextUtil springContextUtil, IAuthUserCacheService authUserCacheService,
+                               AppConfig appConfig, UumsSysUserinfoApi userinfoApi,
+                               RedisOperationsSessionRepository redisOperationsSessionRepository, Oauth2RedisTokenStore oauth2RedisTokenStore){
+        this.springContextUtil = springContextUtil;
+        this.authUserCacheService = authUserCacheService;
         this.appConfig = appConfig;
         this.userinfoApi = userinfoApi;
         this.redisOperationsSessionRepository = redisOperationsSessionRepository;
@@ -66,19 +75,29 @@ public abstract class AbstractAuthService implements IAuthService {
 
     @Override
     public IUser findByKey(String keyword, KeyType keyType) {
-        IUser user = userinfoApi.findByKey(keyword, keyType, appConfig.getAppcode());
+        IUser user = authUserCacheService.loadCacheUser(keyword);
+        if(null == user) {
+            user = userinfoApi.findByKey(keyword, keyType, appConfig.getAppcode());
+            if(null != user) {
+                authUserCacheService.saveOrUpdateCacheUser(user);
+            }
+        }
         log.debug("通过关键字【{}】和关键字类型【{}】应用代码【{}】获取用户信息为【{}】", keyword, keyType.name(), appConfig.getAppcode(), user);
         return user;
     }
 
     @Override
     public Set<? extends IPermission> findUserPermissionByAppcode(String username, String appcode) {
-        Set<IPermission> permissions = Sets.newHashSet();
-        Set<SimplePermission> simplePermissions = userinfoApi.findPermissionByAppUserNoSession(username, appcode);
-        if(null != simplePermissions && !simplePermissions.isEmpty()){
-            for(SimplePermission s : simplePermissions) {
-                permissions.add(s);
+        Set<IPermission> permissions = authUserCacheService.loadCacheUserPermission(username, appcode);
+        if(null == permissions) {
+            permissions = Sets.newHashSet();
+            Set<SimplePermission> simplePermissions = userinfoApi.findPermissionByAppUserNoSession(username, appcode);
+            if(null != simplePermissions && !simplePermissions.isEmpty()){
+                for(SimplePermission s : simplePermissions) {
+                    permissions.add(s);
+                }
             }
+            authUserCacheService.saveOrUpdateCacheUserPermission(username, appcode, permissions);
         }
         log.debug("用户【{}】从应用【{}】获取到【{}】权限", username, appcode, permissions.size());
         return permissions;
@@ -86,7 +105,12 @@ public abstract class AbstractAuthService implements IAuthService {
 
     @Override
     public boolean checkUserAccessApp(String username, String appcode) {
-        return userinfoApi.checkUserAccessAppNoSession(username, appcode);
+        Boolean isPermit = authUserCacheService.loadCacheUserAccess(username, appcode);
+        if(null == isPermit) {
+            isPermit = userinfoApi.checkUserAccessAppNoSession(username, appcode);
+            authUserCacheService.saveOrUpdateCacheUserAccess(username, appcode, isPermit);
+        }
+        return isPermit;
     }
 
     @Override
@@ -146,14 +170,14 @@ public abstract class AbstractAuthService implements IAuthService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDetails userDetails = null;
         try {
-            userDetails = userinfoApi.findByUsername(username, appConfig.getAppcode());
+            if (PhoneCheckUtil.isPhoneLegal(username)) {
+                userDetails = findByKey(username, KeyType.preferredMobile);
+            }
+            if (null == userDetails) {
+                userDetails = findByKey(username, KeyType.username);
+            }
         } catch (Exception e){
-            log.debug("通过SSO单点调用findByUsername获取用户认证主体信息发生异常【{}】", e.getMessage());
-        }
-        //用户名，可能是手机号码，所以再尝试一次
-        if(null == userDetails && PhoneCheckUtil.isPhoneLegal(username)){
-            log.debug("通过SSO单点调用findByUsername获取用户认证主体信息发生异常，但由于用户名是手机号，即将尝试通过手机号码提取用户认证主体信息【{}】", username);
-            userDetails = userinfoApi.findByKey(username, KeyType.preferredMobile, appConfig.getAppcode());
+            log.debug("通过SSO单点调用findByKey获取用户认证主体信息发生异常【{}】", e.getMessage());
         }
         log.debug("通过用户名【{}】和应用代码【{}】提取到的用户信息为【{}】", username, appConfig.getAppcode(), userDetails);
         if(null == userDetails){
