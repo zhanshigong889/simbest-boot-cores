@@ -13,7 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -39,9 +40,16 @@ public class SsoAuthenticationRegister {
         return sortedSet;
     }
 
-    public String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType){
+    public String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType) {
         String decodeKeyword = null;
         for(SsoAuthenticationService decryptService : getSsoAuthenticationService()) {
+            //防止从前端 加密后的参数通过浏览器后，+之类的字符变成空格
+            try {
+                encodeKeyword = URLDecoder.decode(encodeKeyword,"UTF-8");
+            } catch ( UnsupportedEncodingException e ) {
+                //不支持该字符编码方式
+                log.error("解密参数时，发现不支持该字符编码方式(UTF-8)，关键字【{}】和关键字类型【{}】,请立即检查！", encodeKeyword, keyType);
+            }
             decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
             if(StringUtils.isNotEmpty(decodeKeyword)) {
                 log.debug("通过关键字【{}】解密后为【{}】", encodeKeyword, decodeKeyword);
