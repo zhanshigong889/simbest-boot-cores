@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.util.redis.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -33,17 +34,20 @@ import java.util.Set;
  * 作者: lishuyi
  * 时间: 2018/4/25  23:49
  */
-@Api(description = "SessionController", tags = {"权限管理-Session会话管理"})
+@Api(description = "SysAdminController", tags = {"系统管理-通用维护管理"})
 @Slf4j
 @RestController
 @RequestMapping("/sys/admin")
-public class SessionController {
+public class SysAdminController {
 
     @Autowired
     private SessionRegistry sessionRegistry;
 
     @Autowired
     protected IAuthService authService;
+
+    @Autowired
+    private IAuthUserCacheService authUserCacheService;
 
     @Autowired
     protected RedisOperationsSessionRepository redisOperationsSessionRepository;
@@ -106,12 +110,21 @@ public class SessionController {
         return JsonResponse.success(delCache);
     }
 
+
     @ApiOperation(value = "清理分布式事务锁", notes = "注意此接口将清理所有应用的分布式锁")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/cleanRedisLock")
     public JsonResponse cleanRedisLock() {
         Long ret = RedisUtil.cleanRedisLock();
         return JsonResponse.success(String.format("共计清理%s个", String.valueOf(ret)));
+    }
+
+    @ApiOperation(value = "清理认证用户的所有身份缓存信息", notes = "清理认证用户的所有身份缓存信息")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/cleanAuthUserCache")
+    public JsonResponse cleanAuthUserCache(String username) {
+        authUserCacheService.removeCacheUserAllInformaitions(username);
+        return JsonResponse.defaultSuccessResponse();
     }
 
 }
