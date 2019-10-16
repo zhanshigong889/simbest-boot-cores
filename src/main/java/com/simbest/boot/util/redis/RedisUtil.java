@@ -95,7 +95,7 @@ public class RedisUtil {
      * @param key
      */
     public static Long mulDelete(String pattern) {
-        Set<String> keys = cacheUtils.redisTemplate.keys(ApplicationConstants.STAR + pattern + ApplicationConstants.STAR);
+        Set<String> keys = cacheUtils.redisTemplate.keys(prefix + pattern + ApplicationConstants.STAR);
         return cacheUtils.redisTemplate.delete(keys);
     }
 
