@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.component;
 
+import com.simbest.boot.util.redis.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Connector;
 import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
@@ -46,6 +47,8 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
                         log.error("Tomcat线程池未能彻底关闭，请检查应用代码！！！");
                     }
                 }
+                //程序销毁的时候 删除reids缓存中放的tmp开头的临时变量
+                RedisUtil.mulDelete( "tmp" );
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
