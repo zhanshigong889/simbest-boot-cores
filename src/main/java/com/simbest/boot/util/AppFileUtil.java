@@ -10,7 +10,6 @@ import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.model.SysFile;
-import com.simbest.boot.sys.web.SysFileController;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -508,7 +507,7 @@ public class AppFileUtil {
      * 创建临时后缀临时文件
      * @return
      */
-    public static File createTempFile(){
+    public File createTempFile(){
         return createTempFile(CodeGenerator.randomChar(4));
     }
 
@@ -517,10 +516,12 @@ public class AppFileUtil {
      * @param suffix
      * @return
      */
-    public static File createTempFile(String suffix){
+    public File createTempFile(String suffix){
         File tempFile = null;
         try {
-            tempFile = File.createTempFile(CodeGenerator.randomChar(4), ApplicationConstants.DOT + suffix);
+            tempFile = new File(config.getUploadTmpFileLocation());
+            FileUtils.touch(tempFile);
+            //tempFile = File.createTempFile(CodeGenerator.randomChar(4), ApplicationConstants.DOT + suffix);
         } catch (IOException e) {
             Exceptions.printException(e);
         }
@@ -544,9 +545,20 @@ public class AppFileUtil {
                 realFile = downloadFromUrl(getFileUrlFromFastDfs(filePath));
                 break;
             case sftp:
-                String dir = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SLASH);
-                String filepath = StringUtils.substringAfterLast(filePath, ApplicationConstants.SLASH);
-                realFile = sftpUtil.download2File(dir, filepath, createTempFile(getFileSuffix(filePath)));
+                //下载文件时每次打开-关闭FTP太费资源。因此，隐藏下面代码，改为配置Nginx的虚拟目录，直接提供URL进行下载
+//                String directory = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SLASH);
+//                String downloadFile = StringUtils.substringAfterLast(filePath, ApplicationConstants.SLASH);
+//                realFile = sftpUtil.download2File(directory, downloadFile, createTempFile(getFileSuffix(filePath)));
+
+                //Nginx的虚拟目录参考
+//                location  /应用上下文名称/anyfile/ {
+//                        alias app.file.upload.path/;
+//                        autoindex on;
+//                }
+                String nginxFileUrl = StringUtils.replace(filePath, config.getUploadPath(), config.getAppHostPort()
+                        .concat(config.getContextPath()).concat("/anyfile"));
+                log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
+                realFile = downloadFromUrl(nginxFileUrl);
                 break;
         }
         return realFile;
