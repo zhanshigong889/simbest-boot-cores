@@ -519,7 +519,7 @@ public class AppFileUtil {
     public File createTempFile(String suffix){
         File tempFile = null;
         try {
-            tempFile = new File(config.getUploadTmpFileLocation());
+            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(CodeGenerator.systemUUID()+ApplicationConstants.DOT+suffix));
             FileUtils.touch(tempFile);
             //tempFile = File.createTempFile(CodeGenerator.randomChar(4), ApplicationConstants.DOT + suffix);
         } catch (IOException e) {
