@@ -89,6 +89,7 @@ public class ApplicationConstants {
     public final static int REDIS_LOCK_RELEASE_TIMEOUT = 10;
     public final static int REDIS_LOCK_TIMEOUT = 2;
     public final static TimeUnit REDIS_LOCK_DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
+    public final static String REDIS_TEMP_KEY = "_redis_tmp_";
     public final static String  MASTER_HOST = "master_ip";
     public final static String  MASTER_PORT = "master_port";
     public final static String  MASTER_LOCK = "master_lock";

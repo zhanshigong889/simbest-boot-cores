@@ -114,7 +114,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
         if (sysFile != null) {
             ExcelUtil<T> importUtil = new ExcelUtil<>(clazz);
-            File tempFile = AppFileUtil.createTempFile();
+            File tempFile = appFileUtil.createTempFile();
             try {
                 multipartFile.transferTo(tempFile);
                 List<T> listData = importUtil.importExcel(sheetName, new FileInputStream(tempFile));
@@ -134,7 +134,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
         if (sysFile != null) {
             ExcelUtil<T> importUtil = new ExcelUtil<>(clazz);
-            File tempFile = AppFileUtil.createTempFile();
+            File tempFile = appFileUtil.createTempFile();
             try {
                 multipartFile.transferTo(tempFile);
                 List<T> listData = importUtil.importExcel(sheetName, new FileInputStream(tempFile),inputRow);
@@ -154,7 +154,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         SysFile sysFile = uploadProcessFile(multipartFile, pmInsType, pmInsId, pmInsTypePart);
         if (sysFile != null) {
             ExcelUtil<T> importUtil = new ExcelUtil<>(clazz);
-            File tempFile = AppFileUtil.createTempFile();
+            File tempFile = appFileUtil.createTempFile();
             try {
                 multipartFile.transferTo(tempFile);
                 Map<String, List<T>> mapData = importUtil.importExcel(new FileInputStream(tempFile));

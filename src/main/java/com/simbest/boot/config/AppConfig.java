@@ -122,6 +122,8 @@ public class AppConfig {
     @Value("${thread.keep.alive.seconds:60}")
     private int threadKeepAliveSeconds;
 
+    private String uploadTmpFileLocation;
+
     //简单实时短信接口配置
     @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
     private String smsAccount;
@@ -160,6 +162,9 @@ public class AppConfig {
         log.info("多线程最大线程数【{}】", threadMaxPoolSize);
         log.info("多线程缓冲队列【{}】", threadQueueCapacity);
         log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
+        uploadTmpFileLocation = System.getProperty("user.dir").concat("/springboottmp").concat(contextPath);
+        log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
     }
+
 
 }

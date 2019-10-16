@@ -38,7 +38,7 @@ public class EmbeddedServletConfiguration {
 
     @Bean
     public GracefulShutdown gracefulShutdown() {
-        return new GracefulShutdown();
+        return new GracefulShutdown(appConfig);
     }
 
     @Bean
@@ -77,8 +77,7 @@ public class EmbeddedServletConfiguration {
             tomcat.addAdditionalTomcatConnectors(createStandardConnector());
         }
 
-        //根据kill PID信号，执行应用关闭销毁前的动作
-        log.debug("【{}】即将被关闭，开始销毁前清理工作................................", appConfig.getAppcode());
+        //增加根据kill PID信号，执行应用关闭销毁前的动作
         tomcat.addConnectorCustomizers(gracefulShutdown);
 
         return tomcat;
