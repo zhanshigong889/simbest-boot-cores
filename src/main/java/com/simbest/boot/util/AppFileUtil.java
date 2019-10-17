@@ -212,7 +212,7 @@ public class AppFileUtil {
                         break;
                 }
                 Assert.notNull(filePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
-                SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename))
+                SysFile sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename)).storeLocation(serverUploadLocation)
                         .filePath(StringUtils.replace(filePath, ApplicationConstants.SEPARATOR, ApplicationConstants.SLASH))
                         .fileSize(multipartFile.getSize()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
                         .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
