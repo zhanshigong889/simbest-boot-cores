@@ -99,29 +99,6 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @param response
      * @throws Exception
      */
-//    @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
-//    @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO})
-//    public void uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
-//        response.setContentType("text/html; charset=UTF-8");
-//        response.setCharacterEncoding("UTF-8");
-//        PrintWriter out = response.getWriter();
-//        MultipartHttpServletRequest mureq = (MultipartHttpServletRequest) request;
-//        Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
-//        List<SysFile> sysFiles = fileService.uploadProcessFiles(multipartFiles.values(), request.getParameter("pmInsType"), request.getParameter("pmInsId"),
-//                request.getParameter("pmInsTypePart"));
-//        JsonResponse jsonResponse;
-//        if(!sysFiles.isEmpty()) {
-//            UploadFileResponse uploadFileResponse = new UploadFileResponse();
-//            uploadFileResponse.setSysFiles(sysFiles);
-//            jsonResponse = JsonResponse.success(uploadFileResponse);
-//        } else {
-//            jsonResponse = JsonResponse.defaultErrorResponse();
-//        }
-//        String result = "<script type=\"text/javascript\">parent.result="+JacksonUtils.obj2json(jsonResponse)+"</script>";
-//        out.println(result);
-//        out.close();
-//    }
-
     @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
     @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO, UPLOAD_PROCESS_FILES_URL_API})
     public void uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
@@ -204,11 +181,11 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @throws Exception
      */
     @GetMapping(value = {OPEN_URL, OPEN_URL_SSO, OPEN_URL_API})
-    public String open(@RequestParam("id") String id) throws Exception{
+    public String open(@RequestParam("id") String id) throws Exception {
         SysFile sysFile = fileService.findById(id);
-        log.debug("Want access file online url is {}", sysFile.getFilePath());
+        log.debug("尝试预览文件地址为【{}】", sysFile.getFilePath());
         String redirectUrl = config.getAppHostPort()+"/webOffice/?furl="+ WebOffice3Des.encode(appFileUtil.getFileUrlFromFastDfs(sysFile.getFilePath()));
-        log.warn("webOfficeUrl is :"+redirectUrl);
+        log.debug("转换后webOfficeUrl地址为【{}】", redirectUrl);
         return "redirect:"+redirectUrl;
     }
 
@@ -219,9 +196,10 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @throws Exception
      */
     @GetMapping(value = {"/openurl", "/openurl/sso", "/openurl/api"})
-    public String openurl(String url) throws Exception{
+    public String openurl(String url) throws Exception {
+        log.debug("尝试预览文件地址为【{}】", url);
         String redirectUrl = config.getAppHostPort()+"/webOffice/?furl="+ WebOffice3Des.encode(url);
-        log.warn("webOfficeUrl is :"+redirectUrl);
+        log.debug("转换后webOfficeUrl地址为【{}】", redirectUrl);
         return "redirect:"+redirectUrl;
     }
 

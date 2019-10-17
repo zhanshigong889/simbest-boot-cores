@@ -6,6 +6,7 @@ package com.simbest.boot.util;
 
 import com.github.stuxuhai.jpinyin.ChineseHelper;
 import com.google.common.collect.Lists;
+import com.simbest.boot.base.enums.StoreLocation;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
@@ -77,9 +78,7 @@ public class AppFileUtil {
 
     private AppFileSftpUtil sftpUtil;
 
-    public static StoreLocation serverUploadLocation = null;
-
-    public enum StoreLocation {disk, fastdfs, sftp}
+    public StoreLocation serverUploadLocation;
 
     @PostConstruct
     public void init() {
@@ -531,10 +530,21 @@ public class AppFileUtil {
 
     /**
      * 从系统中下载文件
-     * @param filePath
+     * @param sysFile
      * @return
      */
-    public File getFileFromSystem(String filePath){
+    public File getFileFromSystem(SysFile sysFile){
+        if(null == sysFile.getStoreLocation()){
+            return getFileFromSystem(serverUploadLocation, sysFile.getFilePath());
+        }
+        else{
+            return getFileFromSystem(sysFile.getStoreLocation(), sysFile.getFilePath());
+        }
+    }
+
+    private File getFileFromSystem(StoreLocation serverUploadLocation, String filePath){
+        Assert.notNull(serverUploadLocation, "文件保存位置不能为空!");
+        Assert.notNull(serverUploadLocation, "文件路径不能为空!");
         File realFile = null;
         log.debug("即将以【{}】方式读取文件【{}】",serverUploadLocation, filePath);
         switch (serverUploadLocation) {
@@ -565,7 +575,7 @@ public class AppFileUtil {
     }
 
     /**
-     * 获取保存在FastDfs中的文件访问路径
+     * 获取保存在FastDfs中的文件访问路径(免登陆)
      * @param filePath
      * @return
      */
@@ -634,44 +644,54 @@ public class AppFileUtil {
         return UrlFile.builder().remoteFileUrl(remoteFileUrl).conn(urlConnection).connUrl(connUrl).fileName(fileName).fileSuffix(suffix).build();
     }
 
-    public int deleteFile(String filePath) {
-        int result = 0;
-        log.debug("Will remove file at {}, and filePath is {}", serverUploadLocation, filePath);
-        if (StringUtils.isNotEmpty(filePath)) {
-            switch (serverUploadLocation) {
-                case disk:
-                    try {
-                        FileUtils.forceDelete(new File(filePath));
-                    } catch (Exception e) {
-                        result = -1;
-                        Exceptions.printException(e);
-                    }
-                    break;
-                case fastdfs:
-                    try {
-                        FastDfsClient.deleteFile(filePath);
-                    } catch (Exception e) {
-                        result = -1;
-                        Exceptions.printException(e);
-                    }
-                    break;
-                case sftp:
-                    try {
-                        sftpUtil.delFile(filePath);
-                    } catch (Exception e) {
-                        result = -1;
-                        Exceptions.printException(e);
-                    }
-                    break;
-                default:
-                    break;
-            }
+    /**
+     * 物理删除文件
+     * @param sysFile
+     * @return
+     */
+    public boolean deleteFile(SysFile sysFile) {
+        if(null == sysFile.getStoreLocation()){
+            return deleteFile(serverUploadLocation, sysFile.getFilePath());
         }
-        return result;
+        else{
+            return deleteFile(sysFile.getStoreLocation(), sysFile.getFilePath());
+        }
     }
 
-    public static void setServerUploadLocation(StoreLocation serverUploadLocation) {
-        AppFileUtil.serverUploadLocation = serverUploadLocation;
+    private boolean deleteFile(StoreLocation serverUploadLocation, String filePath) {
+        Assert.notNull(serverUploadLocation, "文件保存位置不能为空!");
+        Assert.notNull(serverUploadLocation, "文件路径不能为空!");
+        boolean result = ApplicationConstants.TRUE;
+        log.debug("即将以【{}】方式删除文件【{}】",serverUploadLocation, filePath);
+        switch (serverUploadLocation) {
+            case disk:
+                try {
+                    FileUtils.forceDelete(new File(filePath));
+                } catch (Exception e) {
+                    result = ApplicationConstants.FALSE;
+                    Exceptions.printException(e);
+                }
+                break;
+            case fastdfs:
+                try {
+                    FastDfsClient.deleteFile(filePath);
+                } catch (Exception e) {
+                    result = ApplicationConstants.FALSE;
+                    Exceptions.printException(e);
+                }
+                break;
+            case sftp:
+                try {
+                    sftpUtil.delFile(filePath);
+                } catch (Exception e) {
+                    result = ApplicationConstants.FALSE;
+                    Exceptions.printException(e);
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     /**

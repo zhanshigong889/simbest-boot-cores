@@ -1,6 +1,7 @@
 package com.simbest.boot.sys.service.impl;
 
 import com.google.common.collect.Lists;
+import com.simbest.boot.base.enums.StoreLocation;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.service.impl.LogicService;
 import com.simbest.boot.config.AppConfig;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -49,10 +51,17 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     @Autowired
     private SpringContextUtil springContextUtil;
 
+    public StoreLocation serverUploadLocation;
+
     @Autowired
     public SysFileService(SysFileRepository repository) {
         super(repository);
         this.repository = repository;
+    }
+
+    @PostConstruct
+    public void init() {
+        serverUploadLocation = Enum.valueOf(StoreLocation.class, config.getUploadLocation());
     }
 
     @Override
@@ -78,7 +87,6 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 String mobileFilePath = null;
                 String apiFilePath = null;
                 String anonymousFilePath = null;
-                AppFileUtil.StoreLocation serverUploadLocation = Enum.valueOf(AppFileUtil.StoreLocation.class, config.getUploadLocation());
                 switch (serverUploadLocation) {
                     case disk:
                         mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
@@ -172,7 +180,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     @Override
     public File getRealFileById(String id) {
         SysFile sysFile = this.findById(id);
-        return appFileUtil.getFileFromSystem(sysFile.getFilePath());
+        return appFileUtil.getFileFromSystem(sysFile);
     }
 
     @Override
@@ -181,7 +189,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         SysFile sysFile = this.findById(id);
         String filePath = sysFile.getFilePath();
         super.deleteById(id);
-        int result = appFileUtil.deleteFile(filePath);
-        log.warn("Delete file result is {}", result);
+        boolean result = appFileUtil.deleteFile(sysFile);
+        log.warn("物理删除文件结果为【{}】", result);
     }
 }
