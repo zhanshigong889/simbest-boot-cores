@@ -12,6 +12,7 @@ import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.model.SysFile;
 import com.simbest.boot.util.json.JacksonUtils;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -78,6 +79,7 @@ public class AppFileUtil {
 
     private AppFileSftpUtil sftpUtil;
 
+    @Getter
     public StoreLocation serverUploadLocation;
 
     @PostConstruct
@@ -542,7 +544,7 @@ public class AppFileUtil {
         }
     }
 
-    private File getFileFromSystem(StoreLocation serverUploadLocation, String filePath){
+    public File getFileFromSystem(StoreLocation serverUploadLocation, String filePath){
         Assert.notNull(serverUploadLocation, "文件保存位置不能为空!");
         Assert.notNull(serverUploadLocation, "文件路径不能为空!");
         File realFile = null;
@@ -658,7 +660,7 @@ public class AppFileUtil {
         }
     }
 
-    private boolean deleteFile(StoreLocation serverUploadLocation, String filePath) {
+    public boolean deleteFile(StoreLocation serverUploadLocation, String filePath) {
         Assert.notNull(serverUploadLocation, "文件保存位置不能为空!");
         Assert.notNull(serverUploadLocation, "文件路径不能为空!");
         boolean result = ApplicationConstants.TRUE;
