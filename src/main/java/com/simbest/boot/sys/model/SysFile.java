@@ -105,8 +105,8 @@ public class SysFile extends LogicModel {
     @Column(length = 500)
     private String anonymousFilePath;
 
-    @ApiModelProperty(value = "文件存储位置")
-    @Column(nullable = false, length = 10)
+    @ApiModelProperty(value = "文件存储方式")
+    @Column(length = 10)
     @Enumerated(EnumType.STRING)
     private StoreLocation storeLocation;
 
