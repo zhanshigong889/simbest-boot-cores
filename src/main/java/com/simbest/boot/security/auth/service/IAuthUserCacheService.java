@@ -5,6 +5,8 @@ package com.simbest.boot.security.auth.service;
 
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.util.redis.RedisUtil;
+import org.springframework.util.Assert;
 
 import java.util.Set;
 
@@ -88,6 +90,24 @@ public interface IAuthUserCacheService {
      */
     void removeCacheUserAccess(String username, String appcode);
     //===================================处理用户应用访问 END=========================================================//
+
+
+    //===================================处理用户密码 START=========================================================//
+    void saveOrUpdateCacheUserPassword(String username, String password, Boolean isRight);
+
+    /**
+     * 尝试从缓存中读取用户密码
+     * @param keyword
+     * @return
+     */
+    Boolean loadCacheUserPassword(String username, String password);
+
+    /**
+     * 清理用户应用访问
+     * @param user
+     */
+    void removeCacheUserPassword(String username);
+    //===================================处理用户密码 END=========================================================//
 
 
     /**

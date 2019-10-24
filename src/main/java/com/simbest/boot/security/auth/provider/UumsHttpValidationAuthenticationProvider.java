@@ -14,6 +14,8 @@ import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
+import com.simbest.boot.security.auth.service.IAuthUserCacheService;
+import com.simbest.boot.util.encrypt.RsaEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +46,15 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
     @Autowired
     private GenericAuthenticationChecker genericAuthenticationChecker;
 
+    @Autowired
+    private IAuthUserCacheService authUserCacheService;
+
+    @Autowired
+    private RsaEncryptor rsaEncryptor;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        boolean authResult = true;
         Object principal = authentication.getPrincipal();
         Object credentials = authentication.getCredentials();
         if (null != principal && credentials != null) {
@@ -55,21 +64,33 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                 String username = principal.toString();
                 String password = uumsCredentials.getPassword();
                 String appcode = uumsCredentials.getAppcode();
-                log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
-                JsonResponse response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
-                        .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
-                        .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
-                        .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
-                        .asBean(JsonResponse.class);
-                if(!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
-                    log.warn(LOGTAG + "UUMS认证用户 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
-                    throw new
-                            BadCredentialsException(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
-                }else {
+                Boolean cacheUserPassword = authUserCacheService.loadCacheUserPassword(username, rsaEncryptor.decrypt(password));
+                if(null != cacheUserPassword && cacheUserPassword){
+                    log.debug("用户名【{}】和密码【{}】在缓存中存在记录，即将到UUMS进行远程认证！");
+                }
+                else {
+                    log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
+                    JsonResponse response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
+                            .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
+                            .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
+                            .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                            .asBean(JsonResponse.class);
+                    if (!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
+                        authResult = false;
+                    }else{
+                        authUserCacheService.saveOrUpdateCacheUserPassword(username, rsaEncryptor.decrypt(password), true);
+                    }
+                }
+                if(authResult){
                     log.info(LOGTAG + "UUMS认证用户 【{}】 访问 【{}】 成功！", principal, uumsCredentials.getAppcode());
                     UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                             .password(password).appcode(appcode).build());
                     return genericAuthenticationChecker.authChek(authentication, appcode);
+                }
+                else{
+                    log.warn(LOGTAG + "UUMS认证用户 【{}】 访问 【{}】 失败, 错误信息: 【{}】", principal, uumsCredentials.getAppcode(), ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
+                    throw new
+                            BadCredentialsException(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
                 }
             }
             catch (BadCredentialsException e){

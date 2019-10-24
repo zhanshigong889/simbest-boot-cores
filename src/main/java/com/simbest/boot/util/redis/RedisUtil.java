@@ -131,9 +131,13 @@ public class RedisUtil {
 		return cacheUtils.redisTemplate.expire(prefix+key, timeout, unit);
 	}
 
+    public static Boolean expireGlobal(String key, long timeout, TimeUnit unit) {
+        return cacheUtils.redisTemplate.expire(key, timeout, unit);
+    }
+
 	/**
 	 * 设置过期时间
-	 * 
+	 *
 	 * @param key
 	 * @param date
 	 * @return
@@ -141,6 +145,17 @@ public class RedisUtil {
 	public static Boolean expireAt(String key, Date date) {
 		return cacheUtils.redisTemplate.expireAt(prefix+key, date);
 	}
+
+    /**
+     * 设置过期时间
+     *
+     * @param key
+     * @param date
+     * @return
+     */
+    public static Boolean expireGlobalAt(String key, Date date) {
+        return cacheUtils.redisTemplate.expireAt(key, date);
+    }
 
 	/**
 	 * 查找匹配的key
