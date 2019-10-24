@@ -596,5 +596,22 @@ public class UumsSysUserInfoController {
     public JsonResponse findUserIncludeExtensionByOrgCode(@RequestParam(required = false) int page,@RequestParam(required = false)  int size,@RequestBody(required = false)Map<String,Object> mapParam,@RequestParam(required = false) String appcode) {
         return JsonResponse.success( uumsSysUserinfoApi.findUserIncludeExtensionByOrgCode( page,   size,  null,   null,mapParam,  appcode) );
     }
+
+    /**
+     * 根据权限id查询此权限下的用户并分页
+     * @param page
+     * @param size
+     * @param id
+     * @param appcode
+     * @return
+     */
+    @ApiOperation(value = "根据权限id查询此权限下的用户并分页", notes = "根据权限id查询此权限下的用户并分页",tags={"人员 权限查人"})
+    @PostMapping(value = {"/findUserFromPerId","/findUserFromPerId/sso"})
+    public JsonResponse findUserFromPerId(@RequestParam(required = false, defaultValue = "1") int page,
+                                          @RequestParam(required = false, defaultValue = "10") int size,
+                                          @RequestParam(required = false) String id,
+                                          @RequestParam(required = false) String appcode) {
+        return  uumsSysUserinfoApi.findUserFromPerId( page, size,  id, appcode);
+    }
 }
 
