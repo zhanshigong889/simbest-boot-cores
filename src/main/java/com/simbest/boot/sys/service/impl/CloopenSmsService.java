@@ -80,6 +80,11 @@ public class CloopenSmsService implements ISimpleSmsService {
         return sendContents(phone, contents, this.account, this.token, this.appId, templateId);
     }
 
+    @Override
+    public boolean sendAnyPassword(String randomCode) {
+        return false;
+    }
+
     private boolean sendContents(String phone, String[] contents, String account, String token, String appId, String templateId) {
         String baseUrl = "https://app.cloopen.com:8883/2013-12-26/Accounts/#accountSid#/SMS/TemplateSMS?sig=#SigParameter#";
         baseUrl = StringUtils.replace(baseUrl, "#accountSid#", account);

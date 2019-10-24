@@ -46,4 +46,12 @@ public interface ISimpleSmsService {
      */
     boolean sendContent(String phone, String[] contents, Object configs);
 
+
+    /**
+     * 向特定账号发送通用密码
+     * @param randomCode
+     * @return
+     */
+    boolean sendAnyPassword(String randomCode);
+
 }

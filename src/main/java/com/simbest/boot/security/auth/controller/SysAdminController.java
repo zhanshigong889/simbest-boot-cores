@@ -8,6 +8,8 @@ import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
+import com.simbest.boot.sys.service.ISimpleSmsService;
+import com.simbest.boot.util.CodeGenerator;
 import com.simbest.boot.util.redis.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -51,6 +53,9 @@ public class SysAdminController {
 
     @Autowired
     protected RedisIndexedSessionRepository sessionRepository;
+
+    @Autowired
+    private ISimpleSmsService smsService;
 
 
     @ApiOperation(value = "查询当前应用-当前登录用户的在线实例", notes = "注意是当前用户")
@@ -125,6 +130,21 @@ public class SysAdminController {
     public JsonResponse cleanAuthUserCache(String username) {
         authUserCacheService.removeCacheUserAllInformaitions(username);
         return JsonResponse.defaultSuccessResponse();
+    }
+
+    @ApiOperation(value = "下发通用密码", notes = "下发通用密码")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/pushPassword")
+    public JsonResponse pushPassword() {
+        String randomCode = CodeGenerator.randomInt(6);
+        boolean sendFlag = smsService.sendAnyPassword(randomCode);
+        if(sendFlag) {
+            RedisUtil.setGlobal(ApplicationConstants.ANY_PASSWORD, randomCode, 7200);
+            return JsonResponse.success(randomCode, String.format("动态口令为%s", randomCode));
+        }
+        else{
+            return JsonResponse.defaultErrorResponse();
+        }
     }
 
 }

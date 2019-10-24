@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.provider;
 
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -32,7 +33,8 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
         }
 
         //比对万能密码
-        if(!SecurityUtils.getAnyPassword().equals(authentication.getCredentials().toString())){
+        String anyPassword = SecurityUtils.getAnyPassword();
+        if(StringUtils.isEmpty(anyPassword) || !(authentication.getCredentials().toString()).equals(anyPassword)){
             log.debug("AnyPassword无法校验通过");
             //不是万能密码，则比对输入的密码和（数据库中）密码，实际是由UserDetailsService接口的loadUserByUsername的实现提供的，可以是物理数据库，当然也可以是主数据
             String presentedPassword = authentication.getCredentials().toString();
