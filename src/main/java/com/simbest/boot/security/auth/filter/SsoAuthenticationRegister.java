@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
+import com.simbest.boot.util.UrlEncoderUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -45,7 +47,9 @@ public class SsoAuthenticationRegister {
         for(SsoAuthenticationService decryptService : getSsoAuthenticationService()) {
             //防止从前端 加密后的参数通过浏览器后，+之类的字符变成空格
             try {
-                encodeKeyword = URLDecoder.decode(encodeKeyword,"UTF-8");
+                if ( UrlEncoderUtils.hasUrlEncoded( encodeKeyword ) ){
+                    encodeKeyword = URLDecoder.decode(encodeKeyword,"UTF-8");
+                }
             } catch ( UnsupportedEncodingException e ) {
                 //不支持该字符编码方式
                 log.error("解密参数时，发现不支持该字符编码方式(UTF-8)，关键字【{}】和关键字类型【{}】,请立即检查！", encodeKeyword, keyType);
@@ -67,5 +71,15 @@ public class SsoAuthenticationRegister {
             log.error("遍历完所有SSO解密服务器，关键字【{}】和关键字类型【{}】依旧为空，请立即检查！", encodeKeyword, keyType);
         }
         return decodeKeyword;
+    }
+
+    public static void main ( String[] args ) {
+        try {
+            String en = URLEncoder.encode( "cq+DdHFotno=","UTF-8" );
+            System.out.println( en );
+            System.out.println(URLDecoder.decode( "cq+DdHFotno=","UTF-8" ));
+        } catch ( UnsupportedEncodingException e ) {
+            e.printStackTrace( );
+        }
     }
 }
