@@ -253,6 +253,10 @@ public class RedisUtil {
 		cacheUtils.redisTemplate.opsForValue().set(prefix+key, value);
 	}
 
+    public static void setGlobal(String key, String value) {
+        cacheUtils.redisTemplate.opsForValue().set(key, value);
+    }
+
     /**
      * 设置指定 key 的值
      * @param key
@@ -261,6 +265,10 @@ public class RedisUtil {
      */
     public static void set(String key, String value, int seconds) {
         cacheUtils.redisTemplate.opsForValue().set(prefix+key, value, seconds, TimeUnit.SECONDS);
+    }
+
+    public static void setGlobal(String key, String value, int seconds) {
+        cacheUtils.redisTemplate.opsForValue().set(key, value, seconds, TimeUnit.SECONDS);
     }
 
 	/**
@@ -272,8 +280,22 @@ public class RedisUtil {
 		return cacheUtils.redisTemplate.opsForValue().get(prefix+key);
 	}
 
+    public static String getGlobal(String key) {
+        return cacheUtils.redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 设置指定 key 的对象
+     * @param key
+     * @param obj
+     * @param <T>
+     */
     public static <T> void setBean(String key, T obj) {
         cacheUtils.redisTemplate.opsForValue().set(prefix + key, JacksonUtils.obj2json(obj));
+    }
+
+    public static <T> void setBeanGlobal(String key, T obj) {
+        cacheUtils.redisTemplate.opsForValue().set(key, JacksonUtils.obj2json(obj));
     }
 
     /**
@@ -288,6 +310,11 @@ public class RedisUtil {
         cacheUtils.redisTemplate.opsForValue().set(prefix + key, JacksonUtils.obj2json(obj), seconds, TimeUnit.SECONDS);
     }
 
+    public static <T> void setBeanGlobal(String key, T obj, int seconds) {
+        cacheUtils.redisTemplate.opsForValue().set(key, JacksonUtils.obj2json(obj), seconds, TimeUnit.SECONDS);
+    }
+
+
     /**
      * 取得复杂类型数据
      *
@@ -298,6 +325,15 @@ public class RedisUtil {
      */
     public static <T> T getBean(String key, Class<T> clazz) {
         String value = cacheUtils.redisTemplate.opsForValue().get(prefix + key);
+        if (null == value) {
+            return null;
+        } else {
+            return JacksonUtils.json2obj(value, clazz);
+        }
+    }
+
+    public static <T> T getBeanGlobal(String key, Class<T> clazz) {
+        String value = cacheUtils.redisTemplate.opsForValue().get(key);
         if (null == value) {
             return null;
         } else {

@@ -82,7 +82,7 @@ public class SysCustomFieldController extends LogicController<SysCustomField, St
         c.like("fieldClassify", "%" + fieldClassify + "%");
 
         // 生成排序规则
-        Sort sort = new Sort(Sort.Direction.ASC, "id");
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
         PageRequest pageable = PageRequest.of(page - 1, size, sort);
 
         Specification<SysCustomField> s = fieldService.getSpecification(c);

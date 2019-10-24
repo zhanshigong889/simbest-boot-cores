@@ -6,6 +6,7 @@ import com.simbest.boot.sys.model.SysLogLogin;
 import com.simbest.boot.sys.repository.SysLogLoginRepository;
 import com.simbest.boot.sys.service.ISysLogLoginService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,8 @@ public class SysLogLoginService extends GenericService<SysLogLogin, String> impl
     @Override
     public List<Map<String, Object>> countLogin(Map<String, ?> paramMap) {
         String selectSQL = "SELECT account, login_entry AS loginEntry, is_success AS isSuccess, count(*) AS count FROM SYS_LOG_LOGIN ";
-        String whereSQL = "WHERE 1=1 ";
+//        String whereSQL = "WHERE 1=1 "; //sql injection 漏洞
+        String whereSQL = " WHERE";
         String groupBySQL = "GROUP BY account, login_entry, is_success ";
 
         for(String property : paramMap.keySet()){
@@ -60,6 +62,7 @@ public class SysLogLoginService extends GenericService<SysLogLogin, String> impl
             }
         }
 
+        whereSQL = StringUtils.replace(whereSQL, "WHEREAND", "WHERE ");
         String querySQL = selectSQL+whereSQL+groupBySQL;
         log.debug("Query sql is : {} and parameter is {}", querySQL, paramMap);
         return dynamicRepository.queryNamedParameterForList(querySQL, paramMap);

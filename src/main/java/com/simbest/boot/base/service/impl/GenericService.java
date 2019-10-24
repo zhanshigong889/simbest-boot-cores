@@ -88,7 +88,7 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
             sortProperties = properties.split(",");
 
             // 生成排序规则
-            Sort sort = new Sort(sortDirection, sortProperties);
+            Sort sort = Sort.by(sortDirection, sortProperties);
             pageable = PageRequest.of(pagePage, pageSize, sort);
         } else {
             pageable = PageRequest.of(pagePage, pageSize);

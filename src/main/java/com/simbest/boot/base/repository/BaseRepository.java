@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -89,7 +90,7 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 			sortProperties = properties.split(",");
 
 			// 生成排序规则
-			Sort sort = new Sort(sortDirection, sortProperties);
+			Sort sort = Sort.by(sortDirection, sortProperties);
 			pageable = PageRequest.of(pagePage, pageSize, sort);
 		} else {
 			pageable = PageRequest.of(pagePage, pageSize);

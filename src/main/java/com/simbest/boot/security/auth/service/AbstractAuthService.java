@@ -34,7 +34,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
-import org.springframework.session.data.redis.RedisOperationsSessionRepository;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 
 import java.util.Map;
 import java.util.Set;
@@ -58,18 +58,18 @@ public abstract class AbstractAuthService implements IAuthService {
 
     protected UumsSysUserinfoApi userinfoApi;
 
-    private RedisOperationsSessionRepository redisOperationsSessionRepository;
+    private RedisIndexedSessionRepository sessionRepository;
 
     private Oauth2RedisTokenStore oauth2RedisTokenStore;
 
     public AbstractAuthService(SpringContextUtil springContextUtil, IAuthUserCacheService authUserCacheService,
                                AppConfig appConfig, UumsSysUserinfoApi userinfoApi,
-                               RedisOperationsSessionRepository redisOperationsSessionRepository, Oauth2RedisTokenStore oauth2RedisTokenStore){
+                               RedisIndexedSessionRepository sessionRepository, Oauth2RedisTokenStore oauth2RedisTokenStore){
         this.springContextUtil = springContextUtil;
         this.authUserCacheService = authUserCacheService;
         this.appConfig = appConfig;
         this.userinfoApi = userinfoApi;
-        this.redisOperationsSessionRepository = redisOperationsSessionRepository;
+        this.sessionRepository = sessionRepository;
         this.oauth2RedisTokenStore = oauth2RedisTokenStore;
     }
 
@@ -124,14 +124,20 @@ public abstract class AbstractAuthService implements IAuthService {
         Map<String, Long> delPrincipal = Maps.newHashMap();
         Set<String> keys = RedisUtil.globalKeys(ApplicationConstants.STAR + ":org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:" + newUser.getUsername());
         for (String key : keys) {
-            Set<Object> members = redisOperationsSessionRepository.getSessionRedisOperations().boundSetOps(key).members();
+            Set<Object> members = sessionRepository.getSessionRedisOperations().boundSetOps(key).members();
+
             //删除 spring:session:uums:index:org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:litingmin
-            Long number1 = RedisUtil.mulDelete(key);
-            log.debug("即将清理键值【{}】结果为【{}】", key, number1);
+            Set<String> redisKeys1 = RedisUtil.getRedisTemplate().keys(key + ApplicationConstants.STAR);
+            Long number1 = RedisUtil.getRedisTemplate().delete(redisKeys1);
+            log.debug("清理键值【{}】结果为【{}】", key, number1);
+
             //删除 spring:session:uums:sessions:expires:5749a7c5-3bbc-4797-b5fe-f0ab95f633be
+            Long members_size = sessionRepository.getSessionRedisOperations().boundSetOps(key).remove(members);
+            log.debug("清理键值成员结果为【{}】", members_size);
             for (Object member : members) {
-                Long number2 = RedisUtil.mulDelete(member.toString());
-                log.debug("即将清理键值【{}】结果为【{}】", member.toString(), number2);
+                Set<String> redisKeys2 = RedisUtil.getRedisTemplate().keys(member + ApplicationConstants.STAR);
+                Long number2 = RedisUtil.getRedisTemplate().delete(redisKeys2);
+                log.debug("清理键值【{}】结果为【{}】", member.toString(), number2);
             }
         }
         //清空当前会话--End

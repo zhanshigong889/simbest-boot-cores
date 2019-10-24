@@ -18,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -29,7 +28,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.Table;
 import javax.persistence.TypedQuery;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -39,7 +44,14 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -90,8 +102,7 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
 
     @Override
     public T findOneActive(ID id) {
-        return super.findOne(
-                Specifications.where(new ByIdSpecification<T, ID>(entityInformation, id)).and(notDeleted())).orElse(null);
+        return super.findOne(Specification.where(new ByIdSpecification<T, ID>(entityInformation, id)).and(notDeleted())).orElse(null);
     }
 
     @Override
@@ -136,7 +147,7 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
             return results;
         }
         ByIdsSpecification<T> specification = new ByIdsSpecification<T>(entityInformation);
-        TypedQuery<T> query = getQuery(Specifications.where(specification).and(notDeleted()), Sort.unsorted());
+        TypedQuery<T> query = getQuery(Specification.where(specification).and(notDeleted()), Sort.unsorted());
         return query.setParameter(specification.parameter, ids).getResultList();
     }
 
@@ -447,7 +458,7 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
     }
 
     private static final <T> Specification<T> notDeleted() {
-        return Specifications.where(new DeletedIsNull<T>()).or(new DeletedTimeGreatherThanNow<T>());
+        return Specification.where(new DeletedIsNull<T>()).or(new DeletedTimeGreatherThanNow<T>());
     }
 
     public static void main ( String[] args ) {

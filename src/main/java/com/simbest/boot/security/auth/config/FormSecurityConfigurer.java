@@ -111,7 +111,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
      * @throws Exception 异常
      */
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/css/**");
         web.ignoring().antMatchers("/js/**");
         web.ignoring().antMatchers("/fonts/**");

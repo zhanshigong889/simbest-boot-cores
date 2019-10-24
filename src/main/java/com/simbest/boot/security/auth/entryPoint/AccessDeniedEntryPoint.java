@@ -27,7 +27,7 @@ public class AccessDeniedEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException) throws IOException {
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
-        log.warn("无权限访问，即将返回HttpStatus.UNAUTHORIZED，状态码【{}】", HttpStatus.UNAUTHORIZED.value());
+        log.warn("无权限访问【{}】，即将返回HttpStatus.UNAUTHORIZED，状态码【{}】", request.getRequestURI(), HttpStatus.UNAUTHORIZED.value());
         response.getWriter().print(JacksonUtils.obj2json(JsonResponse.unauthorized(request, authException)));
     }
 }

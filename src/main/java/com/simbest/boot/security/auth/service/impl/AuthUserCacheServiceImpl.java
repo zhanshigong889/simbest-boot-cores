@@ -100,22 +100,24 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
      */
     public IUser loadCacheUser(String keyword) {
         String userId = redisAuthUserKeyOps.get(getUserCacheKey(keyword));
+        log.debug("通过关键字【{}】获取到用户主键ID为【{}】", getUserCacheKey(keyword), userId);
         if(StringUtils.isNotEmpty(userId)){
             IUser user = redisAuthUserOps.get(getUserCacheKey(userId));
             if(null != user) {
-                log.debug("通过关键字【{}】即将返回用户【{}】", keyword, user);
+                log.debug("通过用户主键ID【{}】即将返回用户【{}】", getUserCacheKey(userId), user);
                 return user;
             }
             else{
-                log.debug("通过关键字【{}】无法读取用户信息", keyword);
+                log.warn("无法通过用户主键ID【{}】读取用户信息", getUserCacheKey(userId));
                 return null;
             }
         }
         else{
-            log.debug("通过关键字【{}】无法读取用户信息", keyword);
+            log.warn("无法通过关键字【{}】读取用户主键ID", getUserCacheKey(keyword));
             return null;
         }
     }
+
 
 
     /**

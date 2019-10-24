@@ -38,7 +38,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.session.data.redis.RedisOperationsSessionRepository;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import javax.annotation.PostConstruct;
@@ -65,7 +65,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     private RedisKeyGenerator redisKeyGenerator;
 
     @Autowired
-    private RedisOperationsSessionRepository sessionRepository;
+    private RedisIndexedSessionRepository sessionRepository;
 
     @Getter
     private RedissonClient redissonClient;

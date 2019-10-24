@@ -6,6 +6,7 @@ package com.simbest.boot.base.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
+import org.springframework.data.jpa.repository.support.JpaRepositoryImplementation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
@@ -40,10 +41,15 @@ public class CustomJpaRepositoryFactoryBean <T extends JpaRepository<S, ID>, S, 
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        protected Object getTargetRepository(RepositoryInformation information) {
+        protected JpaRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation information, EntityManager entityManager) {
             return new LogicDeleteRepositoryImpl<T, ID>((Class<T>) information.getDomainType(), entityManager);
         }
+
+//        @Override
+//        @SuppressWarnings("unchecked")
+//        protected Object getTargetRepository(RepositoryInformation information) {
+//            return new LogicDeleteRepositoryImpl<T, ID>((Class<T>) information.getDomainType(), entityManager);
+//        }
 
         @Override
         protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {

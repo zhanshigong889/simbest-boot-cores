@@ -38,10 +38,10 @@ public class MultiThreadConfiguration {
     @Bean("simbestThreadExecutor")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(appConfig.getThreadCorePoolSize());
-        executor.setMaxPoolSize(appConfig.getThreadMaxPoolSize());
-        executor.setQueueCapacity(appConfig.getThreadQueueCapacity());
-        executor.setKeepAliveSeconds(appConfig.getThreadKeepAliveSeconds());
+        executor.setCorePoolSize(appConfig.getThreadCorePoolSize()); // 线程池大小
+        executor.setMaxPoolSize(appConfig.getThreadMaxPoolSize()); // 线程池最大线程数
+        executor.setQueueCapacity(appConfig.getThreadQueueCapacity()); // 最大等待任务数
+        executor.setKeepAliveSeconds(appConfig.getThreadKeepAliveSeconds()); // 空闲时间
         executor.setThreadNamePrefix("simbestThreadExecutor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return executor;

@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -98,22 +99,26 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
      * 判断单点用户名是否需要验证
      */
     private boolean authenticationIsRequired(Authentication existingAuth, Principal principal) {
+        boolean needAuth = false;
         if (existingAuth == null || !existingAuth.isAuthenticated()) {
-            return true;
+            needAuth = true;
         }
         else if (existingAuth instanceof SsoUsernameAuthentication
                 && !existingAuth.getName().equals(principal.getName())) {
-            return true;
+            needAuth = true;
         }
-        else if (existingAuth instanceof UsernamePasswordAuthenticationToken
-                && !existingAuth.getName().equals(principal.getName())) {
-            return true;
+        else if (existingAuth instanceof UsernamePasswordAuthenticationToken) {
+            needAuth = true;
+        }
+        else if (existingAuth instanceof OAuth2Authentication) {
+            needAuth = true;
         }
         else if (existingAuth instanceof GenericAuthentication
                 && !existingAuth.getName().equals(principal.getName())) {
-            return true;
+            needAuth = true;
         }
-        return false;
+        log.debug("Authentication认证类型为【{}】，认证主体为【{}】，判断是否需要进行认证结果为【{}】", existingAuth.getClass().getSimpleName(), principal.getName(), needAuth);
+        return needAuth;
     }
 
 

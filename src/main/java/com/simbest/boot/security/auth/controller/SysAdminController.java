@@ -19,7 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.session.data.redis.RedisOperationsSessionRepository;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,7 +50,7 @@ public class SysAdminController {
     private IAuthUserCacheService authUserCacheService;
 
     @Autowired
-    protected RedisOperationsSessionRepository redisOperationsSessionRepository;
+    protected RedisIndexedSessionRepository sessionRepository;
 
 
     @ApiOperation(value = "查询当前应用-当前登录用户的在线实例", notes = "注意是当前用户")
@@ -83,7 +83,7 @@ public class SysAdminController {
         Map<String, Long> delPrincipal = Maps.newHashMap();
         Set<String> keys = RedisUtil.globalKeys(ApplicationConstants.STAR+":org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:"+username);
         for(String key : keys) {
-            Set<Object> members = redisOperationsSessionRepository.getSessionRedisOperations().boundSetOps(key).members();
+            Set<Object> members = sessionRepository.getSessionRedisOperations().boundSetOps(key).members();
             //删除 spring:session:uums:index:org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:litingmin
             Long number1 = RedisUtil.mulDelete(key);
             log.debug("try to remove {} return {}", key, number1);

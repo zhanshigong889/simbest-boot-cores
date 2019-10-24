@@ -77,17 +77,18 @@ public class MultiHttpSecurityConfig {
      */
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        //基于用户名和密码验证
-        auth.authenticationProvider(jdbcAuthenticationProvider());
-        //基于远程校验账户密码
-        auth.authenticationProvider(httpValidationAuthenticationProvider);
-        //仅基于用户名验证
-        auth.authenticationProvider(ssoUsernameAuthenticationProvider);
-
         Map<String, CustomAbstractAuthenticationProvider> auths = appContext.getBeansOfType(CustomAbstractAuthenticationProvider.class);
         for(CustomAbstractAuthenticationProvider provider : auths.values()){
             log.debug("系统将自动注册自定义认证提供器: {}", provider.getClass());
             auth.authenticationProvider(provider);
         }
+        //基于远程校验账户密码
+        auth.authenticationProvider(httpValidationAuthenticationProvider);
+        //基于用户名和密码验证
+        auth.authenticationProvider(jdbcAuthenticationProvider());
+        //仅基于用户名验证
+        auth.authenticationProvider(ssoUsernameAuthenticationProvider);
+
+
     }
 }

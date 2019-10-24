@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -64,7 +65,7 @@ public class CaptchaAuthenticationFilter extends AbstractAuthenticationProcessin
      * 覆盖授权验证方法，这里可以做一些自己需要的session设置操作
      */
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
+            throws AuthenticationException, IOException {
         return null;
     }
 

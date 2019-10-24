@@ -57,9 +57,9 @@ public class FastDfsClient {
                 ProtoCommon.activeTest(trackerServer.getSocket());
             }
             storageClient = new StorageClient(trackerServer, null);
-            log.info("FASTDFS StorageClient init successfully!");
+            log.info("FASTDFS StorageClient 客户端初始化成功!");
         } catch (Exception ex) {
-            log.error("FASTDFS StorageClient init failed!");
+            log.error("FASTDFS StorageClient 客户端初始化失败!");
             Exceptions.printException(ex);
         }
     }
@@ -69,9 +69,9 @@ public class FastDfsClient {
         if(null != trackerServer){
             try {
                 trackerServer.close();
-                log.info("FASTDFS TrackerServer shutdown successfully!");
+                log.info("FASTDFS TrackerServer 关闭成功!");
             } catch (IOException e) {
-                log.error("FASTDFS TrackerServer shutdown failed!");
+                log.error("FASTDFS TrackerServer 关闭失败!");
                 Exceptions.printException(e);
             }
         }
@@ -89,7 +89,7 @@ public class FastDfsClient {
         metas[1] = new NameValuePair("extName", extName);
         metas[2] = new NameValuePair("fileSize", fileLength);
         String result = uploadFile(fileContent, extName, metas);
-        log.debug("FastDfsClient upload result is {}", result);
+        log.debug("FastDfsClient 上传结果为【{}】", result);
         return result;
     }
 

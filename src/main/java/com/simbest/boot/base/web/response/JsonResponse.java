@@ -147,16 +147,21 @@ public class JsonResponse {
                 errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error(HttpStatus.UNAUTHORIZED.name())
+                .timestamp(new Date())
                 .build();
         log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));
         return response;
     }
 
     public static JsonResponse unauthorized(HttpServletRequest request, Exception exception) {
-        JsonResponse response = unauthorized();
-        response.setMessage(exception.getMessage());
-        response.setTimestamp(new Date());
-        response.setPath(request.getServletPath());
+        JsonResponse response = JsonResponse.builder().
+                errcode(HttpStatus.UNAUTHORIZED.value())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.name())
+                .timestamp(new Date())
+                .message(exception.getMessage())
+                .path(request.getRequestURI())
+                .build();
         log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));
         return response;
     }

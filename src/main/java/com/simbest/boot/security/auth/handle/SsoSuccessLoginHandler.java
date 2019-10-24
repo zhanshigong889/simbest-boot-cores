@@ -53,8 +53,7 @@ public class SsoSuccessLoginHandler extends SimpleUrlAuthenticationSuccessHandle
 
         request.getRequestDispatcher(getRequestPath(request)).forward(request, response);
         clearAuthenticationAttributes(request);
-
-
+        super.onAuthenticationSuccess(request, response, authentication);
     }
 
     private String getRequestPath(HttpServletRequest request) {

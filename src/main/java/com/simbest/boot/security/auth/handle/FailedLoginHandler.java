@@ -42,6 +42,7 @@ public class FailedLoginHandler implements AuthenticationFailureHandler {
         //登录发生错误计数，每错误一次，即向后再延时等待5分钟
         String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
         if(StringUtils.isNotEmpty(username)){
+            log.warn("用户【{}】尝试登录失败", username);
             RedisRetryLoginCache.addTryTimes(username);
         }
 
