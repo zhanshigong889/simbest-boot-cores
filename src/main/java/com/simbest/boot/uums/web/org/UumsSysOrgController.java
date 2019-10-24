@@ -128,6 +128,12 @@ public class UumsSysOrgController {
         return JsonResponse.success(uumsSysOrgApi.findOrgByUserMap(appcode,userMap));
     }
 
+    /**
+     * 根据corpId查询企业根节点
+     * @param appcode
+     * @param corpId
+     * @return
+     */
     @ApiOperation(value = "根据corpId查询企业根节点", notes = "根据corpId查询企业根节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "corpId", value = "企业id", dataType = "String", paramType = "query")
@@ -160,6 +166,38 @@ public class UumsSysOrgController {
     public JsonResponse findRuleOrgTree(@RequestParam(required = false) String appcode, @RequestBody(required = false) Map<String,Object> orgMap) {
         return JsonResponse.success(uumsSysOrgApi.findRuleOrgTree(appcode,orgMap));
     }
+
+    /**
+     * 根据组织code查询组织信息
+     * @param orgCode
+     */
+    @ApiOperation(value = "特殊查询之根据组织编码查询存在的组织列表", notes = "根据组织编码查询存在的组织列表",tags={"组织 组织特殊查询"})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "appcode", value = "应用编码", dataType = "String", paramType = "query")
+    })
+    @PostMapping(value = {"/findListByOrgCode","/findListByOrgCode/sso"})
+    public JsonResponse findListByOrgCode( @RequestParam(required = false) String orgCode,@RequestParam(required = false) String appcode) {
+        return JsonResponse.success(uumsSysOrgApi.findListByOrgCode(orgCode,appcode));
+    }
+
+
+    /**
+     * 查询某个子组织的父组织
+     * @param orgCode
+     * @param appcode
+     * @return
+     */
+    @ApiOperation(value = "子父级之查看某个子组织的父组织", notes = "子父级之查看某个子组织的父组织",tags={"组织 组织特殊查询"})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "orgCode", value = "组织编码", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "appcode", value = "应用编码", dataType = "String", paramType = "query")
+    })
+    @PostMapping(value = {"/findParentBySon","/findParentBySon/sso"})
+    public JsonResponse findParentBySon( @RequestParam(required = false) String orgCode,@RequestParam(required = false) String appcode) {
+        return JsonResponse.success(uumsSysOrgApi.findParentBySon(orgCode,appcode));
+    }
+
 }
 
 

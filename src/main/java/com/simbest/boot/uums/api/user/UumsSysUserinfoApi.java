@@ -948,5 +948,26 @@ public class UumsSysUserinfoApi {
         return setSimpleUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<SimpleUser>>(){});
     }
 
+    /**
+     * 根据权限id查询此权限下的用户并分页
+     * @param page
+     * @param size
+     * @param id
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findUserFromPerId( int page, int size, String id, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserFromPerId"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("id", id)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
 }
 
