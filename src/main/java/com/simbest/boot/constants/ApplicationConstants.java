@@ -46,7 +46,8 @@ public class ApplicationConstants {
     public static final String LOGIN_ERROR_PAGE = "/login?loginError";
     public static final String LOGIN_SESSION_CODE = "validateCode";
     public static final String LOGIN_VALIDATE_CODE = "verifyCode";
-    public static final String ANY_PASSWORD = "SimBest_SSO_2018";
+    public static final String ANY_PASSWORD = "_anypassword_";
+    public static final int ANY_PASSWORDTIME = 7200;
 
     public static final int DEFAULT_PAGE = 0;
     public static final int DEFAULT_SIZE = 100;

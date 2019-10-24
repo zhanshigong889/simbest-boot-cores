@@ -139,8 +139,8 @@ public class SysAdminController {
         String randomCode = CodeGenerator.randomInt(6);
         boolean sendFlag = smsService.sendAnyPassword(randomCode);
         if(sendFlag) {
-            RedisUtil.setGlobal(ApplicationConstants.ANY_PASSWORD, randomCode, 7200);
-            return JsonResponse.success(randomCode, String.format("动态口令为%s", randomCode));
+            RedisUtil.setGlobal(ApplicationConstants.ANY_PASSWORD, randomCode, ApplicationConstants.ANY_PASSWORDTIME);
+            return JsonResponse.defaultSuccessResponse();
         }
         else{
             return JsonResponse.defaultErrorResponse();

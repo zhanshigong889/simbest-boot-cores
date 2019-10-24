@@ -66,10 +66,10 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                 String appcode = uumsCredentials.getAppcode();
                 Boolean cacheUserPassword = authUserCacheService.loadCacheUserPassword(username, rsaEncryptor.decrypt(password));
                 if(null != cacheUserPassword && cacheUserPassword){
-                    log.debug("用户名【{}】和密码【{}】在缓存中存在记录，即将到UUMS进行远程认证！");
+                    log.debug("用户名【{}】和密码【{}】在缓存中存在记录，跳过UUMS远程认证！");
                 }
                 else {
-                    log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
+                    log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】，即将到UUMS远程认证", username, password, appcode);
                     JsonResponse response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
                             .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
                             .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
