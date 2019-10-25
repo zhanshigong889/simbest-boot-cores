@@ -117,7 +117,7 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
                 && !existingAuth.getName().equals(principal.getName())) {
             needAuth = true;
         }
-        log.debug("Authentication认证类型为【{}】，认证主体为【{}】，判断是否需要进行认证结果为【{}】", existingAuth.getClass().getSimpleName(), principal.getName(), needAuth);
+        log.debug("Authentication认证类型为【{}】，认证主体为【{}】，判断是否需要进行认证结果为【{}】", existingAuth, principal, needAuth);
         return needAuth;
     }
 
