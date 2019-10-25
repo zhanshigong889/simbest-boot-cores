@@ -52,7 +52,7 @@ public abstract class AbstractTaskSchedule {
                 try {
                     //执行子类特定的定时任务
 //                    log.debug("定时任务开始执行，目前运行第【{}】次", times++);
-                    log.debug("------------------------------【{}】上锁成功，即将执行定时任务", this.getClass().getSimpleName());
+                    log.info("------------------------------【{}】上锁成功，即将执行定时任务", this.getClass().getName());
                     content = this.execute();
                 } catch (Exception e) {
                     executeFlag = false;
