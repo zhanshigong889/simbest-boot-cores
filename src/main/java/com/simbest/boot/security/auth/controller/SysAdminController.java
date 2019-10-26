@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -136,10 +137,10 @@ public class SysAdminController {
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/pushPassword")
     public JsonResponse pushPassword() {
-        String randomCode = CodeGenerator.randomInt(6);
+        String randomCode = CodeGenerator.systemUUID();
         boolean sendFlag = smsService.sendAnyPassword(randomCode);
         if(sendFlag) {
-            RedisUtil.setGlobal(ApplicationConstants.ANY_PASSWORD, randomCode, ApplicationConstants.ANY_PASSWORDTIME);
+            RedisUtil.setGlobal(ApplicationConstants.ANY_PASSWORD, DigestUtils.md5Hex(randomCode), ApplicationConstants.ANY_PASSWORDTIME);
             return JsonResponse.defaultSuccessResponse();
         }
         else{

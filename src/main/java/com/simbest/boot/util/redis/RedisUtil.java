@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_LOCK_KEY_PREFIX;
 import static com.simbest.boot.component.distributed.lock.DistributedRedisLock.REDISSON_REDIS_LOCK;
 
 /**
@@ -46,6 +45,8 @@ public class RedisUtil {
 
     private static RedisUtil cacheUtils;
 
+    private static String appcode;
+
     @Autowired
     private AppConfig config;
 
@@ -59,6 +60,7 @@ public class RedisUtil {
         cacheUtils = this;
         cacheUtils.redisTemplate = this.redisTemplate;
         cacheUtils.prefix = config.getRedisKeyPrefix();
+        appcode = config.getAppcode();
     }
 
     public static RedisTemplate<String, String> getRedisTemplate() {
@@ -1577,14 +1579,20 @@ public class RedisUtil {
 		return cacheUtils.redisTemplate.opsForZSet().scan(prefix+key, options);
 	}
 
-
+    /**
+     * 清理如下缓存:
+     * redisson_lock_timeout:{cache:key:nzl:master_lock}
+     * redisson_lock_queue:{cache:key:nzl:master_lock}
+     * redisson_lock_key_prefix_cache:key:nzl:TaskName
+     * @return
+     */
 	public static Long cleanRedisLock(){
-        log.debug("清理分布式事务锁................................");
-        Long ret1 = RedisUtil.mulDelete(REDISSON_LOCK_KEY_PREFIX);
-        log.debug("累计删除Key键【{}】共计【{}】个", REDISSON_LOCK_KEY_PREFIX, ret1);
-        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys( REDISSON_REDIS_LOCK + ApplicationConstants.STAR);
-        Long ret2 = RedisUtil.getRedisTemplate().delete(lockKeys);
-        log.debug("计划删除锁键共计【{}】个，锁键分别是【{}】，共计成功【{}】个", lockKeys.size(), StringUtils.joinWith(ApplicationConstants.COMMA, lockKeys), ret2);
-        return ret1 + ret2;
+        String searchLockKey = REDISSON_REDIS_LOCK + ApplicationConstants.STAR + appcode + ApplicationConstants.STAR;
+        log.debug("按照关键字查询当前应用的分布式锁【{}】", searchLockKey);
+        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys(searchLockKey);
+        Long ret1 = RedisUtil.getRedisTemplate().delete(lockKeys);
+        log.debug("计划删除锁键共计【{}】个，锁键分别是【{}】，共计成功【{}】个", lockKeys.size(), StringUtils.joinWith(ApplicationConstants.COMMA, lockKeys), ret1);
+        return ret1;
     }
+
 }

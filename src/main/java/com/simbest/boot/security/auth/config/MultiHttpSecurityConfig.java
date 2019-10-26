@@ -7,17 +7,16 @@ import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.provider.CustomAbstractAuthenticationProvider;
 import com.simbest.boot.security.auth.provider.CustomDaoAuthenticationProvider;
+import com.simbest.boot.security.auth.provider.GenericAuthenticationChecker;
 import com.simbest.boot.security.auth.provider.SsoUsernameAuthenticationProvider;
 import com.simbest.boot.security.auth.provider.UumsHttpValidationAuthenticationProvider;
-import com.simbest.boot.util.encrypt.Md5Encryptor;
-import com.simbest.boot.util.encrypt.MochaEncryptor;
+import com.simbest.boot.util.encrypt.RsaEncryptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -51,7 +50,10 @@ public class MultiHttpSecurityConfig {
     private UumsHttpValidationAuthenticationProvider httpValidationAuthenticationProvider;
 
     @Autowired
-    private Md5Encryptor encryptor;
+    private GenericAuthenticationChecker genericAuthenticationChecker;
+
+    @Autowired
+    private RsaEncryptor rsaEncryptor;
 
     @Bean
     public PasswordEncoder myBCryptPasswordEncoder() {
@@ -62,7 +64,7 @@ public class MultiHttpSecurityConfig {
 
     @Bean
     public AuthenticationProvider jdbcAuthenticationProvider() {
-        CustomDaoAuthenticationProvider impl = new CustomDaoAuthenticationProvider();
+        CustomDaoAuthenticationProvider impl = new CustomDaoAuthenticationProvider(genericAuthenticationChecker, rsaEncryptor);
         impl.setUserDetailsService(authService);
         impl.setPasswordEncoder(myBCryptPasswordEncoder());
         impl.setHideUserNotFoundExceptions(true);

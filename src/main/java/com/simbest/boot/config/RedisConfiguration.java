@@ -296,8 +296,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @PreDestroy
     public void destroy() {
         if(null != redissonClient) {
-            Long ret = RedisUtil.cleanRedisLock();
-            log.debug("共计清理Redis分布式事务锁【{}】个", ret);
+            log.debug("清理分布式事务锁START................................");
+            RedisUtil.cleanRedisLock();
+            log.debug("清理分布式事务锁END................................");
 //            redissonClient.shutdown(); //RedisConfiguration.redissonClient()申明创建出来的RedissonClient的shutdown执行真正的销毁redissonClient
             log.debug("Congratulations------------------------------------------------Redis 进程实例已销毁成功");
         }

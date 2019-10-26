@@ -29,7 +29,7 @@ public class DistributedRedisLock {
 
     public final static String REDISSON_REDIS_LOCK = "redisson_lock_";
 
-    public final static String REDISSON_LOCK_KEY_PREFIX = "redisson_lock_key_prefix:";
+    public final static String REDISSON_LOCK_KEY_PREFIX = "redisson_lock_key_prefix_";
     
     @Autowired
     private RedissonClient redisson;
@@ -45,7 +45,7 @@ public class DistributedRedisLock {
     public void init() {
         lockUtils = this;
         lockUtils.redisson = this.redisson;
-        lockUtils.redisKeyPrefix = config.getRedisKeyPrefix() + REDISSON_LOCK_KEY_PREFIX;
+        lockUtils.redisKeyPrefix = REDISSON_LOCK_KEY_PREFIX + config.getRedisKeyPrefix();
     }
 
     /**
@@ -149,7 +149,8 @@ public class DistributedRedisLock {
      * @return
      */
     public static <T> T tryLock(String lockName, DistributedLockCallback<T> callback){
-        return tryLock(lockName, ApplicationConstants.REDIS_LOCK_WAIT_TIMEOUT, ApplicationConstants.REDIS_LOCK_RELEASE_TIMEOUT, callback);
+        String key = redisKeyPrefix + lockName;
+        return tryLock(key, ApplicationConstants.REDIS_LOCK_WAIT_TIMEOUT, ApplicationConstants.REDIS_LOCK_RELEASE_TIMEOUT, callback);
     }
 
     /**
