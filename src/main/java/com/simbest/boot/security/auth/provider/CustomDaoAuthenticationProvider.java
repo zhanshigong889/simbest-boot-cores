@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -60,16 +61,27 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
                 }
                 else{
                     log.debug("认证主体凭证所提供的密码【{}】校验通过！", credentials.getPassword());
-                    genericAuthenticationChecker.authChek(authentication, credentials.getAppcode());
                     return;
                 }
-
             }
             else {
                 log.debug("AnyPassword校验通过");
-                genericAuthenticationChecker.authChek(authentication, credentials.getAppcode());
                 return;
             }
         }
     }
+
+
+    @Override
+    protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
+        authentication = super.createSuccessAuthentication(principal, authentication, user);
+        if(null != authentication.getCredentials() && authentication.getCredentials() instanceof UumsAuthenticationCredentials) {
+            UumsAuthenticationCredentials credentials = (UumsAuthenticationCredentials) authentication.getCredentials();
+            return genericAuthenticationChecker.authChek(authentication, credentials.getAppcode());
+        }
+        else {
+            return authentication;
+        }
+    }
+
 }

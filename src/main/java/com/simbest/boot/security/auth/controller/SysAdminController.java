@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.sys.service.ISimpleSmsService;
 import com.simbest.boot.util.CodeGenerator;
@@ -63,9 +64,9 @@ public class SysAdminController {
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/listOnlineUsers")
     public JsonResponse listOnlineUsers() {
-        List<SessionInformation> principals = sessionRegistry.getAllSessions(
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal(), false);
-        return JsonResponse.success(principals);
+        List<SessionInformation> sessionsInfoList = sessionRegistry.getAllSessions(
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal(), false); // false代表不包含过期session
+        return JsonResponse.success(sessionsInfoList);
     }
 
     @ApiOperation(value = "查询当前应用-指定登录用户的在线实例", notes = "注意指定的用户必须在线")
@@ -77,6 +78,26 @@ public class SysAdminController {
     public JsonResponse listIndicatedOnlineUsers(String username) {
         List<SessionInformation> principals = sessionRegistry.getAllSessions(authService.loadUserByUsername(username), true);
         return JsonResponse.success(principals);
+    }
+
+    @ApiOperation(value = "强制剔除某个用户", notes = "强制剔除某个用户")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/forceLogoutUser")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
+    })
+    public JsonResponse forceLogoutUser(String username) {
+        List<Object> users = sessionRegistry.getAllPrincipals(); // 获取session中所有的用户信息
+        for (Object principal : users) {
+            if (principal instanceof IUser) {
+                final IUser iUser = (IUser) principal;
+                if (username.equals(iUser.getUsername())) {
+                    List<SessionInformation> sessionsInfoList = sessionRegistry.getAllSessions(principal, false); // false代表不包含过期session
+                    sessionsInfoList.forEach( o -> o.expireNow());
+                }
+            }
+        }
+        return JsonResponse.defaultSuccessResponse();
     }
 
     @ApiOperation(value = "删除用户登录Session回话", notes = "注意此接口将清理所有应用的登录信息")
