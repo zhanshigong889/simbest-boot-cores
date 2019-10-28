@@ -268,6 +268,9 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
         Assert.notNull(username, "用户账号不允许为空!");
         Assert.notNull(password, "应用标识不允许为空!");
         Assert.notNull(isRight, "用户密码校验结果不允许为空!");
+        //保存新密码时，先删除该用户的历史密码
+        RedisUtil.mulDeleteGlobal(AUTH_USER_PASSWORD_GLOBAL_KEY.concat(username).concat(ApplicationConstants.COLON));
+        //保存该用户的新密码
         RedisUtil.setBeanGlobal(getAuthUserPasswordGlobalKey(username, password), isRight);
     }
 

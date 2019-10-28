@@ -101,6 +101,16 @@ public class RedisUtil {
         return cacheUtils.redisTemplate.delete(keys);
     }
 
+    /**
+     * 模糊删除key(全局)
+     *
+     * @param key
+     */
+    public static Long mulDeleteGlobal(String pattern) {
+        Set<String> keys = cacheUtils.redisTemplate.keys(pattern + ApplicationConstants.STAR);
+        return cacheUtils.redisTemplate.delete(keys);
+    }
+
 	/**
 	 * 序列化key
 	 * 

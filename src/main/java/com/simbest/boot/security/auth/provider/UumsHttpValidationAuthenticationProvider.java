@@ -63,10 +63,13 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                 UumsAuthenticationCredentials uumsCredentials = (UumsAuthenticationCredentials)credentials;
                 String username = principal.toString();
                 String password = uumsCredentials.getPassword();
+                String passwordDecode = rsaEncryptor.decrypt(password);
                 String appcode = uumsCredentials.getAppcode();
-                Boolean cacheUserPassword = authUserCacheService.loadCacheUserPassword(username, rsaEncryptor.decrypt(password));
+                Boolean cacheUserPassword = authUserCacheService.loadCacheUserPassword(username, passwordDecode);
                 if(null != cacheUserPassword && cacheUserPassword){
-                    log.debug("用户名【{}】和密码【{}】在缓存中存在记录，跳过UUMS远程认证！");
+                    log.debug("恭喜用户【{}】认证命中缓存！Congratulation auth user 【{} 】for success cache password----------START", username, username);
+                    log.debug("用户名【{}】和密码【{}】在缓存中存在登录认证通过的缓存记录，直接跳过UUMS远程认证，可以登录成功！", username, passwordDecode);
+                    log.debug("恭喜用户【{}】认证命中缓存！Congratulation auth user 【{} 】for success cache password----------END", username, username);
                 }
                 else {
                     log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】，即将到UUMS远程认证", username, password, appcode);
@@ -78,7 +81,7 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                     if (!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
                         authResult = false;
                     }else{
-                        authUserCacheService.saveOrUpdateCacheUserPassword(username, rsaEncryptor.decrypt(password), true);
+                        authUserCacheService.saveOrUpdateCacheUserPassword(username, passwordDecode, true);
                     }
                 }
                 if(authResult){

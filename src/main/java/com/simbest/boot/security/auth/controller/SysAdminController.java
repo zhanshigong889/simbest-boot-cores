@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.sys.service.ISimpleSmsService;
 import com.simbest.boot.util.CodeGenerator;
@@ -87,16 +86,8 @@ public class SysAdminController {
             @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
     })
     public JsonResponse forceLogoutUser(String username) {
-        List<Object> users = sessionRegistry.getAllPrincipals(); // 获取session中所有的用户信息
-        for (Object principal : users) {
-            if (principal instanceof IUser) {
-                final IUser iUser = (IUser) principal;
-                if (username.equals(iUser.getUsername())) {
-                    List<SessionInformation> sessionsInfoList = sessionRegistry.getAllSessions(principal, false); // false代表不包含过期session
-                    sessionsInfoList.forEach( o -> o.expireNow());
-                }
-            }
-        }
+        List<SessionInformation> principals = sessionRegistry.getAllSessions(authService.loadUserByUsername(username), true);
+        principals.forEach( o -> o.expireNow());
         return JsonResponse.defaultSuccessResponse();
     }
 
