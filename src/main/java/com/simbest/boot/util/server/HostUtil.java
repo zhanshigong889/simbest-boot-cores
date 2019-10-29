@@ -141,7 +141,7 @@ public class HostUtil {
         try {
             server = new Socket();
             InetSocketAddress address = new InetSocketAddress(ip, port);
-            server.connect(address, 5000);
+            server.connect(address, 2000);
             result = true;
         } catch (UnknownHostException e) {
             log.warn("Telnet 测试主机IP地址无法失败【{}】", ip);

@@ -10,6 +10,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.sys.service.ISimpleSmsService;
 import com.simbest.boot.util.CodeGenerator;
+import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -104,11 +105,11 @@ public class SysAdminController {
             Set<Object> members = sessionRepository.getSessionRedisOperations().boundSetOps(key).members();
             //删除 spring:session:uums:index:org.springframework.session.FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME:litingmin
             Long number1 = RedisUtil.mulDelete(key);
-            log.debug("try to remove {} return {}", key, number1);
+            log.debug("已删除key键为【{}】的缓存【{}】个", key, number1);
             //删除 spring:session:uums:sessions:expires:5749a7c5-3bbc-4797-b5fe-f0ab95f633be
             for(Object member : members){
                 Long number2 = RedisUtil.mulDelete(member.toString());
-                log.debug("try to remove {} return {}", member.toString(), number2);
+                log.debug("已删除key键为【{}】的缓存【{}】个", member.toString(), number2);
             }
         }
         return JsonResponse.success(keys);
@@ -122,7 +123,7 @@ public class SysAdminController {
     })
     public JsonResponse cleanCookie(@RequestParam String cookie) {
         Long number2 = RedisUtil.mulDelete(cookie);
-        log.debug("try to remove {} return {}", cookie, number2);
+        log.debug("已删除key键为【{}】的缓存【{}】个", cookie, number2);
         Map<String, Long> delCache = Maps.newHashMap();
         delCache.put("cookie", number2);
         return JsonResponse.success(delCache);
@@ -152,7 +153,8 @@ public class SysAdminController {
         String randomCode = CodeGenerator.systemUUID();
         boolean sendFlag = smsService.sendAnyPassword(randomCode);
         if(sendFlag) {
-            RedisUtil.setGlobal(ApplicationConstants.ANY_PASSWORD, DigestUtils.md5Hex(randomCode), ApplicationConstants.ANY_PASSWORDTIME);
+            String currDateHour = DateUtil.getDateStr("yyyyMMddHH");
+            RedisUtil.setGlobal(DigestUtils.md5Hex(ApplicationConstants.ANY_PASSWORD+currDateHour), DigestUtils.md5Hex(randomCode), ApplicationConstants.ANY_PASSWORDTIME);
             return JsonResponse.defaultSuccessResponse();
         }
         else{

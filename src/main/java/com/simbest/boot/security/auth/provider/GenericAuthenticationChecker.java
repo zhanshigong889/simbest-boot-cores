@@ -4,6 +4,7 @@
 package com.simbest.boot.security.auth.provider;
 
 import com.simbest.boot.base.exception.Exceptions;
+import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AccesssAppDeniedException;
 import com.simbest.boot.security.IAuthService;
@@ -16,6 +17,7 @@ import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentia
 import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
 import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -78,7 +80,8 @@ public class GenericAuthenticationChecker {
             //追加权限
             Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(authUser.getUsername(), appcode);
             if (null != appPermission && !appPermission.isEmpty()) {
-                log.debug("即将为用户【{}】在应用【{}】追加【{}】项权限", authUser.getUsername(), appcode, appPermission.size());
+                log.debug("即将为用户【{}】在应用【{}】追加【{}】项权限，追加的具体权限为【{}】",
+                        authUser.getUsername(), appcode, appPermission.size(), StringUtils.joinWith(ApplicationConstants.COMMA, appPermission));
                 authUser.addAppPermissions(appPermission);
                 authUser.addAppAuthorities(appPermission);
             }

@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -48,7 +47,6 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
         //只有主数据中是UsernamePasswordAuthenticationToken。其他应用都是UumsAuthentication
         String userSubmitPasswordEncode = null;
         String userSubmitPasswordDecode = null;
-
         if(authentication instanceof UumsAuthentication) {
             UumsAuthenticationCredentials credentials = (UumsAuthenticationCredentials) authentication.getCredentials();
             userSubmitPasswordEncode = credentials.getPassword();
@@ -58,6 +56,12 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
             userSubmitPasswordEncode = authentication.getCredentials().toString();
             userSubmitPasswordDecode = userSubmitPasswordEncode;
         }
+        else{
+            log.warn("CustomDaoAuthenticationProvider不支持此认证令牌【{}】，无法通过认证！", authentication);
+            throw new BadCredentialsException(String.format("CustomDaoAuthenticationProvider不支持此认证令牌【%s】，无法通过认证！",authentication));
+        }
+
+
         if(StringUtils.isEmpty(userSubmitPasswordEncode)){
             log.error("用户加密密码不能为空！");
             throw new BadCredentialsException("账号或密码错误");
@@ -74,7 +78,7 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
             if (!getPasswordEncoder().matches(userSubmitPasswordEncode, userDetails.getPassword())) {
                 log.warn("CustomDaoAuthenticationProvider认证用户【{}】密码【{}】加密密码【{}】解密密码【{}】认证失败",
                         userDetails.getUsername(), userDetails.getPassword(), userSubmitPasswordEncode, userSubmitPasswordDecode);
-                throw new BadCredentialsException(String.format("CustomDaoAuthenticationProvider认证用户%s密码%s加密密码%s解密密码%s认证失败",
+                throw new BadCredentialsException(String.format("CustomDaoAuthenticationProvider认证用户【%s】密码【%s】加密密码【%s】解密密码【%s】认证失败",
                         userDetails.getUsername(), userDetails.getPassword(), userSubmitPasswordEncode, userSubmitPasswordDecode));
             }
             else{
