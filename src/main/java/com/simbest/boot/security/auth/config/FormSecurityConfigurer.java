@@ -9,6 +9,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.entryPoint.AccessDeniedEntryPoint;
 import com.simbest.boot.security.auth.filter.CaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.CustomAbstractAuthenticationProcessingFilter;
+import com.simbest.boot.security.auth.filter.RestCaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RestUumsAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RsaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.SsoAuthenticationFilter;
@@ -150,7 +151,8 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .addFilterBefore(captchaUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(captchaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(restCaptchaAuthenticationFilter(), CaptchaAuthenticationFilter.class)
                 .addFilterBefore(uumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(restUumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(rsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -200,7 +202,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(successLoginHandler);
-        //记录失败登录日志
+        //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedLoginHandler);
         filter.setEncryptor(rsaEncryptor);
        return filter;
@@ -217,7 +219,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(successLoginHandler);
-        //记录失败登录日志
+        //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedLoginHandler);
         return filter;
     }
@@ -236,7 +238,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
         //跳至登陆页，但不作任何提醒
         //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_PAGE));
-        //记录失败登录日志
+        //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
     }
@@ -252,7 +254,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
-        //记录失败登录日志
+        //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
     }
@@ -274,7 +276,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
      * @throws Exception
      */
     @Bean
-    public CaptchaAuthenticationFilter captchaUsernamePasswordAuthenticationFilter() throws Exception {
+    public CaptchaAuthenticationFilter captchaAuthenticationFilter() throws Exception {
         CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
                 new OrRequestMatcher(
                         new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
@@ -282,6 +284,22 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationManager(authenticationManagerBean());
         //跳至登陆页，提醒验证码错误
         filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_ERROR_PAGE));
+        return filter;
+    }
+
+    /** 验证码
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    public RestCaptchaAuthenticationFilter restCaptchaAuthenticationFilter() throws Exception {
+        RestCaptchaAuthenticationFilter filter = new RestCaptchaAuthenticationFilter(
+                new OrRequestMatcher(
+                        new AntPathRequestMatcher("/*restlogin", RequestMethod.POST.name())
+                ));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //记录失败登录次数
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
     }
 
