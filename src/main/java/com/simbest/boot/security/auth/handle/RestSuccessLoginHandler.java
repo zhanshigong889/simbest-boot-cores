@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.handle;
 
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.util.ObjectUtil;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import com.simbest.boot.util.security.LoginUtils;
@@ -36,18 +37,19 @@ public class RestSuccessLoginHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
+        Object returnObj = JsonResponse.authorized();
         if(authentication.getPrincipal() instanceof IUser){
             IUser iUser = (IUser)authentication.getPrincipal();
+            returnObj = iUser;
             //登录成功后，立即清除失败缓存，不再等待错误缓存的到期时间
             RedisRetryLoginCache.cleanTryTimes(iUser.getUsername());
             log.debug("用户【{}】登录成功，用户身份详细信息为【{}】", iUser.getUsername(), iUser);
-
             //记录登录日志
             loginUtils.recordLoginLog(request, authentication);
         }
 
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/javascript;charset=utf-8");
-        response.getWriter().print(JacksonUtils.obj2json(JsonResponse.authorized()));
+        response.getWriter().print(JacksonUtils.obj2json(returnObj));
     }
 }
