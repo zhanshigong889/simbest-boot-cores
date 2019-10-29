@@ -40,7 +40,7 @@ public class RestSuccessLoginHandler implements AuthenticationSuccessHandler {
         Object returnObj = JsonResponse.authorized();
         if(authentication.getPrincipal() instanceof IUser){
             IUser iUser = (IUser)authentication.getPrincipal();
-            returnObj = iUser;
+            returnObj = JsonResponse.success(iUser);
             //登录成功后，立即清除失败缓存，不再等待错误缓存的到期时间
             RedisRetryLoginCache.cleanTryTimes(iUser.getUsername());
             log.debug("用户【{}】登录成功，用户身份详细信息为【{}】", iUser.getUsername(), iUser);
