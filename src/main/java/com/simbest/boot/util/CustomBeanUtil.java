@@ -4,9 +4,11 @@
 package com.simbest.boot.util;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.PropertyAccessorFactory;
 
 import java.lang.reflect.Field;
@@ -23,6 +25,7 @@ import java.util.Set;
  *
  * @author lishuyi
  */
+@Slf4j
 public class CustomBeanUtil extends BeanUtils {
 
     public static String[] getNullPropertyNames(Object source) {
@@ -31,9 +34,15 @@ public class CustomBeanUtil extends BeanUtils {
 
         Set<String> emptyNames = new HashSet<String>();
         for (java.beans.PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) {
+            try {
+                Object srcValue = src.getPropertyValue(pd.getName());
+                if (srcValue == null) {
+                    emptyNames.add(pd.getName());
+                }
+            }
+            catch (InvalidPropertyException e){
                 emptyNames.add(pd.getName());
+                log.error("获取属性【{}】发生异常【{}】", pd.getName(), e.getMessage());
             }
         }
         String[] result = new String[emptyNames.size()];
