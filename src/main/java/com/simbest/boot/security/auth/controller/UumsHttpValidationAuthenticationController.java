@@ -69,7 +69,8 @@ public class UumsHttpValidationAuthenticationController {
                 if(authentication.isAuthenticated()) {
                     if(authentication.getPrincipal() instanceof IUser){
                         IUser iUser = (IUser)authentication.getPrincipal();
-                        if(!passwordDecode.equalsIgnoreCase(rsaEncryptor.decrypt(iUser.getReserve4()))){
+                        if(StringUtils.isEmpty(iUser.getReserve4()) ||
+                                !passwordDecode.equalsIgnoreCase(rsaEncryptor.decrypt(iUser.getReserve4()))){
                             SimpleUser simpleUser = new SimpleUser();
                             simpleUser.setUsername( username );
                             simpleUser.setReserve4( password );
