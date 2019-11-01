@@ -209,8 +209,8 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @throws Exception
      */
     @RequestMapping(value = {"/get/url", "/get/url/sso", "/get/url/api"}, method = {RequestMethod.POST, RequestMethod.GET})
-    public JsonResponse openurlNoRedirect(@RequestParam String url) throws Exception {
-        return JsonResponse.success( getWebOfficeUrl(url) );
+    public ResponseEntity openurlNoRedirect( @RequestParam String url) throws Exception {
+        return new ResponseEntity(JsonResponse.success( getWebOfficeUrl(url) ), HttpStatus.OK);
     }
 
     private String getWebOfficeUrl(String url) throws Exception {
