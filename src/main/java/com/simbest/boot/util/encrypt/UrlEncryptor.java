@@ -22,8 +22,8 @@ public class UrlEncryptor extends AbstractEncryptor {
 
     public static void main(String[] args) {
         UrlEncryptor encryptor = new UrlEncryptor();
-        log.debug(encryptor.encrypt("a291c2hhb2d1bw=="));
-        log.debug(encryptor.decrypt(encryptor.encrypt("a291c2hhb2d1bw==")));
+        log.debug(encryptor.encrypt("http://10.92.81.163:8088/uud/filedownload.jsp?webname=CCPN&filen=201910301858344460.doc&showfilen=河南移动廉政视窗系统设计.doc"));
+        log.debug(encryptor.decrypt(encryptor.encrypt("http://10.92.81.163:8088/uud/filedownload.jsp?webname=CCPN&filen=201910301858344460.doc&showfilen=河南移动廉政视窗系统设计.doc")));
     }
 
     /**

@@ -11,6 +11,7 @@ import com.simbest.boot.sys.model.SysFile;
 import com.simbest.boot.sys.model.UploadFileResponse;
 import com.simbest.boot.sys.service.ISysFileService;
 import com.simbest.boot.util.AppFileUtil;
+import com.simbest.boot.util.UrlEncoderUtils;
 import com.simbest.boot.util.encrypt.UrlEncryptor;
 import com.simbest.boot.util.encrypt.WebOffice3Des;
 import com.simbest.boot.util.http.BrowserUtil;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -195,12 +197,9 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @return
      * @throws Exception
      */
-    @GetMapping(value = {"/openurl", "/openurl/sso", "/openurl/api"})
-    public String openurl(String url) throws Exception {
-        log.debug("尝试预览文件地址为【{}】", url);
-        String redirectUrl = config.getAppHostPort()+"/webOffice/?furl="+ WebOffice3Des.encode(url);
-        log.debug("转换后webOfficeUrl地址为【{}】", redirectUrl);
-        return "redirect:"+redirectUrl;
+    @RequestMapping(value = {"/openurl", "/openurl/sso", "/openurl/api"}, method = {RequestMethod.POST, RequestMethod.GET})
+    public String openurl(@RequestParam String url) throws Exception {
+        return "redirect:"+getWebOfficeUrl(url);
     }
 
     /**
@@ -209,12 +208,19 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @return
      * @throws Exception
      */
-    @GetMapping(value = {"/get/url", "/get/url/sso", "/get/url/api"})
-    public JsonResponse openurlNoRedirect(String url) throws Exception {
+    @RequestMapping(value = {"/get/url", "/get/url/sso", "/get/url/api"}, method = {RequestMethod.POST, RequestMethod.GET})
+    public JsonResponse openurlNoRedirect(@RequestParam String url) throws Exception {
+        return JsonResponse.success( getWebOfficeUrl(url) );
+    }
+
+    private String getWebOfficeUrl(String url) throws Exception {
+        if(UrlEncoderUtils.hasUrlEncoded(url)){
+            url = urlEncryptor.decrypt(url);
+        }
         log.debug("尝试预览文件地址为【{}】", url);
         String redirectUrl = config.getAppHostPort()+"/webOffice/?furl="+ WebOffice3Des.encode(url);
         log.debug("转换后webOfficeUrl地址为【{}】", redirectUrl);
-        return JsonResponse.success( redirectUrl );
+        return redirectUrl;
     }
 
     @PostMapping(value = DELETE_URL)
