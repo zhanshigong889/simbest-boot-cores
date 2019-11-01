@@ -203,6 +203,20 @@ public class SysFileController extends LogicController<SysFile, String> {
         return "redirect:"+redirectUrl;
     }
 
+    /**
+     * 在线预览文件，支持任意免认证的URL,不进行重定向
+     * @param url
+     * @return
+     * @throws Exception
+     */
+    @GetMapping(value = {"/get/url", "/get/url/sso", "/get/url/api"})
+    public JsonResponse openurlNoRedirect(String url) throws Exception {
+        log.debug("尝试预览文件地址为【{}】", url);
+        String redirectUrl = config.getAppHostPort()+"/webOffice/?furl="+ WebOffice3Des.encode(url);
+        log.debug("转换后webOfficeUrl地址为【{}】", redirectUrl);
+        return JsonResponse.success( redirectUrl );
+    }
+
     @PostMapping(value = DELETE_URL)
     @ResponseBody
     public JsonResponse deleteById(@RequestParam("id") String id){
