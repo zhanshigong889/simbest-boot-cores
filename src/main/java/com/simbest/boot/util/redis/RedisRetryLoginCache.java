@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util.redis;
 
+import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.AttempMaxLoginFaildException;
@@ -36,6 +37,7 @@ public class RedisRetryLoginCache {
      */
     public static Integer getTryTimes(String username){
         Integer failedTimes = RedisUtil.getBean(getKey(username), Integer.class);
+        failedTimes = null == failedTimes ? ApplicationConstants.ZERO:failedTimes;
         log.debug("当前用户【{}】错误登录已达到【{}】次", username, failedTimes);
         return failedTimes;
     }

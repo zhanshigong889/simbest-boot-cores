@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.provider;
 
+import com.google.gson.JsonSyntaxException;
 import com.mzlion.easyokhttp.HttpClient;
 import com.mzlion.easyokhttp.exception.HttpClientException;
 import com.simbest.boot.base.web.response.JsonResponse;
@@ -23,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 
@@ -72,12 +74,27 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                     log.debug("恭喜用户【{}】认证命中缓存！Congratulation auth user 【{} 】for success cache password----------END", username, username);
                 }
                 else {
-                    log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】，即将到UUMS远程认证", username, password, appcode);
-                    JsonResponse response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
-                            .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
-                            .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
-                            .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
-                            .asBean(JsonResponse.class);
+                    log.debug("UUMS主数据认证器处理用户【{}】访问【{}】，即将向UUMS发起Http认证请求，所持凭证信息为【{}】", username, appcode, password);
+//                    org.springframework.security.web.FilterChainProxy.doFilter Line:328 - /httpauth/validate at position 16 of 19 in additional filter chain; firing Filter: 'AnonymousAuthenticationFilter'
+//                    org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter Line:100 - Populated SecurityContextHolder with anonymous token: 'org.springframework.security.authentication.AnonymousAuthenticationToken@9c34e841: Principal: anonymousUser; Credentials: [PROTECTED]; Authenticated: true; Details: org.springframework.security.web.authentication.WebAuthenticationDetails@957e: RemoteIpAddress: 10.87.57.23; SessionId: null; Granted Authorities: ROLE_ANONYMOUS'
+//                    org.springframework.security.web.FilterChainProxy.doFilter Line:328 - /httpauth/validate at position 17 of 19 in additional filter chain; firing Filter: 'SessionManagementFilter'
+//                    org.springframework.security.web.session.SessionManagementFilter.doFilter Line:124 - Requested session ID 5daf5bc1-6181-45db-a9ea-9c88f14a2d3b is invalid.
+//                    org.springframework.security.web.session.SimpleRedirectInvalidSessionStrategy.onInvalidSessionDetected Line:49 - Starting new session (if required) and redirecting to '/login'
+//                    以下调用方式解决上述SpringSecurity的上述bug，为permitAll的接口/httpauth/validate自动创建session并定位到login页面
+                    JsonResponse response;
+                    try {
+                        response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
+                                .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
+                                .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
+                                .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                                .asBean(JsonResponse.class);
+                    } catch (JsonSyntaxException jse ){
+                        response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
+                                .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
+                                .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
+                                .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                                .asBean(JsonResponse.class);
+                    }
                     if (!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
                         authResult = false;
                     }else{
@@ -85,7 +102,7 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                     }
                 }
                 if(authResult){
-                    log.info(LOGTAG + "UUMS认证用户 【{}】 访问 【{}】 成功！", principal, uumsCredentials.getAppcode());
+                    log.info(LOGTAG + "UUMS主数据认证器处理用户【{}】访问【{}】成功！", principal, uumsCredentials.getAppcode());
                     UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                             .password(password).appcode(appcode).build());
                     return genericAuthenticationChecker.authChek(authentication, appcode);

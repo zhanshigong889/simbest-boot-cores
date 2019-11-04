@@ -113,6 +113,17 @@ public abstract class AbstractAuthService implements IAuthService {
         return isPermit;
     }
 
+    /**
+     * 默认抽象类，不做定制实现
+     * @param iUser
+     * @param appcode
+     * @return
+     */
+    @Override
+    public IUser customUserForApp(IUser iUser, String appcode){
+        return iUser;
+    }
+
     @Override
     public void changeUserSessionByCorp(IUser newUser) {
         Assert.notNull(newUser, "更新用户不能为空！");

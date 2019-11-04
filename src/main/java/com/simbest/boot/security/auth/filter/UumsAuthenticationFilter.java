@@ -40,11 +40,11 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
         String password = request.getParameter(AuthoritiesConstants.SSO_UUMS_PASSWORD);
         String appcode = request.getParameter(AuthoritiesConstants.SSO_API_APP_CODE);
         RedisRetryLoginCache.preCheckTryTimes(username);
-        log.debug("用户【{}】即将通过凭证【{}】访问应用【{}】", username, password, appcode);
+        log.debug("UUMS主数据过滤器处理用户【{}】访问【{}】，所持凭证信息为【{}】", username, appcode, password);
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password) || StringUtils.isEmpty(appcode)) {
-            log.error("UUMS 认证失败， 令牌、密码、应用标识不能为空！");
+            log.error("UUMS主数据过滤器认证失败， 令牌、密码、应用标识不能为空！");
             throw new BadCredentialsException(
-                    "UUMS 认证失败， 令牌、密码、应用标识不能为空: " + username);
+                    "UUMS主数据过滤器认证失败， 令牌、密码、应用标识不能为空: " + username);
         }
 
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
