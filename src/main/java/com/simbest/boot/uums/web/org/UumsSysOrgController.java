@@ -195,7 +195,7 @@ public class UumsSysOrgController {
     })
     @PostMapping(value = {"/findParentBySon","/findParentBySon/sso"})
     public JsonResponse findParentBySon( @RequestParam(required = false) String orgCode,@RequestParam(required = false) String appcode) {
-        return JsonResponse.success(uumsSysOrgApi.findParentBySon(orgCode,appcode));
+        return JsonResponse.success(uumsSysOrgApi.findParentBySon(appcode,orgCode));
     }
 
 }
