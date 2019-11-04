@@ -85,6 +85,9 @@ public class GenericAuthenticationChecker {
                 authUser.addAppPermissions(appPermission);
                 authUser.addAppAuthorities(appPermission);
             }
+            //定制用户信息
+            authUser = authService.customUserForApp(authUser, appcode);
+            //返回Authentication进入Session上下文
             GenericAuthentication result = new GenericAuthentication(authUser, UumsAuthenticationCredentials.builder()
                     .password(authUser.getPassword()).appcode(appcode).build(), authUser.getAuthorities());
             result.setDetails(authentication.getDetails());

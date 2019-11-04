@@ -286,7 +286,7 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
             return isRight;
         }
         else{
-            log.debug("通过用户账号【{}】和密码【{}】无法判断用户密码", username, password);
+            log.debug("通过用户账号【{}】和密码【{}】在缓存校验失败", username, password);
             return null;
         }
     }
