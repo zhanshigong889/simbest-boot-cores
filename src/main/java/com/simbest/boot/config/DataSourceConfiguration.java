@@ -3,16 +3,24 @@
  */
 package com.simbest.boot.config;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
+import com.alibaba.druid.wall.WallConfig;
+import com.alibaba.druid.wall.WallFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import com.alibaba.druid.filter.Filter;
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用途：配置静态文件目录
@@ -22,12 +30,19 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfiguration {
 
+    @Autowired
+    private WallFilter wallFilter;
+
     @Bean
     @Primary
     @Qualifier("dataSource")
     @ConfigurationProperties(prefix = "spring.datasource.druid")
     public DataSource defaultDataSource() {
-        return DruidDataSourceBuilder.create().build();
+        DruidDataSource druidDataSource = DruidDataSourceBuilder.create().build();
+        List<Filter> filters = new ArrayList<>();
+        filters.add(wallFilter);
+        druidDataSource.setProxyFilters(filters);
+        return druidDataSource;
     }
 
     @Bean(name = "jdbcTemplate")
@@ -38,6 +53,24 @@ public class DataSourceConfiguration {
     @Bean(name = "namedParameterJdbcTemplate")
     public NamedParameterJdbcTemplate namedParameterJdbcTemplate( @Qualifier("dataSource") DataSource dataSource) {
         return new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    //下面的配置解决批量操作的异常
+    @Bean(name = "wallConfig")
+    WallConfig wallFilterConfig(){
+        WallConfig wc = new WallConfig();
+        wc.setMultiStatementAllow(true);        //允许一次执行多条语句
+        wc.setNoneBaseStatementAllow(true);     //允许一次执行多条语句
+        wc.setConditionAndAlwayTrueAllow(true); //检查查询条件(WHERE/HAVING子句)中是否包含AND永真条件
+        return wc;
+    }
+
+    @Bean(name = "wallFilter")
+    @DependsOn ("wallConfig")
+    WallFilter wallFilter(WallConfig wallConfig){
+        WallFilter wfilter = new WallFilter();
+        wfilter.setConfig(wallConfig);
+        return wfilter;
     }
 
     /**
