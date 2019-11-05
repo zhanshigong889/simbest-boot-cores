@@ -205,7 +205,7 @@ public abstract class AbstractAuthService implements IAuthService {
     }
 
     @Override
-    public void bindUserOpenidAndUnionidByPhone(String preferredMobile, String openid, String unionid, String appcode){
+    public int updateUserOpenidAndUnionid(String preferredMobile, String openid, String unionid, String appcode){
         org.springframework.util.Assert.notNull(preferredMobile, "preferredMobile不可为空");
         org.springframework.util.Assert.notNull(openid, "openid不可为空");
         org.springframework.util.Assert.notNull(appcode, "appcode不可为空");
@@ -222,9 +222,13 @@ public abstract class AbstractAuthService implements IAuthService {
                 if(StringUtils.isNotEmpty(unionid)) {
                     simpleUser.setUnionid(unionid);
                 }
-                userinfoApi.update(preferredMobile, KeyType.preferredMobile, appcode, simpleUser);
+                simpleUser = userinfoApi.update(preferredMobile, KeyType.preferredMobile, appcode, simpleUser);
+                if(StringUtils.isNotEmpty(simpleUser.getId())){
+                    return ApplicationConstants.ONE;
+                }
             }
         }
+        return ApplicationConstants.ZERO;
     }
 
     @Override
