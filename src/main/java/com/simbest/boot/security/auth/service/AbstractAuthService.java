@@ -23,6 +23,7 @@ import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.core.Authentication;
@@ -218,7 +219,9 @@ public abstract class AbstractAuthService implements IAuthService {
                 SimpleUser simpleUser = new SimpleUser();
                 BeanUtils.copyProperties(iUser, simpleUser);
                 simpleUser.setOpenid(openid);
-                simpleUser.setUnionid(unionid);
+                if(StringUtils.isNotEmpty(unionid)) {
+                    simpleUser.setUnionid(unionid);
+                }
                 userinfoApi.update(preferredMobile, KeyType.preferredMobile, appcode, simpleUser);
             }
         }
