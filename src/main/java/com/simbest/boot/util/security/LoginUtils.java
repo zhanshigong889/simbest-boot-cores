@@ -55,6 +55,7 @@ public class LoginUtils {
      * @param appcode
      */
     public void manualLogin(String username, String appcode) {
+        log.debug("通过用户名【{}】和应用编码【{}】进行系统自动登录", username, appcode);
         String rawUsername = ssoAuthenticationRegister.decodeKeyword(username, IAuthService.KeyType.username);
         Principal principal = UsernamePrincipal.builder().username(rawUsername).build();
         SsoUsernameAuthentication authReq = new SsoUsernameAuthentication(principal, appcode);
@@ -70,6 +71,7 @@ public class LoginUtils {
      * @param appcode
      */
     public void manualLogin(String username, String password, String appcode) {
+        log.debug("通过用户名【{}】、密码【{}】和应用编码【{}】进行系统自动登录", username, password, appcode);
         String rawUsername = ssoAuthenticationRegister.decodeKeyword(username, IAuthService.KeyType.username);
         UumsAuthentication uumsAuthentication = new UumsAuthentication(rawUsername, UumsAuthenticationCredentials.builder()
                 .password(password).appcode(appcode).build());
@@ -82,6 +84,7 @@ public class LoginUtils {
      * 管理员认证
      */
     public void adminLogin() {
+        log.debug("通过管理账号【{}】进行系统自动登录", ApplicationConstants.ADMINISTRATOR);
         IUser iUser = authService.findByKey(ApplicationConstants.ADMINISTRATOR, IAuthService.KeyType.username);
         GenericAuthentication auth = new GenericAuthentication(iUser, null, iUser.getAuthorities());
         SecurityContext sc = SecurityContextHolder.getContext();
