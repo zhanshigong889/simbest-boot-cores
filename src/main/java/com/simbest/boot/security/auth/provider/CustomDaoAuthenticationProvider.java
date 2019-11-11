@@ -16,6 +16,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import static com.simbest.boot.constants.ErrorCodeConstants.LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD;
+
 /**
  * 用途：自定义密码认证器
  * 作者: lishuyi
@@ -58,17 +60,17 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
         }
         else{
             log.warn("CustomDaoAuthenticationProvider不支持此认证令牌【{}】，无法通过认证！", authentication);
-            throw new BadCredentialsException(String.format("CustomDaoAuthenticationProvider不支持此认证令牌【%s】，无法通过认证！",authentication));
+            throw new BadCredentialsException(LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
         }
 
 
         if(StringUtils.isEmpty(userSubmitPasswordEncode)){
             log.error("用户加密密码不能为空！");
-            throw new BadCredentialsException("账号或密码错误");
+            throw new BadCredentialsException(LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
         }
         else if(StringUtils.isEmpty(userSubmitPasswordDecode)){
             log.error("用户解密密码不能为空！");
-            throw new BadCredentialsException("账号或密码错误");
+            throw new BadCredentialsException(LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
         }
         //比对万能密码
         String anyPassword = SecurityUtils.getAnyPassword();
@@ -78,8 +80,7 @@ public class CustomDaoAuthenticationProvider extends DaoAuthenticationProvider {
             if (!getPasswordEncoder().matches(userSubmitPasswordEncode, userDetails.getPassword())) {
                 log.warn("CustomDaoAuthenticationProvider认证用户【{}】密码【{}】加密密码【{}】解密密码【{}】认证失败",
                         userDetails.getUsername(), userDetails.getPassword(), userSubmitPasswordEncode, userSubmitPasswordDecode);
-                throw new BadCredentialsException(String.format("CustomDaoAuthenticationProvider认证用户【%s】密码【%s】加密密码【%s】解密密码【%s】认证失败",
-                        userDetails.getUsername(), userDetails.getPassword(), userSubmitPasswordEncode, userSubmitPasswordDecode));
+                throw new BadCredentialsException(LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
             }
             else{
                 log.debug("认证主体【{}】凭证所提供的密码【{}】校验通过！", userDetails.getUsername(), userSubmitPasswordDecode);
