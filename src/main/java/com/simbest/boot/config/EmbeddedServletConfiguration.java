@@ -59,10 +59,14 @@ public class EmbeddedServletConfiguration {
                     protocol.setMaxSwallowSize(-1);
                     log.info("应用支持的附件上传最大限制为【{}】",maxFileSize);
 
+                    //最小监听线程
+                    protocol.setMinSpareThreads(20);
+                    //最大排队数
+                    protocol.setAcceptCount(200);
                     //设置最大连接数
-                    protocol.setMaxConnections(200);
+                    protocol.setMaxConnections(1000);
                     //设置最大线程数
-                    protocol.setMaxThreads(300);
+                    protocol.setMaxThreads(800);
                     //连接超时时间
                     protocol.setConnectionTimeout(10000);
 
