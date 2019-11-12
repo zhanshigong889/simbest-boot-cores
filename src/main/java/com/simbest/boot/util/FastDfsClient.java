@@ -18,6 +18,7 @@ import org.csource.fastdfs.TrackerClient;
 import org.csource.fastdfs.TrackerServer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -106,6 +107,7 @@ public class FastDfsClient {
         for(NameValuePair kv : metas){
             log.debug("metadata name: {} value: {}", kv.getName(), kv.getValue());
         }
+        Assert.notNull(storageClient, "请检查FasfDFS配置和服务运行状态");
         String[] result = storageClient.upload_file(fileContent, extName, metas);
         String group = result[0];
         String filePath = result[1];
@@ -116,6 +118,7 @@ public class FastDfsClient {
         String group = StringUtils.substringBefore(storagePath, ApplicationConstants.SLASH);
         String filename = StringUtils.substringAfter(storagePath, ApplicationConstants.SLASH);
         log.warn("Want remove file at group {}, filepath {}", group, filename);
+        Assert.notNull(storageClient, "请检查FasfDFS配置和服务运行状态");
         return storageClient.delete_file(group, filename);
     }
 
@@ -128,6 +131,7 @@ public class FastDfsClient {
     public static FileInfo getFileInfo(String group, String path){
         FileInfo fileInfo = null;
         try {
+            Assert.notNull(storageClient, "请检查FasfDFS配置和服务运行状态");
             fileInfo = storageClient.get_file_info(group, path);
         } catch (IOException e) {
             Exceptions.printException(e);
@@ -146,6 +150,7 @@ public class FastDfsClient {
     public static NameValuePair[] getMetadata(String group, String path){
         NameValuePair[] metadata = null;
         try {
+            Assert.notNull(storageClient, "请检查FasfDFS配置和服务运行状态");
             metadata = storageClient.get_metadata(group, path);
         } catch (IOException e) {
             Exceptions.printException(e);

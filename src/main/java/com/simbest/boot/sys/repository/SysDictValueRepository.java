@@ -16,6 +16,8 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
 
     List<SysDictValue> findByEnabled(Boolean enabled);
 
+    SysDictValue findByDictTypeAndNameAndBlocidAndCorpid(String dictType, String name, String blocid, String corpid);
+    
     SysDictValue findByDictTypeAndName(String dictType, String name);
 
     /**

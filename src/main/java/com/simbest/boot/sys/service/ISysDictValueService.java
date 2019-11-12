@@ -18,6 +18,16 @@ public interface ISysDictValueService extends ILogicService<SysDictValue,String>
     List<SysDictValue> findDictValue(SysDictValue sysDictValue);
 
     /**
+     * 根据字典类型和字典值名称，获取字典值(集团和企业特有字典值)
+     * @param dictType
+     * @param name
+     * @param blocid
+     * @param corpid
+     * @return
+     */
+    SysDictValue findByDictTypeAndNameAndBlocidAndCorpid(String dictType, String name, String blocid, String corpid);
+
+    /**
      * 根据字典类型和字典值名称，获取字典值
      * @param dictType
      * @param name

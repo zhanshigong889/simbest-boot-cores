@@ -28,7 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class SysDictValueService extends LogicService<SysDictValue,String> implements ISysDictValueService {
 
-    public static final String CACHE_KEY = "SYS_DICT_VALUE_CACHE";
+    public static final String CACHE_KEY = "SYS_DICT_VALUE_CACHE:";
+    public static final int CACHE_EXPIRE_SECONDES = 3600;
 
     private SysDictValueRepository dictValueRepository;
 
@@ -40,6 +41,9 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
 
     @Autowired
     private RedisTemplate<String, SysDictValue> dvRedisTemplate;
+
+    @Autowired
+    private RedisTemplate<String, List<SysDictValue>> dvListRedisTemplate;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -75,14 +79,29 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
         return dictValueRepository.findById(id).orElse(null);
     }
 
+
+    @Override
+    public SysDictValue findByDictTypeAndNameAndBlocidAndCorpid(String dictType, String name, String blocid, String corpid) {
+        String key = CACHE_KEY+appConfig.getAppcode().concat(ApplicationConstants.COLON)
+                .concat(dictType).concat(ApplicationConstants.COLON).concat(name)
+                .concat(ApplicationConstants.COLON).concat(blocid)
+                .concat(ApplicationConstants.COLON).concat(corpid);
+        SysDictValue dv = dvRedisTemplate.opsForValue().get(key);
+        if(null == dv) {
+            dv = dictValueRepository.findByDictTypeAndNameAndBlocidAndCorpid(dictType, name, blocid, corpid);
+            dvRedisTemplate.opsForValue().set(key, dv, CACHE_EXPIRE_SECONDES, TimeUnit.SECONDS);
+        }
+        return dv;
+    }
+
     @Override
     public SysDictValue findByDictTypeAndName(String dictType, String name){
-        String key = "cache:key:"+appConfig.getAppcode().concat(ApplicationConstants.COLON)
+        String key = CACHE_KEY+appConfig.getAppcode().concat(ApplicationConstants.COLON)
                 .concat(dictType).concat(ApplicationConstants.COLON).concat(name);
         SysDictValue dv = dvRedisTemplate.opsForValue().get(key);
         if(null == dv) {
             dv = dictValueRepository.findByDictTypeAndName(dictType, name);
-            dvRedisTemplate.opsForValue().set(key, dv, 1, TimeUnit.HOURS);
+            dvRedisTemplate.opsForValue().set(key, dv, CACHE_EXPIRE_SECONDES, TimeUnit.SECONDS);
         }
         return dv;
     }
@@ -95,18 +114,21 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     @Override
     public List<SysDictValue> findDictValue (SysDictValue dv) {
         List<String> params = Lists.newArrayList();
-        params.add(dv.getBlocid());
-        params.add(dv.getCorpid());
-        params.add(dv.getDictType());
-        params.add(dv.getName());
-        params.add(dv.getValue());
-        String hkey = StringUtils.join(params, ApplicationConstants.LINE);
-        List<SysDictValue> result = (List<SysDictValue>) dvRedisTemplate.opsForHash().get(appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(CACHE_KEY), hkey);
+        if(StringUtils.isNotEmpty(dv.getBlocid()))
+            params.add(dv.getBlocid());
+        if(StringUtils.isNotEmpty(dv.getCorpid()))
+            params.add(dv.getCorpid());
+        if(StringUtils.isNotEmpty(dv.getDictType()))
+            params.add(dv.getDictType());
+        if(StringUtils.isNotEmpty(dv.getName()))
+            params.add(dv.getName());
+        if(StringUtils.isNotEmpty(dv.getValue()))
+            params.add(dv.getValue());
+        String key = CACHE_KEY.concat(appConfig.getAppcode()).concat(ApplicationConstants.COLON)+StringUtils.join(params, ApplicationConstants.LINE);
+        List<SysDictValue> result = dvListRedisTemplate.opsForValue().get(key);
         if(null == result || result.size()==0){
             result = findDictValueDatabase(dv);
-            String key = "cache:key:"+appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(CACHE_KEY);
-            dvRedisTemplate.opsForHash().put(key, hkey, result);
-            dvRedisTemplate.expire(key, 1, TimeUnit.HOURS);
+            dvListRedisTemplate.opsForValue().set(key, result, CACHE_EXPIRE_SECONDES, TimeUnit.SECONDS);
         }
         return result;
     }
@@ -124,6 +146,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
             for(String param : paramMap.keySet()){
                 if(param.equals("dictType")){
                     whereSQL += "AND d.dict_type=:dictType ";
+                    whereSQL += "AND dv.dict_type=:dictType ";
                 }
                 if(param.equals("isPublic")){
                     whereSQL += "AND d.is_public=:isPublic ";
@@ -141,16 +164,15 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
                 if(param.equals("flag")){
                     whereSQL += "AND dv.flag=:flag ";
                 }
-                if(param.equals("dictType")){
-                    whereSQL += "AND dv.dict_type=:dictType ";
-                }
                 if(param.equals("isPublic")){
                     whereSQL += "AND dv.is_public=:isPublic ";
                 }
                 if(param.equals("blocid")){
+                    whereSQL += "AND d.blocid=:blocid ";
                     whereSQL += "AND dv.blocid=:blocid ";
                 }
                 if(param.equals("corpid")){
+                    whereSQL += "AND d.corpid=:corpid ";
                     whereSQL += "AND dv.corpid=:corpid ";
                 }
             }
