@@ -9,21 +9,21 @@ import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.InsertExistObjectException;
 import com.simbest.boot.exceptions.UpdateNotExistObjectException;
-import com.simbest.boot.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.TransactionException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
-import java.util.Iterator;
+import javax.persistence.NonUniqueResultException;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 用途：系统中注册对应返回信息
@@ -67,6 +67,15 @@ public final class GlobalExceptionRegister {
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能更新不存在的对象")
                         .build());
 
+        errorMap.put(DataRetrievalFailureException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("提取数据发出错误")
+                        .build());
+        errorMap.put(IncorrectResultSizeDataAccessException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据记录于预期不符")
+                        .build());
+        errorMap.put(NonUniqueResultException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据记录于预期不符")
+                        .build());
         errorMap.put(HibernateException.class,
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("持久化数据异常")
                         .build());

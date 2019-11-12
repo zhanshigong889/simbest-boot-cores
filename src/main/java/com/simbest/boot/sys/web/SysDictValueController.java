@@ -196,46 +196,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return super.findAll( page,size,direction, properties,sysDictValue);
     }
 
-    /*@PreAuthorize("hasAuthority('ROLE_ADMIN')")  // 指定角色权限才能操作方法
-    @RequestMapping(value = "/list")
-    public ModelAndView list(@RequestParam(defaultValue = "1") int page,
-                             @RequestParam(defaultValue = "10") int size, //
-                             @RequestParam(required = false, defaultValue = "") String searchCode,
-                             @RequestParam Integer id) {
-
-        SysDict dict = dictService.findById(id);
-        if (dict == null) {
-            return new ModelAndView("error", "message", "do not find dict by id:" + id);
-        }
-
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("searchCode", searchCode);
-
-        Condition c = new Condition();
-        c.eq("dictId", id);
-        c.eq("removed", false);
-        c.like("name", "%" + searchCode + "%");
-
-        // 生成排序规则
-        Sort sort = new Sort(Sort.Direction.ASC, "id");
-        PageRequest pageable = PageRequest.of(page - 1, size, sort);
-
-        Specification<SysDictValue> s = sysDictValueService.getSpecification(c);
-        Page allData = sysDictValueService.findAll(s, pageable);
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("totalSize", allData.getTotalElements());
-        map.put("totalPage", allData.getTotalPages());
-        map.put("dataList", allData.getContent());
-        map.put("dict", dict);
-        map.put("size", allData.getSize());
-        map.put("page", page);
-        map.put("title", "数据字典值");
-        map.put("searchD", dataMap);
-
-        return new ModelAndView("sys/sysdict/dictionaryList", "dictModel", map);
-    }*/
-
     /**
      * 新增子字典值
      * @param dictValue
@@ -255,53 +215,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     }
 
 
-   /* @PreAuthorize("hasAuthority('ROLE_USER')")  // 指定角色权限才能操作方法
-    @RequestMapping(value = "/json/listByDictId", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
-    @ResponseBody
-    public JsonResponse listJson(@RequestParam(required = false, defaultValue = "1") int page, //
-                                 @RequestParam(required = false, defaultValue = "10") int size, //
-                                 @RequestParam(required = false, defaultValue = "-1") int dictId, //
-                                 @RequestParam(required = false, defaultValue = "") String name) {
-
-        // 获取查询条件
-        Condition condition = new Condition();
-        condition.eq("enabled", true);
-        condition.eq("removed", false);
-        condition.eq("dictId", dictId);
-        condition.like("name", "%" + name + "%");
-
-        // 生成排序规则
-        Sort sort = new Sort(Sort.Direction.ASC, "id");
-        Pageable pageable = sysDictValueService.getPageable(page, size, "ASC", "id");
-
-        Specification<SysDictValue> s = sysDictValueService.getSpecification(condition);
-
-        // 获取查询结果
-        Page pages = sysDictValueService.findAll(s, pageable);
-
-        // 构成返回信息
-        Map<String, Object> searchD = new HashMap<>();
-        searchD.put("dictId", dictId);
-        searchD.put("name", name);
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("totalSize", pages.getTotalElements());
-        map.put("totalPage", pages.getTotalPages());
-        map.put("list", pages.getContent());
-        map.put("size", pages.getSize());
-        map.put("page", page);
-        map.put("searchD", searchD);
-
-        JsonResponse res = JsonResponse.builder() //
-                .errcode(JsonResponse.SUCCESS_CODE) //
-                .message("查询成功！") //
-                .build();
-
-        res.setData(map);
-        return res;
-    }*/
-
-
     @ApiOperation (value = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
     @PostMapping(value = {"/findDictValue", "/findDictValue/sso", "/findDictValue/api"})
     public JsonResponse findDictValue(@RequestBody(required = false) SysDictValue sysDictValue){
@@ -318,6 +231,18 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return JsonResponse.success(sysDictValueService.findByDictTypeAndName(dictType, name));
     }
 
+    @ApiOperation (value = "根据字典类型和字典值名称，以及集团Id、企业Id，获取字典值")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictType", value = "字典类型", dataType = "String", paramType = "query", required = true),
+            @ApiImplicitParam(name = "name", value = "字典值名称", dataType = "String", paramType = "query", required = true),
+            @ApiImplicitParam(name = "blocid", value = "集团Id", dataType = "String", paramType = "query", required = true),
+            @ApiImplicitParam(name = "corpid", value = "企业Id", dataType = "String", paramType = "query", required = true)
+    })
+    @PostMapping(value = {"/findByDictTypeAndNameAndBlocidAndCorpid", "/findByDictTypeAndNameAndBlocidAndCorpid/sso", "/findByDictTypeAndNameAndBlocidAndCorpid/api"})
+    public JsonResponse findByDictTypeAndNameAndBlocidAndCorpid(@RequestParam String dictType, @RequestParam String name,
+                                                                @RequestParam String blocid, @RequestParam String corpid){
+        return JsonResponse.success(sysDictValueService.findByDictTypeAndNameAndBlocidAndCorpid(dictType, name, blocid, corpid));
+    }
 
     @ApiOperation(value = "查看数据字典的所有值", notes = "查看数据字典的所有值")
     @PostMapping(value = {"/findAllDictValue", "/findAllDictValue/sso", "/findAllDictValue/api"})
