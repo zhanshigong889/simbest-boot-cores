@@ -43,21 +43,24 @@ public final class GlobalExceptionRegister {
     //初始化状态码与文字说明
     static {
         errorMap.put(Exception.class,
-                JsonResponse.builder().errcode(HttpStatus.BAD_REQUEST.value()).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).build());
+                JsonResponse.builder().errcode(HttpStatus.BAD_REQUEST.value()).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).message("请求参数错误").build());
         errorMap.put(RuntimeException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name())
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统内部错误")
+                        .build());
+        errorMap.put(NullPointerException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统空指针异常")
                         .build());
         errorMap.put(AccessDeniedException.class,
-                JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).build());
+                JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).message("权限禁止访问").build());
         errorMap.put(HttpRequestMethodNotSupportedException.class,
                 JsonResponse.builder().errcode(HttpStatus.METHOD_NOT_ALLOWED.value()).status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(HttpStatus.METHOD_NOT_ALLOWED.name())
                         .build());
 
         errorMap.put(MultipartException.class,
-                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).message("Upload attachment failed-上传文件失败")
+                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).message("文件上传失败")
                         .build());
         errorMap.put(MaxUploadSizeExceededException.class,
-                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.REQUEST_ENTITY_TOO_LARGE.value()).error(HttpStatus.REQUEST_ENTITY_TOO_LARGE.name()).message("Attachment size exceeds-文件过大")
+                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.REQUEST_ENTITY_TOO_LARGE.value()).error(HttpStatus.REQUEST_ENTITY_TOO_LARGE.name()).message("文件大小受限")
                         .build());
 
         errorMap.put(InsertExistObjectException.class,
@@ -65,6 +68,10 @@ public final class GlobalExceptionRegister {
                         .build());
         errorMap.put(UpdateNotExistObjectException.class,
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能更新不存在的对象")
+                        .build());
+
+        errorMap.put(IllegalArgumentException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name())
                         .build());
 
         errorMap.put(DataRetrievalFailureException.class,
@@ -123,7 +130,7 @@ public final class GlobalExceptionRegister {
 
     private static void setCorrectErrorMessage(JsonResponse response, Exception e){
         if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains("ConstraintViolationException")){
-            response.setMessage("主键或唯一索引限制异常");
+            response.setMessage("数据处理异常");
         }
         else if(StringUtils.isEmpty(response.getMessage())){
             response.setMessage(e.getMessage());

@@ -89,8 +89,7 @@ public class JsonResponse {
      * @return 输出成功数据
      */
     public static JsonResponse success(Object obj) {
-        JsonResponse response = defaultSuccessResponse();
-        response.setData(obj);
+        JsonResponse response = success(obj, null);
         return response;
     }
 
@@ -105,6 +104,11 @@ public class JsonResponse {
         return response;
     }
 
+    public static JsonResponse success(String message) {
+        JsonResponse response = success(null, message);
+        return response;
+    }
+
     /**
      *
      * @param obj 成功数据
@@ -112,7 +116,8 @@ public class JsonResponse {
      * @return 输出成功数据
      */
     public static JsonResponse success(Object obj, String message) {
-        JsonResponse response = success(obj);
+        JsonResponse response = defaultSuccessResponse();
+        response.setData(obj);
         response.setMessage(message);
         return response;
     }
