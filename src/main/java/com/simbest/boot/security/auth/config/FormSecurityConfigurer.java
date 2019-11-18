@@ -279,7 +279,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     public CaptchaAuthenticationFilter captchaAuthenticationFilter() throws Exception {
         CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
                 new OrRequestMatcher(
-                        new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
+//                        new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
+                        new AntPathRequestMatcher("/uumslogin", RequestMethod.POST.name()),
+                        new AntPathRequestMatcher("/login", RequestMethod.POST.name())
                 ));
         filter.setAuthenticationManager(authenticationManagerBean());
         //跳至登陆页，提醒验证码错误
@@ -295,7 +297,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     public RestCaptchaAuthenticationFilter restCaptchaAuthenticationFilter() throws Exception {
         RestCaptchaAuthenticationFilter filter = new RestCaptchaAuthenticationFilter(
                 new OrRequestMatcher(
-                        new AntPathRequestMatcher("/*restlogin", RequestMethod.POST.name())
+                        new AntPathRequestMatcher("/restlogin", RequestMethod.POST.name())
                 ));
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录失败登录次数
