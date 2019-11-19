@@ -102,8 +102,10 @@ public class AppFileUtil {
      * @return
      */
     public static boolean validateUploadFileType(String fileName) {
-        Matcher matcher = pattern.matcher(getFileSuffix(fileName));
-        return matcher.matches();
+        Matcher matcher = pattern.matcher(getFileSuffix(fileName).toLowerCase());
+        boolean ret = matcher.matches();
+        log.debug("判断文件【{}】是否合法结果为【{}】", fileName, ret);
+        return ret;
     }
 
     /**
@@ -113,7 +115,7 @@ public class AppFileUtil {
      * @return
      */
     public static String getFileName(String pathToName) {
-        Assert.notNull(pathToName, "File name can not empty!");
+        Assert.notNull(pathToName, pathToName+"文件名称不能为空");
         String fileName = FilenameUtils.getName(pathToName);
         return StringUtils.isEmpty(fileName) || "0".equals(fileName) ? null : fileName;
     }
@@ -125,7 +127,7 @@ public class AppFileUtil {
      * @return
      */
     public static String getFileBaseName(String pathToName) {
-        Assert.notNull(pathToName, "File name can not empty!");
+        Assert.notNull(pathToName, pathToName+"文件名称不能为空");
         String fileBaseName =  FilenameUtils.getBaseName(pathToName);
         return StringUtils.isEmpty(fileBaseName) || "0".equals(fileBaseName) ? null : fileBaseName;
     }
@@ -137,7 +139,7 @@ public class AppFileUtil {
      * @return
      */
     public static String getFileSuffix(String pathToName) {
-        Assert.notNull(pathToName, "File name can not empty!");
+        Assert.notNull(pathToName, pathToName+"文件名称不能为空");
         return FilenameUtils.getExtension(pathToName);
     }
 
@@ -150,16 +152,17 @@ public class AppFileUtil {
     }
 
     public static boolean isImage(File file) {
+        Assert.notNull(file, "图片文件不能为空");
+        boolean ret = false;
         try {
             Image image = ImageIO.read(file);
-            if (image == null) {
-                return false;
-            } else {
-                return true;
+            if (image != null) {
+                ret = true;
             }
-        } catch(IOException ex) {
-           return false;
+        } catch(Exception ex) {
         }
+        log.debug("判断文件【{}】是否为图片结果为【{}】", file.getName(), ret);
+        return ret;
     }
 
     /**
@@ -170,7 +173,7 @@ public class AppFileUtil {
      * @throws Exception
      */
     public SysFile uploadFile(String directory, MultipartFile multipartFile) throws Exception {
-        Assert.notNull(multipartFile, "Upload file can not empty!");
+        Assert.notNull(multipartFile, "上传文件不能为空");
         return uploadFiles(directory, Arrays.asList(multipartFile)).get(0);
     }
 
@@ -182,7 +185,7 @@ public class AppFileUtil {
      * @throws Exception
      */
     public List<SysFile> uploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
-        Assert.notEmpty(multipartFiles, "Upload file can not empty!");
+        Assert.notEmpty(multipartFiles, "上传文件不能为空");
         List<SysFile> fileModels = Lists.newArrayList();
         for (MultipartFile multipartFile : multipartFiles) {
             if (multipartFile.isEmpty()) {
@@ -465,7 +468,7 @@ public class AppFileUtil {
         SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(imageFile.getAbsolutePath()))
                 .filePath(filePath).fileSize(imageFile.length()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
                 .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
-        log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
+        log.debug("上传文件成功，具体信息为【{}】", sysFile.toString());
         return sysFile;
     }
 
@@ -499,7 +502,7 @@ public class AppFileUtil {
         File targetFileDirectory = new File(storePath);
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);
-            log.debug("Directory {} is not exist, force create direcorty....", storePath);
+            log.debug("目录不存在，即将强制创建路径【{}】", storePath);
         }
         return targetFileDirectory;
     }
@@ -526,7 +529,7 @@ public class AppFileUtil {
         } catch (IOException e) {
             Exceptions.printException(e);
         }
-        log.debug("创建的临时文件路径为：{}", tempFile.getAbsolutePath());
+        log.debug("创建的临时文件路径为【{}】", tempFile.getAbsolutePath());
         return tempFile;
     }
 
@@ -600,9 +603,9 @@ public class AppFileUtil {
             if (urlFile.getConn().getContentLengthLong() != 0) {
                 FileUtils.copyURLToFile(urlFile.getConnUrl(), targetFile);
                 urlFile.getConn().disconnect();
-                log.debug("即将从路径: {} 下载文件保存至： {}", fileUrl, targetFile.getAbsolutePath());
+                log.debug("即将从路径【{}】 下载文件保存至【{}】", fileUrl, targetFile.getAbsolutePath());
             } else {
-                log.error("从路径: {} 下载文件发生异常", fileUrl);
+                log.error("从路径【{}】下载文件发生异常", fileUrl);
             }
         } catch (Exception e) {
             if (urlConnection!= null) {
