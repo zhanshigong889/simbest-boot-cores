@@ -129,8 +129,11 @@ public final class GlobalExceptionRegister {
     }
 
     private static void setCorrectErrorMessage(JsonResponse response, Exception e){
-        if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains("ConstraintViolationException")){
-            response.setMessage("数据处理异常");
+        if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains(" constraint [")){
+            String constraintField = e.getMessage();
+            constraintField = StringUtils.substringAfter(constraintField, "constraint [");
+            constraintField = StringUtils.substringBefore(constraintField, "]");
+            response.setMessage("数据".concat(constraintField).concat("唯一性校验错误"));
         }
         else if(StringUtils.isEmpty(response.getMessage())){
             response.setMessage(e.getMessage());
