@@ -189,8 +189,10 @@ public class AppFileUtil {
         List<SysFile> fileModels = Lists.newArrayList();
         for (MultipartFile multipartFile : multipartFiles) {
             if (multipartFile.isEmpty()) {
+                log.warn("上传文件流为空，继续循环处理上传文件");
                 continue;
             } else if (multipartFile.getSize() == 0L){
+                log.warn("上传文件流大小为空，继续循环处理上传文件");
                 continue;
             }
             String filePath = null;
@@ -508,6 +510,40 @@ public class AppFileUtil {
     }
 
     /**
+     * 创建临时目录
+     * @return
+     */
+    public File createTempDirectory(String dir){
+        File tempDirectory = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(CodeGenerator.systemUUID()).concat(ApplicationConstants.SLASH).concat(dir));
+        try {
+            FileUtils.forceMkdir(tempDirectory);
+        } catch (IOException e) {
+            Exceptions.printException(e);
+            return null;
+        }
+        log.debug("创建的临时目录为【{}】", tempDirectory.getAbsolutePath());
+        return tempDirectory;
+    }
+
+    /**
+     * 创建指定文件名称的临时文件
+     * @param filename
+     * @return
+     */
+    public File createTempFileWithName(String filename){
+        File tempFile = null;
+        try {
+            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(filename));
+            FileUtils.forceDeleteOnExit(tempFile);
+            FileUtils.touch(tempFile);
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        }
+        log.debug("创建的临时文件路径为【{}】", tempFile.getAbsolutePath());
+        return tempFile;
+    }
+
+    /**
      * 创建临时后缀临时文件
      * @return
      */
@@ -525,7 +561,6 @@ public class AppFileUtil {
         try {
             tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(CodeGenerator.systemUUID()+ApplicationConstants.DOT+suffix));
             FileUtils.touch(tempFile);
-            //tempFile = File.createTempFile(CodeGenerator.randomChar(4), ApplicationConstants.DOT + suffix);
         } catch (IOException e) {
             Exceptions.printException(e);
         }
