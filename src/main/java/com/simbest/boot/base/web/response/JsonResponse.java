@@ -104,8 +104,23 @@ public class JsonResponse {
         return response;
     }
 
+    /**
+     * 成功提示信息
+     * @param message
+     * @return
+     */
     public static JsonResponse success(String message) {
         JsonResponse response = success(null, message);
+        return response;
+    }
+
+    /**
+     * 失败提示信息
+     * @param message
+     * @return
+     */
+    public static JsonResponse fail(String message) {
+        JsonResponse response = fail(null, message);
         return response;
     }
 
