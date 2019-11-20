@@ -45,8 +45,11 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
 /**
  * 用途：统一系统文件管理控制器
@@ -95,13 +98,7 @@ public class SysFileController extends LogicController<SysFile, String> {
         this.fileService = fileService;
     }
 
-    /**
-     * 上传文件，支持IE8及以上版本浏览器，支持同时上传多个附件
-     * @param request
-     * @param response
-     * @throws Exception
-     */
-    @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
+    @ApiOperation(value = "传统方式上传附件（支持IE8）,支持关联流程", notes = "会保存到数据库SYS_FILE")
     @PostMapping(value = {UPLOAD_PROCESS_FILES_URL, UPLOAD_PROCESS_FILES_URL_SSO, UPLOAD_PROCESS_FILES_URL_API})
     public void uploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonResponse jsonResponse = doUploadFile(request, response);
@@ -113,17 +110,26 @@ public class SysFileController extends LogicController<SysFile, String> {
         out.close();
     }
 
-    @ApiOperation(value = "上传多个附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
+    @ApiOperation(value = "REST方式上传附件,支持关联流程", notes = "会保存到数据库SYS_FILE")
     @PostMapping(value = {UPLOAD_PROCESS_FILES_URL_REST, UPLOAD_PROCESS_FILES_URL_REST_SSO, UPLOAD_PROCESS_FILES_URL_REST_API})
     public ResponseEntity<?> uploadFileRest(HttpServletRequest request, HttpServletResponse response) throws Exception{
         JsonResponse jsonResponse = doUploadFile(request, response);
         return new ResponseEntity(jsonResponse, HttpStatus.OK);
     }
 
+    /**
+     * 上传文件,支持关联流程
+     */
     private JsonResponse doUploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
         MultipartHttpServletRequest mureq = (MultipartHttpServletRequest) request;
-        Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
-        List<SysFile> sysFiles = fileService.uploadProcessFiles(multipartFiles.values(),
+        //优先通过参数名称获取文件
+        Collection<MultipartFile> uploadingFileList = mureq.getFiles("file");
+        //如果通过参数名称file获取不到文件，那么通过单文件方式再次尝试获取文件
+        if(uploadingFileList.size() == ZERO){
+            Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
+            uploadingFileList = multipartFiles.values();
+        }
+        List<SysFile> sysFiles = fileService.uploadProcessFiles(uploadingFileList,
                 request.getParameter("pmInsType"),
                 request.getParameter("pmInsId"),
                 request.getParameter("pmInsTypePart"));
@@ -137,6 +143,7 @@ public class SysFileController extends LogicController<SysFile, String> {
         }
         return jsonResponse;
     }
+
 
     /**
      * 下载文件
