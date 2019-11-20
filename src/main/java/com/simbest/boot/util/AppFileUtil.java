@@ -490,10 +490,10 @@ public class AppFileUtil {
      * 设置文件上传路径
      */
     public String createUploadDirectoryPath(String directory) {
-        return ApplicationConstants.SLASH + DateUtil.getDateStr("yyyy")
-                + ApplicationConstants.SLASH + DateUtil.getDateStr("MM")
-                + ApplicationConstants.SLASH + config.getAppcode()
-                + ApplicationConstants.SLASH + directory;
+        return ApplicationConstants.SEPARATOR + DateUtil.getDateStr("yyyy")
+                + ApplicationConstants.SEPARATOR + DateUtil.getDateStr("MM")
+                + ApplicationConstants.SEPARATOR + config.getAppcode()
+                + ApplicationConstants.SEPARATOR + directory;
     }
 
     /**
@@ -514,7 +514,8 @@ public class AppFileUtil {
      * @return
      */
     public File createTempDirectory(String dir){
-        File tempDirectory = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(CodeGenerator.systemUUID()).concat(ApplicationConstants.SLASH).concat(dir));
+        File tempDirectory = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR)
+                .concat(CodeGenerator.systemUUID()).concat(ApplicationConstants.SEPARATOR).concat(dir));
         try {
             FileUtils.forceMkdir(tempDirectory);
         } catch (IOException e) {
@@ -530,10 +531,12 @@ public class AppFileUtil {
      * @param filename
      * @return
      */
-    public File createTempFileWithName(String filename){
+    public File createTempFile(String dir, String filename){
         File tempFile = null;
         try {
-            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(filename));
+            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR)
+                    .concat(CodeGenerator.systemUUID()).concat(ApplicationConstants.SEPARATOR)
+                    .concat(dir).concat(ApplicationConstants.SEPARATOR).concat(filename));
             FileUtils.forceDeleteOnExit(tempFile);
             FileUtils.touch(tempFile);
         } catch (IOException e) {
@@ -559,7 +562,7 @@ public class AppFileUtil {
     public File createTempFile(String suffix){
         File tempFile = null;
         try {
-            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SLASH).concat(CodeGenerator.systemUUID()+ApplicationConstants.DOT+suffix));
+            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat(CodeGenerator.systemUUID()+ApplicationConstants.DOT+suffix));
             FileUtils.touch(tempFile);
         } catch (IOException e) {
             Exceptions.printException(e);
