@@ -637,6 +637,37 @@ public final class DateUtil {
 	}
 
     /**
+     * 返回两个时间相差的天数、小时数、分数的中文描述
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public static String descBetweenDates(Date startDate, Date endDate) {
+        long[] requestTimeDurations = timeBetweenDates(startDate, endDate);
+        String desc = String.format("%s天%s小时%s分钟%s秒", requestTimeDurations[0],
+                requestTimeDurations[1], requestTimeDurations[2], requestTimeDurations[3]);
+        if(desc.startsWith("0")) {
+            if (desc.startsWith("0天0小时0分钟")) {
+                desc = StringUtils.removeStart(desc, "0天0小时0分钟");
+            } else if (desc.startsWith("0天0小时")) {
+                desc = StringUtils.removeStart(desc, "0天0小时");
+            } else if (desc.startsWith("0天")) {
+                desc = StringUtils.removeStart(desc, "0天");
+            }
+        }
+        if(desc.endsWith("天0小时0分钟0秒")){
+            desc = StringUtils.removeEnd(desc, "0小时0分钟0秒");
+        }
+        else if(desc.endsWith("小时0分钟0秒")){
+            desc = StringUtils.removeEnd(desc, "0分钟0秒");
+        }
+        else if(desc.endsWith("分钟0秒")){
+            desc = StringUtils.removeEnd(desc, "0秒");
+        }
+        return desc;
+    }
+
+    /**
      * 获取日期在一个星期的周几
      * @param date
      * @return
