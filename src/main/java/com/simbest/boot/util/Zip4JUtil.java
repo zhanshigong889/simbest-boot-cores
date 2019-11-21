@@ -21,7 +21,7 @@ import java.util.List;
  * 作者: lishuyi
  * 时间: 2019/11/21  11:23
  */
-public class ZipUtil {
+public class Zip4JUtil {
     /**
      * 使用给定密码解压指定的ZIP压缩文件到指定目录
      * <p>
