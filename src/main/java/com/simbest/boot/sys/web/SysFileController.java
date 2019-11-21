@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.sys.web;
 
+import com.google.common.collect.Sets;
 import com.simbest.boot.base.web.controller.LogicController;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
@@ -48,6 +49,7 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
@@ -121,15 +123,15 @@ public class SysFileController extends LogicController<SysFile, String> {
      * 上传文件,支持关联流程
      */
     private JsonResponse doUploadFile(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        Set<MultipartFile> uploadingFileSet = Sets.newHashSet();
         MultipartHttpServletRequest mureq = (MultipartHttpServletRequest) request;
-        //优先通过参数名称获取文件
+        //优先通过指定参数名称file获取文件
         Collection<MultipartFile> uploadingFileList = mureq.getFiles("file");
-        //如果通过参数名称file获取不到文件，那么通过单文件方式再次尝试获取文件
-        if(uploadingFileList.size() == ZERO){
-            Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
-            uploadingFileList = multipartFiles.values();
-        }
-        List<SysFile> sysFiles = fileService.uploadProcessFiles(uploadingFileList,
+        uploadingFileList.forEach(f -> uploadingFileSet.add(f));
+        //再通过不指定参数名称获取文件
+        Map<String, MultipartFile> multipartFiles = mureq.getFileMap();
+        multipartFiles.values().forEach(f -> uploadingFileSet.add(f));
+        List<SysFile> sysFiles = fileService.uploadProcessFiles(uploadingFileSet,
                 request.getParameter("pmInsType"),
                 request.getParameter("pmInsId"),
                 request.getParameter("pmInsTypePart"));

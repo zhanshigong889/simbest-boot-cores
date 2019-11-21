@@ -86,11 +86,14 @@ public class AppFileUtil {
     public void init() {
         serverUploadLocation = Enum.valueOf(StoreLocation.class, config.getUploadLocation());
         log.info("应用上传文件将基于【{}】方式保存", serverUploadLocation.name());
-        if(StoreLocation.sftp.equals(serverUploadLocation)) {
-            try {
-                sftpUtil = springContextUtil.getBean(AppFileSftpUtil.class);
-            } catch (NoSuchBeanDefinitionException e) {
-                Exceptions.printException(e);
+        try {
+            sftpUtil = springContextUtil.getBean(AppFileSftpUtil.class);
+        }
+        catch (NoSuchBeanDefinitionException e) {
+        }
+        finally {
+            if(null == sftpUtil){
+                log.info("请注意应用没有配置SFTP，请检查配置是否需要，如不需要，则忽略该条警告信息！");
             }
         }
     }
@@ -578,9 +581,11 @@ public class AppFileUtil {
      */
     public File getFileFromSystem(SysFile sysFile){
         if(null == sysFile.getStoreLocation()){
+            log.debug("文件记录的存储位置为空，将通过【{}】方式下载文件【{}】", serverUploadLocation, sysFile.getFilePath());
             return getFileFromSystem(serverUploadLocation, sysFile.getFilePath());
         }
         else{
+            log.debug("将通过【{}】方式下载文件【{}】", sysFile.getStoreLocation(), sysFile.getFilePath());
             return getFileFromSystem(sysFile.getStoreLocation(), sysFile.getFilePath());
         }
     }
