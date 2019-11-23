@@ -3,7 +3,10 @@
  */
 package com.simbest.boot.security.auth.handle;
 
+import com.simbest.boot.security.IUser;
+import com.simbest.boot.util.security.LoginUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.CompositeLogoutHandler;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
@@ -28,6 +31,9 @@ import java.util.Arrays;
 @Component
 public class DefaultLogoutHandler implements LogoutHandler {
 
+    @Autowired
+    private LoginUtils loginUtils;
+
     private LogoutHandler handler;
 
     public DefaultLogoutHandler(){
@@ -38,6 +44,10 @@ public class DefaultLogoutHandler implements LogoutHandler {
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        if(authentication.getPrincipal() instanceof IUser) {
+            IUser iUser = (IUser) authentication.getPrincipal();
+            loginUtils.recordLogoutUsername(iUser.getUsername());
+        }
         handler.logout(request, response, authentication);
     }
 }

@@ -49,6 +49,8 @@ public class SsoSuccessLoginHandler extends SimpleUrlAuthenticationSuccessHandle
         //单点登录首页，记录登录日志
         if(ApplicationConstants.ROOT_SSO_PAGE.equals(ssoPath)) {
             loginUtils.recordLoginLog(request, authentication);
+            //记录当前登录账号
+            loginUtils.recordLoginUsername(authentication.getName());
         }
 
         request.getRequestDispatcher(getRequestPath(request)).forward(request, response);

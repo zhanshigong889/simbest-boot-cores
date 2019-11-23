@@ -43,6 +43,9 @@ public class SuccessLoginHandler implements AuthenticationSuccessHandler {
 
             //记录登录日志
             loginUtils.recordLoginLog(request, authentication);
+            //记录当前登录账号
+            loginUtils.recordLoginUsername(iUser.getUsername());
+
         }
 
         response.setStatus(HttpServletResponse.SC_OK);

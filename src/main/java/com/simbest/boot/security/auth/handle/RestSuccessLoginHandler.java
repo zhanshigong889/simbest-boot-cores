@@ -46,6 +46,8 @@ public class RestSuccessLoginHandler implements AuthenticationSuccessHandler {
             log.debug("用户【{}】登录成功，用户身份详细信息为【{}】", iUser.getUsername(), iUser);
             //记录登录日志
             loginUtils.recordLoginLog(request, authentication);
+            //记录当前登录账号
+            loginUtils.recordLoginUsername(iUser.getUsername());
         }
 
         response.setCharacterEncoding("utf-8");

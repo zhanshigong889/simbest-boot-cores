@@ -19,6 +19,7 @@ public class ApplicationConstants {
 
     public static final int ZERO = 0;
     public static final int ONE = 1;
+    public static final int FONE = -1;
     public static final Boolean TRUE = true;
     public static final Boolean FALSE = false;
 

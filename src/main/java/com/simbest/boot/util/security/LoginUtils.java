@@ -15,6 +15,7 @@ import com.simbest.boot.security.auth.filter.SsoAuthenticationRegister;
 import com.simbest.boot.sys.model.SysLogLogin;
 import com.simbest.boot.sys.service.ISysLogLoginService;
 import com.simbest.boot.util.DateUtil;
+import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.util.server.HostUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.util.Set;
 
 /**
  * 用途：登录工具类
@@ -48,6 +50,8 @@ public class LoginUtils {
 
     @Autowired
     private ISysLogLoginService loginService;
+
+    private final static String loggedUser = "LOGGED_USER";
 
     /**
      * 根据用户名，自动登录
@@ -112,4 +116,29 @@ public class LoginUtils {
             loginService.insert(logLogin);
         }
     }
+
+    /**
+     * 记录登录账号
+     * @param username
+     */
+    public void recordLoginUsername(String username){
+        RedisUtil.getRedisTemplate().opsForSet().add(loggedUser, username);
+    }
+
+    /**
+     * 记录登出账号
+     * @param username
+     */
+    public void recordLogoutUsername(String username){
+        RedisUtil.getRedisTemplate().opsForSet().remove(loggedUser, username);
+    }
+
+    /**
+     * 获取所有已登录账号
+     * @return
+     */
+    public Set<String> loadLoginUsername(){
+        return RedisUtil.getRedisTemplate().opsForSet().members(loggedUser);
+    }
+
 }
