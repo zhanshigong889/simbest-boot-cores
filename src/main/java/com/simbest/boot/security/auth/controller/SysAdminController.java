@@ -33,9 +33,9 @@ public class SysAdminController {
 
     @ApiOperation(value = "查询当前应用-当前登录用户的在线实例", notes = "注意是当前用户")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
-    @PostMapping("/listOnlineUsers")
-    public JsonResponse listOnlineUsers() {
-        return sysAdminService.listOnlineUsers();
+    @PostMapping("/listCurrentOnlineUsers")
+    public JsonResponse listCurrentOnlineUsers() {
+        return JsonResponse.success(sysAdminService.listCurrentOnlineUsers());
     }
 
     @ApiOperation(value = "查询当前应用-指定登录用户的在线实例", notes = "注意指定的用户必须在线")
@@ -45,7 +45,14 @@ public class SysAdminController {
             @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
     })
     public JsonResponse listIndicatedOnlineUsers(@RequestParam String username) {
-        return sysAdminService.listIndicatedOnlineUsers(username);
+        return JsonResponse.success(sysAdminService.listIndicatedOnlineUsers(username));
+    }
+
+    @ApiOperation(value = "查询当前应用-所有登录用户的在线实例", notes = "注意是所有用户")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/listAllOnlineUsers")
+    public JsonResponse listAllOnlineUsers() {
+        return JsonResponse.success(sysAdminService.listAllOnlineUsers());
     }
 
     @ApiOperation(value = "强制剔除某个用户", notes = "强制剔除某个用户")

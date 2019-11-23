@@ -4,6 +4,9 @@
 package com.simbest.boot.security.auth.service;
 
 import com.simbest.boot.base.web.response.JsonResponse;
+import org.springframework.security.core.session.SessionInformation;
+
+import java.util.List;
 
 /**
  * 用途：系统管理维护服务层
@@ -12,9 +15,11 @@ import com.simbest.boot.base.web.response.JsonResponse;
  */
 public interface ISysAdminService {
 
-    JsonResponse listOnlineUsers();
+    List<SessionInformation> listCurrentOnlineUsers();
 
-    JsonResponse listIndicatedOnlineUsers(String username);
+    List<SessionInformation> listIndicatedOnlineUsers(String username);
+
+    List<SessionInformation> listAllOnlineUsers();
 
     JsonResponse forceLogoutUser(String username);
 

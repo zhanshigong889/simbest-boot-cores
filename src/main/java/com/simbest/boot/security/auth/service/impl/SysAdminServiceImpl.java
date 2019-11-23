@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.service.impl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
@@ -13,13 +14,16 @@ import com.simbest.boot.sys.service.ISimpleSmsService;
 import com.simbest.boot.util.CodeGenerator;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.util.security.LoginUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.stereotype.Component;
 
@@ -50,20 +54,43 @@ public class SysAdminServiceImpl implements ISysAdminService {
     private IAuthUserCacheService authUserCacheService;
 
     @Autowired
+    private LoginUtils loginUtils;
+
+    @Autowired
     private ISimpleSmsService smsService;
 
     @Override
-    public JsonResponse listOnlineUsers(){
+    public List<SessionInformation> listCurrentOnlineUsers(){
         List<SessionInformation> sessionsInfoList = sessionRegistry.getAllSessions(
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal(), false); // false代表不包含过期session
-        return JsonResponse.success(sessionsInfoList);
+        return sessionsInfoList;
     }
 
     @Override
-    public JsonResponse listIndicatedOnlineUsers(String username) {
-        List<SessionInformation> principals = sessionRegistry.getAllSessions(authService.loadUserByUsername(username), true);
-        return JsonResponse.success(principals);
+    public List<SessionInformation> listIndicatedOnlineUsers(String username) {
+        UserDetails userDetails;
+        try {
+            userDetails = authService.loadUserByUsername(username);
+        }
+        catch (AuthenticationException e){
+            return null;
+        }
+        return sessionRegistry.getAllSessions(userDetails, true);
     }
+
+    @Override
+    public List<SessionInformation> listAllOnlineUsers(){
+        List<SessionInformation> sessionsInfoList = Lists.newArrayList();
+        Set<String> usernameSet = loginUtils.loadLoginUsername();
+        usernameSet.forEach(s -> {
+            List<SessionInformation> sessionInformationList = listIndicatedOnlineUsers(s);
+            if(null != sessionInformationList) {
+                sessionsInfoList.addAll(sessionInformationList);
+            }
+        });
+        return sessionsInfoList;
+    }
+
 
     @Override
     public JsonResponse forceLogoutUser(String username) {

@@ -50,6 +50,6 @@ public class AuthoritiesConstants {
     public static final String CredentialsExpiredException = "账户密码已到期";
     public static final String InsufficientAuthenticationException = "账户密码或验证码错误";
     public static final String AttempMaxLoginFaildException = "错误登录超过"+ATTEMPT_LOGIN_MAX_TIMES+"次，锁定"+ATTEMPT_LOGIN_FAILED_WAIT_SECONDS/60+"分钟";
-    public static final String InternalAuthenticationServiceException = "认证内部错误";
+    public static final String InternalAuthenticationServiceException = "权限认证错误";
 
 }
