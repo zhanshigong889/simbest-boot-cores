@@ -101,11 +101,11 @@ public class ExcelUtil<T> {
                         if (cell == null) {
                             continue;
                         }
-                        int cellType = cell.getCellType();
+                        CellType cellType = cell.getCellTypeEnum();
                         String c = "";
-                        if (cellType == HSSFCell.CELL_TYPE_NUMERIC) {
+                        if (cellType == CellType.NUMERIC) {
                             c = String.valueOf(cell.getNumericCellValue());
-                        } else if (cellType == HSSFCell.CELL_TYPE_BOOLEAN) {
+                        } else if (cellType == CellType.BOOLEAN) {
                             c = String.valueOf(cell.getBooleanCellValue());
                         } else {
                             c = cell.getStringCellValue();
@@ -425,11 +425,12 @@ public class ExcelUtil<T> {
     public static String getExcelCellValue(Cell cell) {
         DataFormatter df = new DataFormatter();
         String result;
-        switch (cell.getCellType()) {
-            case Cell.CELL_TYPE_STRING:
+        CellType cellType = cell.getCellTypeEnum();
+        switch (cellType) {
+            case STRING:
                 result = cell.getRichStringCellValue().getString();
                 break;
-            case Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     result = new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue());
                     break;
@@ -438,16 +439,16 @@ public class ExcelUtil<T> {
                     result = !num.contains(".") ? num : num.replaceAll("0*$", "").replaceAll("\\.$", "");
                     break;
                 }
-            case Cell.CELL_TYPE_BOOLEAN:
+            case BOOLEAN:
                 result = "" + cell.getBooleanCellValue();
                 break;
-            case Cell.CELL_TYPE_FORMULA:
+            case FORMULA:
                 result = cell.getCellFormula();
                 break;
-            case Cell.CELL_TYPE_BLANK:
+            case BLANK:
                 result = "";
                 break;
-            case Cell.CELL_TYPE_ERROR:
+            case ERROR:
                 result = Byte.valueOf(cell.getErrorCellValue()).toString();
                 break;
             default:
@@ -493,8 +494,6 @@ public class ExcelUtil<T> {
     /**
      * 对list数据源将其里面的数据导入到excel表单
      *
-     * @param sheetName
-     *            工作表的名称
      * @param output
      *            java输出流
      */
@@ -514,17 +513,17 @@ public class ExcelUtil<T> {
             HSSFRow row;
             HSSFCell cell;// 产生单元格
             HSSFCellStyle style = workbook.createCellStyle();
-            style.setFillForegroundColor(HSSFColor.SKY_BLUE.index);
-            style.setFillBackgroundColor(HSSFColor.GREY_40_PERCENT.index);
-            style.setBorderBottom(HSSFCellStyle.BORDER_THIN); //下边框
-            style.setBorderLeft(HSSFCellStyle.BORDER_THIN);//左边框
-            style.setBorderTop(HSSFCellStyle.BORDER_THIN);//上边框
-            style.setBorderRight(HSSFCellStyle.BORDER_THIN);//右边框
-            style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 居中
+            style.setFillForegroundColor(HSSFColor.HSSFColorPredefined.SKY_BLUE.getIndex());
+            style.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT.getIndex());
+            style.setBorderBottom(BorderStyle.THIN); //下边框
+            style.setBorderLeft(BorderStyle.THIN);//左边框
+            style.setBorderTop(BorderStyle.THIN);//上边框
+            style.setBorderRight(BorderStyle.THIN);//右边框
+            style.setAlignment(HorizontalAlignment.CENTER); // 居中
             Font font = workbook.createFont();
             font.setFontName("微软雅黑");
             font.setFontHeightInPoints((short)14); //字体大小
-            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setBold(Boolean.TRUE);
             style.setFont(font);
             row = sheet.createRow(0);// 产生一行
             int intArray[]=new int[fields.size()];//定义列宽
@@ -534,7 +533,7 @@ public class ExcelUtil<T> {
                 ExcelVOAttribute attr = field.getAnnotation(ExcelVOAttribute.class);
                 int col = getExcelCol(attr.column());// 获得列号
                 cell = row.createCell(col);// 创建列
-                cell.setCellType(HSSFCell.CELL_TYPE_STRING);// 设置列中写入内容为String类型
+                cell.setCellType(CellType.STRING);// 设置列中写入内容为String类型
                 cell.setCellValue(attr.name());// 写入列名
                 int iLength = attr.name().getBytes().length*256*2;
                 intArray[i] = iLength;//初始化列宽
@@ -565,7 +564,7 @@ public class ExcelUtil<T> {
                         // 根据ExcelVOAttribute中设置情况决定是否导出,有些情况需要保持为空,希望用户填写这一列.
                         if (attr.isExport()) {
                             cell = row.createCell(getExcelCol(attr.column()));// 创建cell
-                            cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+                            cell.setCellType(CellType.STRING);
                             cell.setCellValue(field.get(vo) == null ? ""
                                     : String.valueOf(field.get(vo)));// 如果数据存在就填入,不存在填入空格.
                             if(field.get(vo) != null){
@@ -578,7 +577,7 @@ public class ExcelUtil<T> {
                                 }
                             }
                             font.setFontHeightInPoints((short)12); //字体大小
-                            font.setBoldweight(Font.BOLDWEIGHT_NORMAL);
+                            font.setBold( Boolean.TRUE );
                             style.setFont(font);
                             cell.setCellStyle(style);
                         }
