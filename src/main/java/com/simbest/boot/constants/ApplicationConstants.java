@@ -36,6 +36,7 @@ public class ApplicationConstants {
     public static final String ROOT_SSO_PAGE = "/sso";
     public static final String WELCOME_PAGE = "/welcome"; //站点首页，不需要session
     public static final String LOGIN_PAGE = "/login";
+    public static final String REST_LOGIN_PAGE = "/restlogin";
     public static final String LOGOUT_PAGE = "/logout";
     public static final String ERROR_PAGE = "/error";
     public static final String HOME_PAGE = "/home"; //自动跳转至index，需要session

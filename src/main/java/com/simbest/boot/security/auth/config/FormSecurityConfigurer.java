@@ -4,7 +4,6 @@
 package com.simbest.boot.security.auth.config;
 
 import com.simbest.boot.config.Swagger2CsrfProtection;
-import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.entryPoint.AccessDeniedEntryPoint;
 import com.simbest.boot.security.auth.filter.CaptchaAuthenticationFilter;
@@ -47,6 +46,17 @@ import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Map;
+
+import static com.simbest.boot.constants.ApplicationConstants.ERROR_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.LOGIN_ERROR_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.LOGIN_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.LOGOUT_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.REST_LOGIN_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.REST_UUMS_LOGIN_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.REST_UUMS_LOGOUT_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.ROOT_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.UUMS_LOGIN_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.WELCOME_PAGE;
 
 /**
  * 用途：通用Web请求安全配置
@@ -160,8 +170,8 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()//跨域请求会先进行一次options请求
-                .antMatchers(ApplicationConstants.ROOT_PAGE, ApplicationConstants.WELCOME_PAGE, ApplicationConstants.ERROR_PAGE,
-                        ApplicationConstants.LOGIN_PAGE, ApplicationConstants.LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
+                .antMatchers(ROOT_PAGE, WELCOME_PAGE, ERROR_PAGE,
+                        LOGIN_PAGE, LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
                 .antMatchers("/h2-console/**", "/html/**").permitAll()  // 都可以访问
                 .antMatchers("/httpauth/**", "/**/anonymous/**", "/services/**", "/wx/**").permitAll()  // 都可以访问
                 .antMatchers("/action/**").hasRole("USER")   // 需要相应的角色才能访问
@@ -169,7 +179,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .antMatchers("/sys/admin/**", "/monitoring/**").hasAnyRole("ADMIN", "SUPERVISOR")
                 .anyRequest().authenticated()
                 .and().formLogin().successHandler(successLoginHandler) // 成功登入后，重定向到首页
-                .loginPage(ApplicationConstants.LOGIN_PAGE).failureUrl(ApplicationConstants.LOGIN_ERROR_PAGE) // 自定义登录界面
+                .loginPage(LOGIN_PAGE).failureUrl(LOGIN_ERROR_PAGE) // 自定义登录界面
                 .failureHandler(failedLoginHandler) //记录登录错误日志，并自定义登录错误提示信息
                 .and().logout().logoutSuccessHandler(successLogoutHandler) // 成功登出后，重定向到登陆页
                 .and().exceptionHandling().authenticationEntryPoint(new AccessDeniedEntryPoint()) //无权限返回JSON数据
@@ -177,11 +187,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .and().headers().frameOptions().sameOrigin()
                 .and().csrf().disable().cors().and()
 
-                .sessionManagement().sessionFixation().newSession().invalidSessionUrl(ApplicationConstants.LOGIN_PAGE).maximumSessions(1)
-//                .sessionManagement().invalidSessionUrl(ApplicationConstants.LOGIN_PAGE).maximumSessions(5)
+                .sessionManagement().sessionFixation().newSession().invalidSessionUrl(LOGIN_PAGE).maximumSessions(1)
+//                .sessionManagement().invalidSessionUrl(LOGIN_PAGE).maximumSessions(5)
                 .maxSessionsPreventsLogin(true)
                 .sessionRegistry(sessionRegistry())
-                .expiredUrl(ApplicationConstants.LOGIN_PAGE);
+                .expiredUrl(LOGIN_PAGE);
 
         Map<String, CustomAbstractAuthenticationProcessingFilter> auths = appContext.getBeansOfType(CustomAbstractAuthenticationProcessingFilter.class);
         for(CustomAbstractAuthenticationProcessingFilter filter : auths.values()){
@@ -198,7 +208,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Bean
     public RsaAuthenticationFilter rsaAuthenticationFilter() throws Exception {
         RsaAuthenticationFilter filter = new RsaAuthenticationFilter();
-        filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(ApplicationConstants.LOGIN_PAGE, RequestMethod.POST.name()));
+        filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(LOGIN_PAGE, RequestMethod.POST.name()));
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(successLoginHandler);
@@ -215,7 +225,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public UumsAuthenticationFilter uumsAuthenticationFilter() throws Exception {
-        UumsAuthenticationFilter filter = new UumsAuthenticationFilter(new AntPathRequestMatcher(ApplicationConstants.UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
+        UumsAuthenticationFilter filter = new UumsAuthenticationFilter(new AntPathRequestMatcher(UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(successLoginHandler);
@@ -237,7 +247,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         // 不跳回首页
         filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
         //跳至登陆页，但不作任何提醒
-        //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_PAGE));
+        //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_PAGE));
         //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
@@ -250,7 +260,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public RestUumsAuthenticationFilter restUumsAuthenticationFilter() throws Exception {
-        RestUumsAuthenticationFilter filter = new RestUumsAuthenticationFilter(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
+        RestUumsAuthenticationFilter filter = new RestUumsAuthenticationFilter(new AntPathRequestMatcher(REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()));
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
@@ -266,7 +276,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Bean
     public LogoutFilter restUumsLogoutFilter() {
         LogoutFilter filter = new LogoutFilter(restSuccessLogoutHandler, defaultLogoutHandler);
-        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(ApplicationConstants.REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
+        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
         return filter;
     }
 
@@ -280,12 +290,12 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
                 new OrRequestMatcher(
 //                        new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
-                        new AntPathRequestMatcher("/uumslogin", RequestMethod.POST.name()),
-                        new AntPathRequestMatcher("/login", RequestMethod.POST.name())
+                        new AntPathRequestMatcher(UUMS_LOGIN_PAGE, RequestMethod.POST.name()),
+                        new AntPathRequestMatcher(LOGIN_PAGE, RequestMethod.POST.name())
                 ));
         filter.setAuthenticationManager(authenticationManagerBean());
         //跳至登陆页，提醒验证码错误
-        filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(ApplicationConstants.LOGIN_ERROR_PAGE));
+        filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PAGE));
         return filter;
     }
 
@@ -297,7 +307,8 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     public RestCaptchaAuthenticationFilter restCaptchaAuthenticationFilter() throws Exception {
         RestCaptchaAuthenticationFilter filter = new RestCaptchaAuthenticationFilter(
                 new OrRequestMatcher(
-                        new AntPathRequestMatcher("/restlogin", RequestMethod.POST.name())
+                        new AntPathRequestMatcher(REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()),
+                        new AntPathRequestMatcher(REST_LOGIN_PAGE, RequestMethod.POST.name())
                 ));
         filter.setAuthenticationManager(authenticationManagerBean());
         //记录失败登录次数

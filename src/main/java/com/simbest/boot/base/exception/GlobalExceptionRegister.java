@@ -133,7 +133,7 @@ public final class GlobalExceptionRegister {
             String constraintField = e.getMessage();
             constraintField = StringUtils.substringAfter(constraintField, "constraint [");
             constraintField = StringUtils.substringBefore(constraintField, "]");
-            response.setMessage("数据".concat(constraintField).concat("唯一性校验错误"));
+            response.setMessage("数据[".concat(constraintField).concat("]唯一性校验错误"));
         }
         else if(StringUtils.isEmpty(response.getMessage())){
             response.setMessage(e.getMessage());
