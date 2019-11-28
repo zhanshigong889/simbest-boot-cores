@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -31,16 +32,18 @@ public class CustomBeanUtil extends BeanUtils {
     public static String[] getNullPropertyNames(Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
         java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
         Set<String> emptyNames = new HashSet<String>();
         for (java.beans.PropertyDescriptor pd : pds) {
             try {
+                //下面的判断为避免业务实体类重写属性get方法后，src.getPropertyValue(pd.getName())获取不到值报错
+                if( StrUtil.isEmptyIfStr( pd.getReadMethod() ) ){
+                    continue;
+                }
                 Object srcValue = src.getPropertyValue(pd.getName());
                 if (srcValue == null) {
                     emptyNames.add(pd.getName());
                 }
-            }
-            catch (InvalidPropertyException e){
+            }catch (InvalidPropertyException e){
                 emptyNames.add(pd.getName());
                 log.error("获取属性【{}】发生异常【{}】", pd.getName(), e.getMessage());
             }
