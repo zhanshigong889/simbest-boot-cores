@@ -13,6 +13,7 @@ import com.simbest.boot.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -288,7 +289,11 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
     @Transactional
     public void deleteById ( PK id ) {
         log.debug("@Generic Repository Service deleteById object by id: " + id);
-        genericRepository.deleteById( id );
+        try {
+            genericRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e){
+            log.error("注意：通过主键【{}】没有发现需要删除的记录", id);
+        }
     }
 
     /**
