@@ -5,6 +5,7 @@
 package com.simbest.boot.uums.api.user;
 
 import com.mzlion.easyokhttp.HttpClient;
+import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
@@ -47,7 +48,7 @@ public class UumsSysUserRoleApi {
      * @param appcode
      * @return
      */
-    public int updateRoleUser( Map<String,Object> mapParam,String appcode){
+    public Integer updateRoleUser( Map<String,Object> mapParam,String appcode){
         String loginUser = SecurityUtils.getCurrentUserName();
         log.debug("Http remote request user by username: {}", loginUser);
         String json0=JacksonUtils.obj2json(mapParam);
@@ -60,7 +61,17 @@ public class UumsSysUserRoleApi {
             log.error("--response对象为空!--");
             return 0;
         }
-        return (int)response.getData();
+        Double returnParam = null;
+        try{
+            returnParam = (Double)response.getData();
+        }catch ( Exception e ){
+            Exceptions.printException( e );
+            return 0;
+        }
+        if(returnParam==null){
+            return 0;
+        }
+        return returnParam.intValue();
     }
 
 }
