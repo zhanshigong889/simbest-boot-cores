@@ -52,7 +52,7 @@ public class CustomOauthException extends OAuth2Exception {
     @Override
     public String getSummary() {
         String result = super.getSummary();
-        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】，错误信息【{}】", httpErrorCode, result);
+        log.warn("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】，错误信息【{}】", httpErrorCode, result);
         return result;
     }
 

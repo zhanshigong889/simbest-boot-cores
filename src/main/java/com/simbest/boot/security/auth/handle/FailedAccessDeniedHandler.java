@@ -87,7 +87,7 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
             }
         }
         String responseStr = JacksonUtils.obj2json(jsonResponse);
-        log.error("访问控制校验异常，即将返回【{}】", responseStr);
+        log.warn("访问控制校验异常，即将返回【{}】", responseStr);
         response.getWriter().print(responseStr);
     }
 

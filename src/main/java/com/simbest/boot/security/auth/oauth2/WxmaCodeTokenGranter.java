@@ -64,19 +64,19 @@ public class WxmaCodeTokenGranter extends AbstractTokenGranter {
             userAuth = authenticationManager.authenticate(userAuth);
         }
         catch (AccountStatusException ase) {
-            log.error("Token认证发生异常【{}】", ase.getMessage());
+            log.warn("Token认证发生异常【{}】", ase.getMessage());
             throw new InvalidGrantException(ase.getMessage());
         }
         catch (BadCredentialsException be) {
-            log.error("Token认证发生异常【{}】", be.getMessage());
+            log.warn("Token认证发生异常【{}】", be.getMessage());
             throw new InvalidGrantException(be.getMessage());
         }
         catch (Exception e) {
-            log.error("Token认证发生异常【{}】", e.getMessage());
+            log.warn("Token认证发生异常【{}】", e.getMessage());
             throw new InvalidGrantException(e.getMessage());
         }
         if (userAuth == null || !userAuth.isAuthenticated()) {
-            log.error("认证主体为空或校验失败【{}】", userAuth);
+            log.warn("认证主体为空或校验失败【{}】", userAuth);
             throw new InvalidGrantException(String.format("微信小程序认证%s失败", wxcode));
         }
 

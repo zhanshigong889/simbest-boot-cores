@@ -28,7 +28,7 @@ public class CustomOauthExceptionSerializer extends StdSerializer<CustomOauthExc
 
     @Override
     public void serialize(CustomOauthException value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】", value.getHttpErrorCode());
+        log.warn("OAuth2 认证过程出了点问题，即将组装返回的错误信息，状态码【{}】", value.getHttpErrorCode());
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         gen.writeStartObject();
         gen.writeStringField("errcode", String.valueOf(value.getHttpErrorCode()));

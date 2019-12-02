@@ -30,7 +30,7 @@ public class CustomWebResponseExceptionTranslator extends DefaultWebResponseExce
      */
     @Override
     public ResponseEntity<OAuth2Exception> translate(Exception e) {
-        log.error("OAuth2 认证过程出了点问题，即将组装返回的错误信息【{}】", e.getMessage());
+        log.warn("OAuth2 认证过程出了点问题，即将组装返回的错误信息【{}】", e.getMessage());
         if(e instanceof OAuth2Exception) {
             OAuth2Exception oAuth2Exception = (OAuth2Exception) e;
             if(StringUtils.isNotEmpty(oAuth2Exception.getMessage())){
