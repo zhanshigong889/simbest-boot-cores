@@ -3,11 +3,15 @@
  */
 package com.simbest.boot.config;
 
+import com.simbest.boot.constants.ApplicationConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,6 +35,7 @@ public class MultiThreadConfiguration {
 
     public final static String MULTI_THREAD_BEAN = "simbestThreadExecutor";
 
+    public final static int TERMINATION_SECONDS = 1200;
 
     @Autowired
     private AppConfig appConfig;
@@ -51,9 +56,29 @@ public class MultiThreadConfiguration {
         executor.setMaxPoolSize(appConfig.getThreadMaxPoolSize()); // 线程池最大线程数
         executor.setQueueCapacity(appConfig.getThreadQueueCapacity()); // 最大等待任务数
         executor.setKeepAliveSeconds(appConfig.getThreadKeepAliveSeconds()); // 空闲时间
-        executor.setThreadNamePrefix("simbestThreadExecutor-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(TERMINATION_SECONDS);
+        executor.setThreadNamePrefix(MULTI_THREAD_BEAN.concat(ApplicationConstants.LINE));
+        //增加 TaskDecorator 属性的配置
+        executor.setTaskDecorator(new ContextDecorator());
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
         return executor;
+    }
+
+    public class ContextDecorator implements TaskDecorator {
+        @Override
+        public Runnable decorate(Runnable runnable) {
+            RequestAttributes context = RequestContextHolder.currentRequestAttributes();
+            return () -> {
+                try {
+                    RequestContextHolder.setRequestAttributes(context);
+                    runnable.run();
+                } finally {
+                    RequestContextHolder.resetRequestAttributes();
+                }
+            };
+        }
     }
 
 }
