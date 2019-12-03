@@ -3,6 +3,10 @@
  */
 package com.simbest.boot.util.security;
 
+import cn.hutool.http.useragent.UserAgent;
+import cn.hutool.http.useragent.UserAgentInfo;
+import cn.hutool.http.useragent.UserAgentUtil;
+import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
@@ -18,6 +22,7 @@ import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.util.server.HostUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -27,6 +32,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 
@@ -108,6 +114,17 @@ public class LoginUtils {
                     .trueName(iUser.getTruename())
                     .belongOrgName(iUser.getBelongOrgName())
                     .build();
+            String uaStr = request.getHeader("User-Agent");
+            if(StringUtils.isNotEmpty(uaStr)){
+                UserAgent ua = UserAgentUtil.parse(uaStr);
+                logLogin.setOsFamily(ua.getPlatform().toString());
+                logLogin.setOs(ua.getOs().toString());
+                logLogin.setBrowserName(ua.getBrowser().toString());
+                logLogin.setBrowserVersion(ua.getVersion());
+                logLogin.setBrowserEngine(ua.getEngine().toString());
+                logLogin.setBrowserEngineVersion(ua.getEngineVersion());
+                logLogin.setIsMobile(ua.isMobile());
+            }
             if (authentication.getDetails() instanceof WebAuthenticationDetails) {
                 WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
                 logLogin.setSessionid(details.getSessionId());

@@ -85,4 +85,26 @@ public class SysLogLogin extends GenericModel {
 
     @Column
     private String belongOrgName;
+
+    @Column
+    private String osFamily;
+
+    @Column
+    private String os;
+
+    @Column
+    private String browserName;
+
+    @Column
+    private String browserVersion;
+
+    @Column
+    private String browserEngine;
+
+    @Column
+    private String browserEngineVersion;
+
+    @Column
+    private Boolean isMobile;
+
 }
