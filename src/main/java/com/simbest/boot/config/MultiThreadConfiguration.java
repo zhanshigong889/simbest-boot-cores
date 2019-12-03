@@ -18,10 +18,19 @@ import java.util.concurrent.ThreadPoolExecutor;
  * 时间: 2019/9/5  17:08
  * 参考：http://blog.didispace.com/springbootasync-2/
  *      https://www.cnblogs.com/sxdcgaq8080/p/8074567.html
+ *
+ * 如果多线程需要获取主线程的SESSION上下文信息，在启动类SimbestApplication的run方法增加以下内容：
+ * SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+ * 更多工作模式参考：
+ * https://blog.csdn.net/andy_zhang2007/article/details/81559975
+ *
  */
 @EnableAsync
 @Configuration
 public class MultiThreadConfiguration {
+
+    public final static String MULTI_THREAD_BEAN = "simbestThreadExecutor";
+
 
     @Autowired
     private AppConfig appConfig;
@@ -35,7 +44,7 @@ public class MultiThreadConfiguration {
      * 线程池对拒绝任务的处理策略：这里采用了CallerRunsPolicy策略，当线程池没有处理能力的时候，该策略会直接在 execute 方法的调用线程中运行被拒绝的任务；如果执行程序已关闭，则会丢弃该任务
      * @return
      */
-    @Bean("simbestThreadExecutor")
+    @Bean(MULTI_THREAD_BEAN)
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(appConfig.getThreadCorePoolSize()); // 线程池大小
