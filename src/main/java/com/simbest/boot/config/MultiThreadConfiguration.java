@@ -60,7 +60,7 @@ public class MultiThreadConfiguration {
         executor.setAwaitTerminationSeconds(TERMINATION_SECONDS);
         executor.setThreadNamePrefix(MULTI_THREAD_BEAN.concat(ApplicationConstants.LINE));
         //增加 TaskDecorator 属性的配置
-        executor.setTaskDecorator(new ContextDecorator());
+//        executor.setTaskDecorator(new ContextDecorator()); //配置后，UDP请求无法使用多线程
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         return executor;
