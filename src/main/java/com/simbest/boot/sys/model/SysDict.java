@@ -27,9 +27,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "sys_dict", uniqueConstraints = {
-        @UniqueConstraint(name="blocid_corpid_dictType", columnNames = {"blocid", "corpid", "dictType"})
-})
+@Table(name = "sys_dict")
 public class SysDict extends LogicModel {
 
     @Id
@@ -40,7 +38,7 @@ public class SysDict extends LogicModel {
     private String id;
 
     @ApiModelProperty(value = "字典类型")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String dictType;
 
     @ApiModelProperty(value = "字典名称")

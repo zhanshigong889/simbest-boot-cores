@@ -168,11 +168,9 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
                     whereSQL += "AND dv.is_public=:isPublic ";
                 }
                 if(param.equals("blocid")){
-                    whereSQL += "AND d.blocid=:blocid ";
                     whereSQL += "AND dv.blocid=:blocid ";
                 }
                 if(param.equals("corpid")){
-                    whereSQL += "AND d.corpid=:corpid ";
                     whereSQL += "AND dv.corpid=:corpid ";
                 }
             }

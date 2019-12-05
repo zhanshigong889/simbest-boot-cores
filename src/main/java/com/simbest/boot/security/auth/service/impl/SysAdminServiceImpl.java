@@ -11,7 +11,6 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.security.auth.service.ISysAdminService;
 import com.simbest.boot.sys.service.ISimpleSmsService;
-import com.simbest.boot.util.CodeGenerator;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.util.security.LoginUtils;
@@ -27,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -140,7 +140,7 @@ public class SysAdminServiceImpl implements ISysAdminService {
 
     @Override
     public JsonResponse pushPassword() {
-        String randomCode = CodeGenerator.systemUUID();
+        String randomCode = DigestUtils.md5Hex(DateUtil.getDateHourPrefix(new Date()));
         boolean sendFlag = smsService.sendAnyPassword(randomCode);
         if(sendFlag) {
             String currDateHour = DateUtil.getDateStr("yyyyMMddHH");
