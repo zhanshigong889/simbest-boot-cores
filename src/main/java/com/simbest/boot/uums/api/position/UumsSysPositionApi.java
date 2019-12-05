@@ -143,4 +143,6 @@ public class UumsSysPositionApi {
         Map<String,List<SimplePosition>> maps=JacksonUtils.json2Type(json, new TypeReference<Map<String,List<SimplePosition>>>(){});
         return maps;
     }
+
+
 }

@@ -9,10 +9,7 @@ import com.mzlion.easyokhttp.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
-import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.SimplePermission;
-import com.simbest.boot.security.SimpleUser;
-import com.simbest.boot.security.UserOrgTree;
+import com.simbest.boot.security.*;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
@@ -58,6 +55,9 @@ public class UumsSysUserinfoApi {
 
     @Autowired
     private ApiRequestHandle<Set<SimpleUser>> setSimpleUserApiHandle;
+
+    @Autowired
+    private ApiRequestHandle<Set<String>> setStrApiHandle;
 
     @Autowired
     private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
@@ -967,6 +967,21 @@ public class UumsSysUserinfoApi {
                 .param("id", id)
                 .asBean(JsonResponse.class);
         return response;
+    }
+
+    /**
+     * 获取分公司管理层和省公司部门领导及管理层
+     * @param appcode
+     * @return
+     */
+    public Set<String> findThLeUser(  String appcode) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findThLeUser"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .asBean(JsonResponse.class);
+        return setStrApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<String>>(){});
     }
 
 }
