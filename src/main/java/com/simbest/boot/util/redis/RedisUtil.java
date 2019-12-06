@@ -78,6 +78,15 @@ public class RedisUtil {
         return cacheUtils.redisTemplate.delete(prefix+key);
 	}
 
+    /**
+     * 删除key
+     *
+     * @param key
+     */
+    public static Boolean deleteGlobal(String key) {
+        return cacheUtils.redisTemplate.delete(key);
+    }
+
 	/**
 	 * 批量删除key
 	 * 
@@ -90,6 +99,19 @@ public class RedisUtil {
         }
         return cacheUtils.redisTemplate.delete(realKeys);
 	}
+
+    /**
+     * 批量删除key
+     *
+     * @param keys
+     */
+    public static Long deleteGlobal(Collection<String> keys) {
+        Collection<String> realKeys = Sets.newHashSet();
+        for(String k : keys){
+            realKeys.add(k);
+        }
+        return cacheUtils.redisTemplate.delete(realKeys);
+    }
 
     /**
      * 模糊删除key

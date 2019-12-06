@@ -45,6 +45,16 @@ public class RedisController {
         return JsonResponse.success(delCache);
     }
 
+    @ApiOperation(value = "全局精确通过Key键删除缓存Value值")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/delCacheGlobal")
+    public JsonResponse delCacheGlobal(String key) {
+        Long number = RedisUtil.deleteGlobal(key) == true ? 1L : 0L;
+        Map<String, Long> delCache = Maps.newHashMap();
+        delCache.put("caches", number);
+        return JsonResponse.success(delCache);
+    }
+
     @ApiOperation(value = "通过Key键删除缓存Value值", notes = "注意是模糊删除")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/mulDeleteCache")
@@ -54,4 +64,15 @@ public class RedisController {
         delCache.put("caches", number);
         return JsonResponse.success(delCache);
     }
+
+    @ApiOperation(value = "通过Key键删除缓存Value值", notes = "注意是模糊删除")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/mulDeleteCacheGlobal")
+    public JsonResponse mulDeleteCacheGlobal(String pattern) {
+        Long number = RedisUtil.mulDeleteGlobal(pattern);
+        Map<String, Long> delCache = Maps.newHashMap();
+        delCache.put("caches", number);
+        return JsonResponse.success(delCache);
+    }
+
 }
