@@ -1,6 +1,7 @@
 package com.simbest.boot.util;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -22,18 +23,19 @@ import java.util.regex.Pattern;
  * 修改人 修改日期 修改描述<br>
  * -------------------------------------------<br>
  */
+@Slf4j
 public class FSearchListTool<T> {
 
     private StringBuffer mKeyWordString = new StringBuffer();   //搜索的关键字内容
     private List<T> mSearchObjs = new ArrayList<>();       //搜索的对象
     private int[] mIndexes;                                     //搜索字段的索引值
 
-    public FSearchListTool(List<T> objects, String... fields) throws Exception {
+    public FSearchListTool(List<T> objects, String... fields){
         super();
         init(objects, fields);
     }
 
-    private void init(List<T> objs, String... fields) throws Exception {
+    private void init(List<T> objs, String... fields) {
         if (objs != null) {
             mKeyWordString.setLength(0);
             mSearchObjs.clear();
@@ -60,7 +62,7 @@ public class FSearchListTool<T> {
     /**
      * 通过反射从对象中取出指定字段的值
      */
-    private String getSearchKey(Object obj, String... fields) throws Exception {
+    private String getSearchKey(Object obj, String... fields)  {
         StringBuilder searchKeys = new StringBuilder();
         Class<? extends Object> clazz = obj.getClass();
         try {
@@ -73,7 +75,7 @@ public class FSearchListTool<T> {
                 f.setAccessible(false);
             }
         } catch (Exception e) {
-            throw new Exception("取值异常：" + e.getMessage());
+            log.warn("反射取值发生错误【{}】", e.getMessage());
         }
         return searchKeys.toString();
     }
