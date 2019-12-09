@@ -1,5 +1,7 @@
 package com.simbest.boot.util;
 
+import lombok.Data;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,18 +22,18 @@ import java.util.regex.Pattern;
  * 修改人 修改日期 修改描述<br>
  * -------------------------------------------<br>
  */
-public class FSearchListTool {
+public class FSearchListTool<T> {
 
     private StringBuffer mKeyWordString = new StringBuffer();   //搜索的关键字内容
-    private List<Object> mSearchObjs = new ArrayList<>();       //搜索的对象
+    private List<T> mSearchObjs = new ArrayList<>();       //搜索的对象
     private int[] mIndexes;                                     //搜索字段的索引值
 
-    public FSearchListTool(List<? extends Object> objects, String... fields) throws Exception {
+    public FSearchListTool(List<T> objects, String... fields) throws Exception {
         super();
         init(objects, fields);
     }
 
-    private void init(List<? extends Object> objs, String... fields) throws Exception {
+    private void init(List<T> objs, String... fields) throws Exception {
         if (objs != null) {
             mKeyWordString.setLength(0);
             mSearchObjs.clear();
@@ -83,12 +85,12 @@ public class FSearchListTool {
      *
      * @return 返回搜索到的对象
      */
-    public List<Object> searchTasks(String keyWords) {
-        List<Object> searchedTask = new ArrayList<>();
+    public List<T> searchTasks(String keyWords) {
+        List<T> searchedTask = new ArrayList<>();
         int[] searchIndex = getSearchIndex(keyWords);
         for (int index : searchIndex) {
             if (index != -1 && index < mSearchObjs.size() * 2) {
-                Object info = mSearchObjs.get(index / 2);
+                T info = mSearchObjs.get(index / 2);
                 if (info != null && !searchedTask.contains(info)) {
                     searchedTask.add(info);
                 }
@@ -146,21 +148,35 @@ public class FSearchListTool {
         return mid;
     }
 
-    /*public static void main ( String[] args ) {
-        List<Student> students = new ArrayList<>();
-        students.add(new Student("001", "小王", "12"));
-        students.add(new Student("002", "小王", "13"));
-        students.add(new Student("003", "小红", "14"));
-        students.add(new Student("004", "小明", "15"));
-        students.add(new Student("005", "小王", "16"));
-        students.add(new Student("006", "小王", "17"));
-        students.add(new Student("007", "小张", "18"));
+    @Data
+    private static class SearchStudent {
+        private String id;
+        private String name;
+        private String address;
+
+        public SearchStudent(String id, String name, String address) {
+            this.id = id;
+            this.name = name;
+            this.address = address;
+        }
+    }
+
+    public static void main ( String[] args ) {
+        List<SearchStudent> students = new ArrayList<>();
+        students.add(new SearchStudent("001", "小李", "12"));
+        students.add(new SearchStudent("002", "小王", "13"));
+        students.add(new SearchStudent("003", "小红", "14"));
+        students.add(new SearchStudent("004", "小明", "15"));
+        students.add(new SearchStudent("005", "小王", "16"));
+        students.add(new SearchStudent("006", "小王", "17"));
+        students.add(new SearchStudent("007", "小张", "18"));
         try {
-            FSearchListTool tool = new FSearchListTool(students, "id","name", "address");
-            System.out.println(tool.searchTasks("001"));
+            FSearchListTool<SearchStudent> tool = new FSearchListTool<>(students, "id","name", "address");
+            System.out.println(tool.searchTasks("小王").get(0).getId());
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
+    }
+
 }
 
