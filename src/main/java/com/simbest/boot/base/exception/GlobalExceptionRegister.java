@@ -25,6 +25,8 @@ import org.springframework.web.multipart.MultipartException;
 import javax.persistence.NonUniqueResultException;
 import java.util.Map;
 
+import static com.simbest.boot.constants.AuthoritiesConstants.ACCESS_FORBIDDEN;
+
 /**
  * 用途：系统中注册对应返回信息
  * 作者: lishuyi
@@ -51,7 +53,7 @@ public final class GlobalExceptionRegister {
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统空指针异常")
                         .build());
         errorMap.put(AccessDeniedException.class,
-                JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).message("权限禁止访问").build());
+                JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).message(ACCESS_FORBIDDEN).build());
         errorMap.put(HttpRequestMethodNotSupportedException.class,
                 JsonResponse.builder().errcode(HttpStatus.METHOD_NOT_ALLOWED.value()).status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(HttpStatus.METHOD_NOT_ALLOWED.name())
                         .build());

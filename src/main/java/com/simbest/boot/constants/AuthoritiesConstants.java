@@ -9,7 +9,10 @@ package com.simbest.boot.constants;
  * 时间: 2018/2/6  17:11
  */
 public class AuthoritiesConstants {
-    public static final String ADMIN = "ROLE_ADMIN";
+
+    public static final String SUPER_ADMIN = "SUPER_ADMIN";
+
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     public static final String USER = "ROLE_USER";
 
@@ -41,6 +44,8 @@ public class AuthoritiesConstants {
     public static final int ATTEMPT_LOGIN_MAX_TIMES = 5;
     public static final int ATTEMPT_LOGIN_FAILED_WAIT_SECONDS = 60 * 5;
     public static final String LOGIN_FAILED_KEY = "LOGIN_FAILED:";
+
+    public static final String ACCESS_FORBIDDEN = "权限不足，禁止访问!";
 
     public static final String UsernameNotFoundException = "账号或密码错误!";
     public static final String BadCredentialsException = "账号或密码错误";
