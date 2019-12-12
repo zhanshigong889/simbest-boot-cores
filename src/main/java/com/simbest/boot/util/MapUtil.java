@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -81,6 +82,14 @@ public class MapUtil {
             }
         }
         return obj;
+    }
+
+    public static Map<String, ?> objectToMap(Object obj, Set<String> ignoreProperties) {
+        Map<String, ?> resultMap = objectToMap(obj);
+        for(String key : ignoreProperties) {
+            resultMap.remove(key);
+        }
+        return resultMap;
     }
 
     /**
