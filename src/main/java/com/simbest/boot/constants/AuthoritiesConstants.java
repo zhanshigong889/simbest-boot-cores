@@ -10,7 +10,7 @@ package com.simbest.boot.constants;
  */
 public class AuthoritiesConstants {
 
-    public static final String SUPER_ADMIN = "SUPER_ADMIN";
+    public static final String SUPER_ADMIN = "ROLE_SUPER";
 
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 

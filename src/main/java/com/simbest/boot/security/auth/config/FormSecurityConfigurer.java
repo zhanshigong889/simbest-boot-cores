@@ -176,7 +176,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .antMatchers("/httpauth/**", "/**/anonymous/**", "/services/**", "/wx/**").permitAll()  // 都可以访问
                 .antMatchers("/action/**").hasRole("USER")   // 需要相应的角色才能访问
                 // 需要相应的角色才能访问, 后台管理和javamelody监控
-                .antMatchers("/sys/admin/**", "/monitoring/**").hasAnyRole("ADMIN", "SUPERVISOR")
+                .antMatchers("/sys/admin/**", "/monitoring/**").hasAnyRole("ADMIN", "SUPER")
                 .anyRequest().authenticated()
                 .and().formLogin().successHandler(successLoginHandler) // 成功登入后，重定向到首页
                 .loginPage(LOGIN_PAGE).failureUrl(LOGIN_ERROR_PAGE) // 自定义登录界面
