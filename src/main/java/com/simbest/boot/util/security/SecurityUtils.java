@@ -128,6 +128,20 @@ public final class SecurityUtils {
     }
 
     /**
+     * 一个权限通过，即可判定成功
+     * @param authorities
+     * @return
+     */
+    public static boolean hasAnyPermission(String[] authorities) {
+        for(String authority : authorities){
+            if(hasPermission(authority)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 获取万能密码
      * @return
      */
