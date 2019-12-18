@@ -1,10 +1,10 @@
 /*
  * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
  */
-package com.simbest.boot.security.auth.controller;
+package com.simbest.boot.sys.web;
 
 import com.simbest.boot.base.web.response.JsonResponse;
-import com.simbest.boot.security.auth.service.ISysAdminService;
+import com.simbest.boot.sys.service.ISysAdminService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

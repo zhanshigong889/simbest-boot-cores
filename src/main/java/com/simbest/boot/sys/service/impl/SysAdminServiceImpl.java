@@ -1,7 +1,7 @@
 /*
  * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
  */
-package com.simbest.boot.security.auth.service.impl;
+package com.simbest.boot.sys.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -9,7 +9,7 @@ import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
-import com.simbest.boot.security.auth.service.ISysAdminService;
+import com.simbest.boot.sys.service.ISysAdminService;
 import com.simbest.boot.sys.service.ISimpleSmsService;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.redis.RedisUtil;
@@ -38,7 +38,7 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-@DependsOn(value = {"sessionRegistry","sessionRepository"})
+@DependsOn(value = {"sessionRegistry", "sessionRepository"})
 public class SysAdminServiceImpl implements ISysAdminService {
 
     @Autowired

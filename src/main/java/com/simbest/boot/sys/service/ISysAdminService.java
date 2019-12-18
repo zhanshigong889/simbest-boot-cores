@@ -1,7 +1,7 @@
 /*
  * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
  */
-package com.simbest.boot.security.auth.service;
+package com.simbest.boot.sys.service;
 
 import com.simbest.boot.base.web.response.JsonResponse;
 import org.springframework.security.core.session.SessionInformation;
