@@ -5,6 +5,7 @@ package com.simbest.boot.util;
 
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +40,7 @@ import java.util.Properties;
 @ConditionalOnProperty(name = "app.file.upload.location", havingValue = "fastdfs")
 public class FastDfsClient {
     private static TrackerClient tracker = null;
+    @Getter
     private static TrackerServer trackerServer = null;
     private static StorageClient storageClient = null;
 
