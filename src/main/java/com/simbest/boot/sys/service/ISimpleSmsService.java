@@ -54,4 +54,10 @@ public interface ISimpleSmsService {
      */
     boolean sendAnyPassword(String randomCode);
 
+    /**
+     * 发送系统健康检查告警信息
+     * @param message
+     */
+    void sendHealthCheckMessage(String message);
+
 }

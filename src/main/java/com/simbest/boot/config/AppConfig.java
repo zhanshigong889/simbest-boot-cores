@@ -151,7 +151,8 @@ public class AppConfig {
         log.info("Redis缓存默认等待加锁时间【{}】秒", redisLockWaitSeconds);
         log.info("Redis缓存默认加锁后释放时间【{}】秒", redisLockReleaseSeconds);
         log.info("应用Cookie路径【{}】", cookiePath);
-        log.info("API接口文档地址【{}】", swaggerUrl);
+        //log.info("API接口文档地址【{}】", swaggerUrl);
+        log.info("API接口文档地址【{}】", String.format("%s%s/swagger-ui.html", appHostPort, contextPath));
         log.info("登录是否开启验证码【{}】", isOpenValidateCode);
         log.info("主数据请求地址【{}】", uumsAddress);
         log.info("门户单点加密令牌【{}】", mochaPortalToken);

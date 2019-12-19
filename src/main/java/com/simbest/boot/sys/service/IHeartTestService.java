@@ -3,6 +3,8 @@
  */
 package com.simbest.boot.sys.service;
 
+import com.simbest.boot.sys.model.SysHealth;
+
 /**
  * 用途：心跳测试服务
  * 作者: lishuyi
@@ -10,5 +12,5 @@ package com.simbest.boot.sys.service;
  */
 public interface IHeartTestService {
 
-    void doTest();
+    SysHealth doTest();
 }

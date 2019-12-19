@@ -42,7 +42,7 @@ public class HeartTestTask extends AbstractTaskSchedule {
         super(master, repository);
     }
 
-    //@Scheduled(cron = "${app.task.heart.test.job}")
+    @Scheduled(cron = "${app.task.heart.test.job}")
     public void checkAndExecute() {
         super.checkAndExecute(false);
     }
