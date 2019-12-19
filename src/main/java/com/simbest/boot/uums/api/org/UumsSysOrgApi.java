@@ -8,6 +8,7 @@ import com.mzlion.easyokhttp.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
+import com.simbest.boot.security.IOrg;
 import com.simbest.boot.security.SimpleOrg;
 import com.simbest.boot.security.UserOrgTree;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
@@ -49,6 +50,23 @@ public class UumsSysOrgApi {
     @Autowired
     private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
 
+    /**
+     * 新增组织信息
+     * @param appcode
+     * @param sysOrgInfoFull
+     * @return
+     */
+    public JsonResponse create( String appcode , IOrg sysOrgInfoFull ){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(sysOrgInfoFull);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAll"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        return response;
+    }
 
     /**
      * 根据id查找
@@ -95,6 +113,25 @@ public class UumsSysOrgApi {
                 .asBean(JsonResponse.class );
         return response;
     }
+
+    /**
+     * 单表条件查询并分页
+     * @param appcode
+     * @param sysOrgMap
+     * @return
+     */
+    public JsonResponse findAllNoPage( String appcode,Map sysOrgMap) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(sysOrgMap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAllNoPage"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        return response;
+    }
+
 
     /**
      *根据组织code查询组织信息

@@ -613,5 +613,39 @@ public class UumsSysUserInfoController {
                                           @RequestParam(required = false) String appcode) {
         return  uumsSysUserinfoApi.findUserFromPerId( page, size,  id, appcode);
     }
+
+    /**
+     * 模糊查询出人所在的组织树
+     * @param appcode
+     * @return
+     */
+    @ApiOperation(value = "模糊查询出人所在的组织树", notes = "模糊查询出人所在的组织树",tags={"人员 模糊出树"})
+    @PostMapping(value = {"/findDimUserTree","/findDimUserTree/sso"})
+    public JsonResponse findDimUserTree( @RequestBody(required = false)  Map<String,Object> mapParam,
+                                          @RequestParam(required = false) String appcode) {
+        return  JsonResponse.success( uumsSysUserinfoApi.findDimUserTree( mapParam, appcode) );
+    }
+
+    @ApiOperation(value = "新增组织下的用户通用", notes = "新增组织下的用户通用",tags={"人员 人员操作"})
+    @PostMapping(value = {"/insertUserInOrgNormal","/insertUserInOrgNormal/sso"})
+    public JsonResponse insertUserInOrgNormal( @RequestBody(required = false) Map<String,Object> mapParam ,
+                                               @RequestParam(required = false) String appcode) {
+        return  uumsSysUserinfoApi.insertUserInOrgNormal( mapParam, appcode);
+    }
+
+    @ApiOperation(value = "修改组织下的用户通用", notes = "修改组织下的用户通用",tags={"人员 人员操作"})
+    @PostMapping(value = {"/updateUserInOrgNormal","/updateUserInOrgNormal/sso"})
+    public JsonResponse updateUserInOrgNormal( @RequestBody(required = false) Map<String,Object> mapParam ,
+                                               @RequestParam(required = false) String appcode) {
+        return  uumsSysUserinfoApi.updateUserInOrgNormal( mapParam, appcode);
+    }
+
+    @ApiOperation(value = "删除组织下的用户通用", notes = "删除组织下的用户通用",tags={"人员 人员操作"})
+    @PostMapping(value = {"/deleteUserInOrgNormal","/deleteUserInOrgNormal/sso"})
+    public JsonResponse deleteUserInOrgNormal( @RequestBody(required = false) Map<String,Object> mapParam ,
+                                               @RequestParam(required = false) String appcode) {
+        return  uumsSysUserinfoApi.deleteUserInOrgNormal( mapParam, appcode);
+    }
+
 }
 

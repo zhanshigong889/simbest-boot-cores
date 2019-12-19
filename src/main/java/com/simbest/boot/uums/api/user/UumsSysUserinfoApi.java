@@ -63,6 +63,9 @@ public class UumsSysUserinfoApi {
     private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
 
     @Autowired
+    private ApiRequestHandle<Set<UserOrgTree>> userOrgTreeSetApiHandle;
+
+    @Autowired
     private ApiRequestHandle<Map<String,Object>> mapUserApiHandlemapUserApiHandle;
 
     /**
@@ -982,6 +985,77 @@ public class UumsSysUserinfoApi {
                 .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
                 .asBean(JsonResponse.class);
         return setStrApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<String>>(){});
+    }
+
+    /**
+     * 模糊查询出人所在的组织树
+     * @param appcode
+     * @return
+     */
+    public Set<UserOrgTree> findDimUserTree(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findDimUserTree"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return userOrgTreeSetApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<UserOrgTree>>(){});
+    }
+
+    /**
+     * 新增组织下的用户通用
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public JsonResponse insertUserInOrgNormal(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "insertUserInOrgNormal"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 修改组织下的用户通用
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public JsonResponse updateUserInOrgNormal(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "updateUserInOrgNormal"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 删除组织下的用户通用
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public JsonResponse deleteUserInOrgNormal(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "deleteUserInOrgNormal"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
     }
 
 }
