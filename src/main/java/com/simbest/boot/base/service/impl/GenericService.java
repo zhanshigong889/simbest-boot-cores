@@ -67,7 +67,8 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
 //        return genericRepository.getPageable(page, size, direction, properties);
         // 页码是从零开始的
         int pagePage = page < 1 ? 0 : (page - 1);
-        int pageSize = size < 1 ? 1 : (size > 100 ? 100 : size);
+//        int pageSize = size < 1 ? 1 : (size > 100 ? 100 : size);
+        int pageSize = size < 1 ? 1 : size;
 
         Pageable pageable;
 
