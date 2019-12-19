@@ -136,16 +136,16 @@ public class SysCustomFieldController extends LogicController<SysCustomField, St
 
     @ApiOperation(value = "获取自定义字段列表", notes = "通过此接口来获取某实体类型自定义字段")
     @ApiImplicitParams({ //
-            @ApiImplicitParam(name = "page", value = "当前页码", dataType = "int", paramType = "query", //
-                    required = true, example = "1"), //
-            @ApiImplicitParam(name = "size", value = "每页数量", dataType = "int", paramType = "query", //
-                    required = true, example = "10"), //
+            @ApiImplicitParam(name = "page", value = "当前页码", dataType = "int", paramType = "query", required = true, example = "1"), //
+            @ApiImplicitParam(name = "size", value = "每页数量", dataType = "int", paramType = "query", required = true, example = "10"), //
+            @ApiImplicitParam(name = "fieldClassify", value = "所属实体分类", dataType = "String", paramType = "query", required = true),
+            @ApiImplicitParam(name = "fieldClassify", value = "所属实体Id", dataType = "String", paramType = "query", required = true)
     })
     @PostMapping(value = "getSysCustomFieldsByFieldClassify")
     public JsonResponse getSysCustomFieldsByFieldClassify(@RequestParam(required = false, defaultValue = "1") int page, //
                                                           @RequestParam(required = false, defaultValue = "10") int size, //
-                                                          @RequestParam(required = true) String fieldClassify, //
-                                                          @RequestParam(required = false, defaultValue = "-1") String fieldEntityId //
+                                                          @RequestParam String fieldClassify, //
+                                                          @RequestParam String fieldEntityId //
     ) {
         // 获取分页规则
         Pageable pageable = fieldRepository.getPageable(page, size, null, null);

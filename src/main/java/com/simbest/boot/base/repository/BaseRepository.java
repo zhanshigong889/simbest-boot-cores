@@ -2,6 +2,8 @@ package com.simbest.boot.base.repository;
 
 import com.simbest.boot.constants.ApplicationConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.security.authentication.ProviderManager;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -25,6 +28,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.simbest.boot.constants.ApplicationConstants.DEFAULT_SIZE;
+
 /**
  * <strong>Title</strong> : BaseRepository.java<br>
  * <strong>Description</strong> : 基础类<br>
@@ -40,6 +45,7 @@ import java.util.regex.Pattern;
  */
 @NoRepositoryBean
 public interface BaseRepository<T, PK extends Serializable> extends JpaRepository<T, PK>, JpaSpecificationExecutor<T> {
+    Log logger = LogFactory.getLog(ProviderManager.class);
 
     default Pageable getPageable(){
         return getPageable(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE);
@@ -70,7 +76,10 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 		int pagePage = page < 1 ? 0 : (page - 1);
 //		int pageSize = size < 1 ? 1 : (size > 100 ? 100 : size);
         int pageSize = size < 1 ? 1 : size;
-        
+        if(DEFAULT_SIZE < pageSize){
+            logger.warn("分页查询容量为【"+pageSize+"】，超过系统默认阈值【"+DEFAULT_SIZE+"】，请检查必要性！");
+        }
+
 		Pageable pageable;
 
 		if (StringUtils.isNotEmpty(direction) && StringUtils.isNotEmpty(properties)) {

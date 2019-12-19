@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.simbest.boot.constants.ApplicationConstants.DEFAULT_SIZE;
+
 /**
  * <strong>Title : 基础实体通用服务层</strong><br>
  * <strong>Description : 基础实体通用服务层</strong><br>
@@ -69,6 +71,9 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
         int pagePage = page < 1 ? 0 : (page - 1);
 //        int pageSize = size < 1 ? 1 : (size > 100 ? 100 : size);
         int pageSize = size < 1 ? 1 : size;
+        if(DEFAULT_SIZE < pageSize){
+            log.warn("分页查询容量为【{}】，超过系统默认阈值【{}】，请检查必要性！", pageSize, DEFAULT_SIZE);
+        }
 
         Pageable pageable;
 
@@ -191,7 +196,7 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
     @Override
     public Page<T>  findAll ( Sort sort ) {
         log.debug("@Generic Repository Service object by Sort");
-        return genericRepository.findAll(PageRequest.of(ApplicationConstants.DEFAULT_PAGE, ApplicationConstants.DEFAULT_SIZE, sort));
+        return genericRepository.findAll(PageRequest.of(ApplicationConstants.DEFAULT_PAGE, DEFAULT_SIZE, sort));
     }
 
     @Override
