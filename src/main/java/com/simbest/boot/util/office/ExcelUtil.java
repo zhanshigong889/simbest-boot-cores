@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util.office;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.simbest.boot.base.annotations.ExcelVOAttribute;
@@ -265,7 +266,7 @@ public class ExcelUtil<T> {
                 }
                 for (int i = inputRow; i < rows; i++) {// 从第2行开始取数据,默认第一行是表头,从0开始算
                     HSSFRow row = sheet.getRow(i);
-                    if ( row == null ){    //空行
+                    if ( row == null || isRowEmpty( row )){    //空行
                         continue;
                     }
                     // int cellNum = row.getPhysicalNumberOfCells();
@@ -464,7 +465,6 @@ public class ExcelUtil<T> {
      * 第一行被表头占用，所以都用65536-1=65535来表示sheetSize。
      * @param list 集合记录
      * @param sheetName sheet页名称
-     * @param rowSize 记录大小
      * @param output 输出流
      * @param isTagValue 标记是否导出此列
      * @return
@@ -689,7 +689,7 @@ public class ExcelUtil<T> {
     /**
      * 得到实体类所有通过注解映射了数据表的字段
      *
-     * @param map
+     * @param clazz
      * @return
      */
     private List<Field> getMappedFiled(@SuppressWarnings("rawtypes") Class clazz, List<Field> fields, String isTagValue) {
@@ -720,5 +720,20 @@ public class ExcelUtil<T> {
         }
 
         return fields;
+    }
+
+    /**
+     * 判断当前行是否是空行
+     * @param row       行对象
+     * @return
+     */
+    private static boolean isRowEmpty(Row row) {
+        for (int c = row.getFirstCellNum(),count = row.getLastCellNum(); c < count; c++) {
+            Cell cell = row.getCell(c);
+            if ( !StrUtil.isEmptyIfStr( cell ) && cell.getCellType() != CellType.BLANK){
+                return false;
+            }
+        }
+        return true;
     }
 }
