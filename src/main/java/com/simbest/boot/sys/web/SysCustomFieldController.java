@@ -139,7 +139,7 @@ public class SysCustomFieldController extends LogicController<SysCustomField, St
             @ApiImplicitParam(name = "page", value = "当前页码", dataType = "int", paramType = "query", required = true, example = "1"), //
             @ApiImplicitParam(name = "size", value = "每页数量", dataType = "int", paramType = "query", required = true, example = "10"), //
             @ApiImplicitParam(name = "fieldClassify", value = "所属实体分类", dataType = "String", paramType = "query", required = true),
-            @ApiImplicitParam(name = "fieldClassify", value = "所属实体Id", dataType = "String", paramType = "query", required = true)
+            @ApiImplicitParam(name = "fieldEntityId", value = "所属实体Id", dataType = "String", paramType = "query", required = true)
     })
     @PostMapping(value = "getSysCustomFieldsByFieldClassify")
     public JsonResponse getSysCustomFieldsByFieldClassify(@RequestParam(required = false, defaultValue = "1") int page, //

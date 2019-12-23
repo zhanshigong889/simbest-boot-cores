@@ -1,49 +1,49 @@
 package com.simbest.boot.sys.service.impl;
 
 import com.google.common.collect.Lists;
-import com.simbest.boot.base.repository.CustomDynamicWhere;
 import com.simbest.boot.base.service.impl.LogicService;
-import com.simbest.boot.config.AppConfig;
-import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.exceptions.BusinessForbiddenException;
+import com.simbest.boot.sys.model.SysDict;
 import com.simbest.boot.sys.model.SysDictValue;
 import com.simbest.boot.sys.repository.SysDictValueRepository;
+import com.simbest.boot.sys.service.ISysDictService;
 import com.simbest.boot.sys.service.ISysDictValueService;
 import com.simbest.boot.util.ObjectUtil;
+import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.simbest.boot.constants.ApplicationConstants.ONE;
+import static com.simbest.boot.constants.ApplicationConstants.ZERO;
+import static com.simbest.boot.constants.AuthoritiesConstants.ACCESS_FORBIDDEN;
+import static com.simbest.boot.constants.AuthoritiesConstants.BUSINESS_FORBIDDEN;
+import static com.simbest.boot.constants.AuthoritiesConstants.ROLE_ADMIN;
+import static com.simbest.boot.constants.AuthoritiesConstants.SUPER_ADMIN;
 
 @Slf4j
 @Service
 public class SysDictValueService extends LogicService<SysDictValue,String> implements ISysDictValueService {
 
-    public static final String CACHE_KEY = "SYS_DICT_VALUE_CACHE:";
-    public static final int CACHE_EXPIRE_SECONDES = 3600;
-
     private SysDictValueRepository dictValueRepository;
 
     @Autowired
-    private CustomDynamicWhere dynamicRepository;
+    private ISysDictService dictService;
 
     @Autowired
-    private AppConfig appConfig;
-
-    @Autowired
-    private RedisTemplate<String, SysDictValue> dvRedisTemplate;
-
-    @Autowired
-    private RedisTemplate<String, List<SysDictValue>> dvListRedisTemplate;
+    private SysDictValueCacheUtil dvCacheUtil;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -52,21 +52,6 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     public SysDictValueService(SysDictValueRepository dictValueRepository) {
         super(dictValueRepository);
         this.dictValueRepository = dictValueRepository;
-    }
-
-    @Override
-    public int updateEnable(boolean enabled, String dictValueId) {
-        SysDictValue val = findById(dictValueId);
-        if (val == null) {
-            return 0;
-        }
-        val.setEnabled(enabled);
-        this.update(val);
-        List<SysDictValue> list = findByParentId(dictValueId);
-        for (SysDictValue v : list) {
-            updateEnable(enabled, v.getId());
-        }
-        return 1;
     }
 
     @Override
@@ -82,28 +67,28 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
 
     @Override
     public SysDictValue findByDictTypeAndNameAndBlocidAndCorpid(String dictType, String name, String blocid, String corpid) {
-        String key = CACHE_KEY+appConfig.getAppcode().concat(ApplicationConstants.COLON)
-                .concat(dictType).concat(ApplicationConstants.COLON).concat(name)
-                .concat(ApplicationConstants.COLON).concat(blocid)
-                .concat(ApplicationConstants.COLON).concat(corpid);
-        SysDictValue dv = dvRedisTemplate.opsForValue().get(key);
+        SysDictValue dv = dvCacheUtil.loadByDictTypeAndNameAndBlocidAndCorpid(dictType, name, blocid, corpid);
         if(null == dv) {
             dv = dictValueRepository.findByDictTypeAndNameAndBlocidAndCorpid(dictType, name, blocid, corpid);
-            dvRedisTemplate.opsForValue().set(key, dv, CACHE_EXPIRE_SECONDES, TimeUnit.SECONDS);
+            dvCacheUtil.setByDictTypeAndNameAndBlocidAndCorpid(dictType, name, blocid, corpid, dv);
         }
         return dv;
     }
 
     @Override
     public SysDictValue findByDictTypeAndName(String dictType, String name){
-        String key = CACHE_KEY+appConfig.getAppcode().concat(ApplicationConstants.COLON)
-                .concat(dictType).concat(ApplicationConstants.COLON).concat(name);
-        SysDictValue dv = dvRedisTemplate.opsForValue().get(key);
+        SysDictValue dv = dvCacheUtil.loadByDictTypeAndName(dictType, name);
         if(null == dv) {
             dv = dictValueRepository.findByDictTypeAndName(dictType, name);
-            dvRedisTemplate.opsForValue().set(key, dv, CACHE_EXPIRE_SECONDES, TimeUnit.SECONDS);
+            dvCacheUtil.setByDictTypeAndName(dictType, name, dv);
         }
         return dv;
+    }
+
+    @Override
+    public List<SysDictValue> findByDictType(String dictType){
+        SysDictValue dv = SysDictValue.builder().dictType(dictType).build();
+        return findDictValue(dv);
     }
 
     /**
@@ -124,11 +109,10 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
             params.add(dv.getName());
         if(StringUtils.isNotEmpty(dv.getValue()))
             params.add(dv.getValue());
-        String key = CACHE_KEY.concat(appConfig.getAppcode()).concat(ApplicationConstants.COLON)+StringUtils.join(params, ApplicationConstants.LINE);
-        List<SysDictValue> result = dvListRedisTemplate.opsForValue().get(key);
+        List<SysDictValue> result = dvCacheUtil.loadByParameters(params);
         if(null == result || result.size()==0){
             result = findDictValueDatabase(dv);
-            dvListRedisTemplate.opsForValue().set(key, result, CACHE_EXPIRE_SECONDES, TimeUnit.SECONDS);
+            dvCacheUtil.setByParameters(params, result);
         }
         return result;
     }
@@ -224,6 +208,147 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     @Override
     public List<Map<String, String>> findAllDictValue () {
         return dictValueRepository.findAllDictValue();
+    }
+
+
+
+
+    @Override
+    public int updateEnable(boolean enabled, String dictValueId) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            dvCacheUtil.expireAllCache();
+            SysDictValue val = findById(dictValueId);
+            if (val == null) {
+                return ZERO;
+            }
+            val.setEnabled(enabled);
+            this.update(val);
+            List<SysDictValue> list = findByParentId(dictValueId);
+            for (SysDictValue v : list) {
+                updateEnable(enabled, v.getId());
+            }
+            return ONE;
+        }
+        else
+            throw new AccessDeniedException(ACCESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public SysDictValue updateEnable (String id, boolean enabled) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            int ret = this.updateEnable(enabled, id);
+            if(ONE == ret){
+                return this.findById(id);
+            }
+            else{
+                return null;
+            }
+        }
+        else
+            throw new AccessDeniedException(ACCESS_FORBIDDEN);
+    }
+
+    private void publicDictCheck(SysDictValue source){
+        SysDict dict = dictService.findByDictType(source.getDictType());
+        Assert.notNull(dict, "关联的数据字典不能为空");
+        Assert.notNull(source.getDictType(), "字典类型不能为空");
+        Assert.notNull(source.getName(), "字典值名称不能为空");
+        if(dict.getIsPublic()){
+            Assert.isTrue(StringUtils.isEmpty(source.getBlocid()), "公共字典，字典值不能维护blocid");
+            Assert.isTrue(StringUtils.isEmpty(source.getCorpid()), "公共字典，字典值不能维护corpid");
+            SysDictValue dv = findByDictTypeAndName(source.getDictType(), source.getName());
+            Assert.isNull(dv, "公共字典值已存在，不能重复添加");
+        }
+        else{
+            Assert.isTrue(StringUtils.isNotEmpty(source.getBlocid()), "非公共字典，字典值必须维护blocid");
+            Assert.isTrue(StringUtils.isNotEmpty(source.getCorpid()), "非公共字典，字典值必须维护corpid");
+        }
+    }
+
+    @Override
+    @Transactional
+    public SysDictValue insert(SysDictValue source) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            publicDictCheck(source);
+            dvCacheUtil.expireAllCache();
+            return super.insert(source);
+        }
+        else
+            throw new AccessDeniedException(ACCESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public SysDictValue update(SysDictValue source) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            publicDictCheck(source);
+            dvCacheUtil.expireAllCache();
+            return super.update(source);
+        }
+        else
+            throw new AccessDeniedException(ACCESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public List<SysDictValue> saveAll(Iterable<SysDictValue> entities) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            List<SysDictValue> list = Lists.newArrayList();
+            for(SysDictValue dv : entities){
+                list.add(this.insert(dv));
+            }
+            return list;
+        }
+        else
+            throw new AccessDeniedException(ACCESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(String id) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            dvCacheUtil.expireAllCache();
+            super.deleteById(id);
+        }
+        else
+            throw new AccessDeniedException(ACCESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void delete(SysDictValue o) {
+        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll(Iterable<? extends SysDictValue> iterable ) {
+        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll() {
+        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllByIds(Iterable<? extends String> pks ) {
+        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void scheduleLogicDelete(String id, LocalDateTime localDateTime) {
+        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+    }
+
+    @Override
+    @Transactional
+    public void scheduleLogicDelete(SysDictValue entity, LocalDateTime localDateTime) {
+        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
     }
 
 }

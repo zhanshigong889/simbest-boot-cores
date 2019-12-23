@@ -208,24 +208,26 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
                         .getMethod("uniqueConstraints").invoke(a);
                 if (uniqueConstraints != null) {
                     for (UniqueConstraint uniqueConstraint : uniqueConstraints) {
-                        Map<String, Object> data = new HashMap<>();
+                        Map<String, Object> uniqueConstraintNames = new HashMap<>();
                         for (String name : uniqueConstraint.columnNames()) {
                             //name = CaseFormat.LOWER_UNDERSCORE.to( CaseFormat.LOWER_CAMEL, name );
                             //name = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
                             PropertyDescriptor pd = new PropertyDescriptor(name, entityClass);
                             Object value = pd.getReadMethod().invoke(entity);
                             if (value == null) {
-                                data.clear();
+                                //联合索引，一个属性如果为空，曾不做联合索引约束，即可重复插入（数据库底层的约定）
+                                uniqueConstraintNames.clear();
                                 break;
                             }
-                            data.put(name, value);
+                            uniqueConstraintNames.put(name, value);
                         }
-                        if (!data.isEmpty()) {
-                            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        if (!uniqueConstraintNames.isEmpty()) {
+                            for (Map.Entry<String, Object> entry : uniqueConstraintNames.entrySet()) {
                                 predicates.add(criteriaBuilder.equal(root.get(entry.getKey()), entry.getValue()));
                             }
                         }
                     }
+                    //联合索引，一个属性如果为空，曾不做联合索引约束，即可重复插入（数据库底层的约定）
                     if (predicates.isEmpty()) {
                         return super.save(entity);
                     }
@@ -277,6 +279,7 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
             return result;
         }
         for (S entity : entities) {
+            //超类SimpleJpaRepository同样具有upsert的功能，即会向上面的save检查联合主键和联合索引
             result.add(super.save(entity));
         }
         return result;

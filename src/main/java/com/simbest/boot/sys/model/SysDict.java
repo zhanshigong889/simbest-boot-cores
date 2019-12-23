@@ -42,7 +42,7 @@ public class SysDict extends LogicModel {
     private String dictType;
 
     @ApiModelProperty(value = "字典名称")
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 200)
     private String name;
 
     @ApiModelProperty(value = "字典描述")
@@ -76,12 +76,18 @@ public class SysDict extends LogicModel {
     @Column
     private Boolean isPublic;
 
+
+
+
+
     @ApiModelProperty(value = "集团id")
     @Column(length = 40)
+    @Deprecated
     private String blocid;
 
     @ApiModelProperty(value = "企业id")
     @Column(length = 40)
+    @Deprecated
     private String corpid;
 
 }

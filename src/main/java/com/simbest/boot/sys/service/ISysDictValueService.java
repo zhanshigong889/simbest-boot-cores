@@ -36,6 +36,13 @@ public interface ISysDictValueService extends ILogicService<SysDictValue,String>
     SysDictValue findByDictTypeAndName(String dictType, String name);
 
     /**
+     * 根据字典类型，获取字典值
+     * @param dictType
+     * @return
+     */
+    List<SysDictValue> findByDictType(String dictType);
+
+    /**
      * 查看数据字典的所有值
      */
     List<Map<String,String>> findAllDictValue();
