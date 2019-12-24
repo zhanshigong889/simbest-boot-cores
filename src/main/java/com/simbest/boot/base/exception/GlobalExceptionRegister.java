@@ -4,15 +4,18 @@
 package com.simbest.boot.base.exception;
 
 
+import com.github.stuxuhai.jpinyin.ChineseHelper;
 import com.google.common.collect.Maps;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.exceptions.InsertExistObjectException;
 import com.simbest.boot.exceptions.UpdateNotExistObjectException;
+import com.simbest.boot.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.TransactionException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -40,60 +43,55 @@ public final class GlobalExceptionRegister {
         HttpStatus a = HttpStatus.BAD_REQUEST;
         System.out.println(a.name());
         System.out.println(a.value());
+        System.out.println(errorMap);
     }
 
     //初始化状态码与文字说明
     static {
+        //系统通用异常
         errorMap.put(Exception.class,
                 JsonResponse.builder().errcode(HttpStatus.BAD_REQUEST.value()).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).message("请求参数错误").build());
         errorMap.put(RuntimeException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统内部错误")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统内部错误").build());
         errorMap.put(NullPointerException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统空指针异常")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("系统空指针异常").build());
+        errorMap.put(IllegalStateException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).build());
+        errorMap.put(IllegalArgumentException.class,
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).build());
+        errorMap.put(HttpRequestMethodNotSupportedException.class,
+                JsonResponse.builder().errcode(HttpStatus.METHOD_NOT_ALLOWED.value()).status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(HttpStatus.METHOD_NOT_ALLOWED.name()).message("请求方式错误").build());
+
+        //权限相关异常
         errorMap.put(AccessDeniedException.class,
                 JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).message(ACCESS_FORBIDDEN).build());
-        errorMap.put(HttpRequestMethodNotSupportedException.class,
-                JsonResponse.builder().errcode(HttpStatus.METHOD_NOT_ALLOWED.value()).status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(HttpStatus.METHOD_NOT_ALLOWED.name())
-                        .build());
 
+        //文件相关异常
         errorMap.put(MultipartException.class,
-                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).message("文件上传失败")
-                        .build());
+                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.BAD_REQUEST.value()).error(HttpStatus.BAD_REQUEST.name()).message("文件上传失败").build());
         errorMap.put(MaxUploadSizeExceededException.class,
-                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.REQUEST_ENTITY_TOO_LARGE.value()).error(HttpStatus.REQUEST_ENTITY_TOO_LARGE.name()).message("文件大小受限")
-                        .build());
+                JsonResponse.builder().errcode(ErrorCodeConstants.ERRORCODE_ATTACHMENT_SIZE_EXCEEDS).status(HttpStatus.REQUEST_ENTITY_TOO_LARGE.value()).error(HttpStatus.REQUEST_ENTITY_TOO_LARGE.name()).message("文件大小受限").build());
 
+        //自定义异常
         errorMap.put(InsertExistObjectException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能写入有ID的对象")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能写入有ID的对象").build());
         errorMap.put(UpdateNotExistObjectException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能更新不存在的对象")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("不能更新不存在的对象").build());
 
-        errorMap.put(IllegalArgumentException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name())
-                        .build());
 
+        //数据库相关异常
         errorMap.put(DataRetrievalFailureException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("提取数据发出错误")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("提取数据发出错误").build());
         errorMap.put(IncorrectResultSizeDataAccessException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据记录与预期不符")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据记录与预期不符").build());
         errorMap.put(NonUniqueResultException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据记录与预期不符")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据记录与预期不符").build());
         errorMap.put(HibernateException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据处理异常")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据处理异常").build());
         errorMap.put(TransactionException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据库事务异常")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据库事务异常").build());
         errorMap.put(DataAccessException.class,
-                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据库处理异常")
-                        .build());
+                JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).message("数据访问层异常").build());
 
     }
 
@@ -127,7 +125,11 @@ public final class GlobalExceptionRegister {
             response.setError(e.getClass().getSimpleName());
         }
         setCorrectErrorMessage(response, e);
-        return response;
+        response.setTimestamp(DateUtil.getCurrent());
+        //构建一个新的对象返回
+        JsonResponse result = new JsonResponse();
+        BeanUtils.copyProperties(response, result);
+        return result;
     }
 
     private static void setCorrectErrorMessage(JsonResponse response, Exception e){
@@ -136,6 +138,9 @@ public final class GlobalExceptionRegister {
             constraintField = StringUtils.substringAfter(constraintField, "constraint [");
             constraintField = StringUtils.substringBefore(constraintField, "]");
             response.setMessage("数据[".concat(constraintField).concat("]唯一性校验错误"));
+        }
+        else if(StringUtils.isNotEmpty(e.getMessage()) && ChineseHelper.containsChinese(e.getMessage())){
+            response.setMessage(e.getMessage());
         }
         else if(StringUtils.isEmpty(response.getMessage())){
             response.setMessage(e.getMessage());

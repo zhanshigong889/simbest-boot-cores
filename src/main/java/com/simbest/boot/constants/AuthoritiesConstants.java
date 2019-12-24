@@ -46,6 +46,7 @@ public class AuthoritiesConstants {
     public static final String LOGIN_FAILED_KEY = "LOGIN_FAILED:";
 
     public static final String ACCESS_FORBIDDEN = "权限不足，禁止访问!";
+    public static final String BUSINESS_FORBIDDEN = "业务禁止访问!";
 
     public static final String UsernameNotFoundException = "账号或密码错误!";
     public static final String BadCredentialsException = "账号或密码错误";

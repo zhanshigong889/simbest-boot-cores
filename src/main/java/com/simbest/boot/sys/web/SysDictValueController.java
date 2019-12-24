@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.simbest.boot.base.web.response.JsonResponse.SUCCESS_CODE;
-import static com.simbest.boot.constants.ApplicationConstants.MSG_ERRO;
 import static com.simbest.boot.constants.ApplicationConstants.MSG_SUCCESS;
 
 /**
@@ -57,8 +56,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         JsonResponse response = super.create( sysDictValue );
         if(response.getErrcode().equals(SUCCESS_CODE)) {
             response.setMessage(MSG_SUCCESS);
-        } else {
-            response.setMessage(MSG_ERRO);
         }
         return response;
     }
@@ -75,8 +72,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         JsonResponse response = super.update(sysDictValue );
         if(response.getErrcode().equals(SUCCESS_CODE)) {
             response.setMessage(MSG_SUCCESS);
-        } else {
-            response.setMessage(MSG_ERRO);
         }
         return response;
     }
@@ -93,8 +88,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         JsonResponse response = super.deleteById( id );
         if(response.getErrcode().equals(SUCCESS_CODE)) {
             response.setMessage(MSG_SUCCESS);
-        } else {
-            response.setMessage(MSG_ERRO);
         }
         return response;
     }
@@ -109,8 +102,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         JsonResponse response = super.delete(sysDictValue);
         if(response.getErrcode().equals(SUCCESS_CODE)) {
             response.setMessage(MSG_SUCCESS);
-        } else {
-            response.setMessage(MSG_ERRO);
         }
         return response;
     }
@@ -126,8 +117,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         JsonResponse response = super.deleteAllByIds(ids);
         if(response.getErrcode().equals(SUCCESS_CODE)) {
             response.setMessage(MSG_SUCCESS);
-        } else {
-            response.setMessage(MSG_ERRO);
         }
         return response;
     }
@@ -146,8 +135,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         JsonResponse response = super.updateEnable( id,enabled );
         if(response.getErrcode().equals(SUCCESS_CODE)) {
             response.setMessage(MSG_SUCCESS);
-        } else {
-            response.setMessage(MSG_ERRO);
         }
         return response;
     }

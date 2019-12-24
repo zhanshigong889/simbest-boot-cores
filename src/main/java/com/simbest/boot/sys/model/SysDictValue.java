@@ -44,7 +44,7 @@ public class SysDictValue extends LogicModel {
     private String id;
 
     @ApiModelProperty(value = "字典值名称")
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 200)
     private String name;
 
     @ApiModelProperty(value = "字典值")
@@ -92,6 +92,7 @@ public class SysDictValue extends LogicModel {
     //默认公共，即isPublic=true，数据库字段值=1
     @ApiModelProperty(value = "是否公共字典")
     @Column
+    @Deprecated
     private Boolean isPublic;
 
     @ApiModelProperty(value = "集团id")

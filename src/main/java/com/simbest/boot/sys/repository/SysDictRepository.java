@@ -9,9 +9,8 @@ import java.util.List;
 @Repository
 public interface SysDictRepository extends LogicRepository<SysDict, String> {
 
-    //    String SQL = "SELECT * FROM sys_dict WHERE parent_id=:id";
-//    @Query(value = SQL, nativeQuery = true)
-//    List<SysDict> findByParentId(@Param("id")Long parentId);
+    SysDict findByDictType(String dictType);
+
     List<SysDict> findByParentId(String parentId);
 
     List<SysDict> findByParentIdAndEnabled(String parentId, Boolean enabled);
