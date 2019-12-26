@@ -15,11 +15,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 
 /**
  * 用途：实体自定义字段值
@@ -42,15 +38,16 @@ public class SysCustomFieldValue extends LogicModel {
     private String id;
 
     //所属实体分类
+    @Column(nullable = false)
     private String fieldClassify;
 
     //所属实体分类主键
+    @Column(nullable = false)
     private Long fieldEntityId;
 
-    @ManyToOne
-    @JoinColumn(name = "custom_field_id", nullable = false)
-    private SysCustomField customField;
+    @Column(nullable = false)
+    private String customFieldId;
 
-    //扩展字段
+    @Column(nullable = false)
     private String customFieldValue;
 }

@@ -19,11 +19,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 /**
@@ -47,6 +43,7 @@ public class SysCustomField extends LogicModel {
     private String id;
 
     //所属实体分类
+    @Column
     private String fieldClassify;
 
     //显示被EntityCnName注解的类的中文名称
@@ -54,9 +51,11 @@ public class SysCustomField extends LogicModel {
     private String fieldClassifyCn;
 
     //字段名称
+    @Column
     private String fieldName;
 
     //字段排序值
+    @Column
     private Integer orderBy;
 
     //字段类型
@@ -65,9 +64,8 @@ public class SysCustomField extends LogicModel {
     private SysCustomFieldType fieldType;
 
     //关联数据字典，fieldType=DICT时有值
-    @ManyToOne
-    @JoinColumn(name = "dict_id", nullable = true)
-    private SysDict sysDict;
+    @Column
+    private String dictId;
 
     /**
      * @return 实体类中文名称
