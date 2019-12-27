@@ -78,6 +78,7 @@ public class RedisIdGenerator {
             dict.setDictType("genCode");
             dict.setName("工单编号值集");
             dict.setDisplayOrder(1);
+            dict.setIsPublic( true );
             dictService.insert(dict);
         }
         // 如果存在工单编号值集genCode，则不需要新建记录

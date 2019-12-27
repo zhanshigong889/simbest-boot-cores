@@ -1,5 +1,6 @@
 package com.simbest.boot.sys.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import com.simbest.boot.base.service.impl.LogicService;
 import com.simbest.boot.exceptions.BusinessForbiddenException;
@@ -28,10 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.simbest.boot.constants.ApplicationConstants.ONE;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
-import static com.simbest.boot.constants.AuthoritiesConstants.ACCESS_FORBIDDEN;
-import static com.simbest.boot.constants.AuthoritiesConstants.BUSINESS_FORBIDDEN;
-import static com.simbest.boot.constants.AuthoritiesConstants.ROLE_ADMIN;
-import static com.simbest.boot.constants.AuthoritiesConstants.SUPER_ADMIN;
+import static com.simbest.boot.constants.AuthoritiesConstants.*;
 
 @Slf4j
 @Service
@@ -254,13 +252,14 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
         Assert.notNull(dict, "关联的数据字典不能为空");
         Assert.notNull(source.getDictType(), "字典类型不能为空");
         Assert.notNull(source.getName(), "字典值名称不能为空");
-        if(dict.getIsPublic()){
+        //StrUtil.isEmptyIfStr(dict.getIsPublic())改判断是为了解决历史数据为空的情况
+        if( StrUtil.isEmptyIfStr(dict.getIsPublic()) || dict.getIsPublic()){
             Assert.isTrue(StringUtils.isEmpty(source.getBlocid()), "公共字典，字典值不能维护blocid");
             Assert.isTrue(StringUtils.isEmpty(source.getCorpid()), "公共字典，字典值不能维护corpid");
-            SysDictValue dv = findByDictTypeAndName(source.getDictType(), source.getName());
-            Assert.isNull(dv, "公共字典值已存在，不能重复添加");
-        }
-        else{
+            //去除以下两句判断，因为更新的时候也过执行这里，这时候数据肯定存在了
+            //SysDictValue dv = findByDictTypeAndName(source.getDictType(), source.getName());
+            //Assert.isNull(dv, "公共字典值已存在，不能重复添加");
+        }else{
             Assert.isTrue(StringUtils.isNotEmpty(source.getBlocid()), "非公共字典，字典值必须维护blocid");
             Assert.isTrue(StringUtils.isNotEmpty(source.getCorpid()), "非公共字典，字典值必须维护corpid");
         }
@@ -269,19 +268,19 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     @Override
     @Transactional
     public SysDictValue insert(SysDictValue source) {
-        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN,USER})) {
             publicDictCheck(source);
             dvCacheUtil.expireAllCache();
             return super.insert(source);
+        }else {
+            throw new AccessDeniedException( ACCESS_FORBIDDEN );
         }
-        else
-            throw new AccessDeniedException(ACCESS_FORBIDDEN);
     }
 
     @Override
     @Transactional
     public SysDictValue update(SysDictValue source) {
-        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN,USER})) {
             publicDictCheck(source);
             dvCacheUtil.expireAllCache();
             return super.update(source);
