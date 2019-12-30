@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.controller;
 
+import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.authentication.CasUser;
@@ -42,6 +43,9 @@ import java.io.UnsupportedEncodingException;
 public class CasRestAuthController {
 
     @Autowired
+    private AppConfig appConfig;
+
+    @Autowired
     private IAuthService authService;
 
     @Autowired
@@ -67,7 +71,7 @@ public class CasRestAuthController {
                 result = new ResponseEntity<CasUser>(HttpStatus.NOT_FOUND);
             }
             //数据库查找
-            IUser dbUser = this.authService.findByKey(userWeb.getUsername(), IAuthService.KeyType.username);
+            IUser dbUser = this.authService.findByKey(userWeb.getUsername(), IAuthService.KeyType.username, appConfig.getAppcode());
             if (dbUser != null) {
                 String rawPassword = des3Encryptor.decrypt(userWeb.getPassword());
 //                rawPassword = md5Encryptor.encrypt(rawPassword);

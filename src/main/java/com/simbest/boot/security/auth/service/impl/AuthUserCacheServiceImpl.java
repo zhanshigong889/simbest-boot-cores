@@ -55,7 +55,6 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
     /**
      * 在缓存中新增或覆盖更新用户信息，并按照KeyType的定义，提供username、preferredMobile、openid三组键值定位
      * @param user
-     * @return
      */
     public void saveOrUpdateCacheUser(IUser user) {
         Assert.notNull(user.getId(), "用户主键唯一标识不允许为空!");
@@ -63,25 +62,41 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
         RedisUtil.setBeanGlobal(getUserCacheKey(user.getId()), user);
         log.debug("用户【{}】已通过键值【{}】完成缓存", user, getUserCacheKey(user.getId()));
 
-        //存放username、preferredMobile、openid三组Key键
+        //存放username, employeeNumber, preferredMobile, email, openid, unionid, reserve1 七组Key键
         if(StringUtils.isNotEmpty(user.getUsername())) {
             RedisUtil.setGlobal(getUserCacheKey(user.getUsername()), user.getId());
             log.debug("用户主键唯一标识【{}】已通过用户名键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getUsername()));
+        }
+        if(StringUtils.isNotEmpty(user.getEmployeeNumber())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getEmployeeNumber()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过员工编号键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getEmployeeNumber()));
         }
         if(StringUtils.isNotEmpty(user.getPreferredMobile())) {
             RedisUtil.setGlobal(getUserCacheKey(user.getPreferredMobile()), user.getId());
             log.debug("用户主键唯一标识【{}】已通过手机号码键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getPreferredMobile()));
         }
+        if(StringUtils.isNotEmpty(user.getEmail())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getEmail()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过邮箱键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getEmail()));
+        }
         if(StringUtils.isNotEmpty(user.getOpenid())) {
             RedisUtil.setGlobal(getUserCacheKey(user.getOpenid()), user.getId());
             log.debug("用户主键唯一标识【{}】已通过openid键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getOpenid()));
+        }
+        if(StringUtils.isNotEmpty(user.getUnionid())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getUnionid()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过unionid键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getUnionid()));
+        }
+        if(StringUtils.isNotEmpty(user.getReserve1())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getReserve1()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过reserve1键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getReserve1()));
         }
     }
 
     /**
      * 尝试从缓存中读取用户信息
      * @param keyword
-     * @return
+     * @return IUser
      */
     public IUser loadCacheUser(String keyword) {
         String userId = RedisUtil.getGlobal(getUserCacheKey(keyword));
@@ -133,7 +148,7 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
     /**
      * 获取用户信息key键，以保证所有应用通用
      * @param key
-     * @return
+     * @return String
      */
     private String getUserCacheKey(String key){
         return AUTH_USER_GLOBAL_KEY.concat(key);
@@ -148,7 +163,6 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
      * @param username
      * @param appcode
      * @param permissions
-     * @return
      */
     public void saveOrUpdateCacheUserPermission(String username, String appcode, Set<IPermission> permissions) {
         Assert.notNull(username, "用户账号不允许为空!");
@@ -159,8 +173,9 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
 
     /**
      * 尝试从缓存中读取用户权限
-     * @param keyword
-     * @return
+     * @param username
+     * @param appcode
+     * @return Set
      */
     public Set<IPermission> loadCacheUserPermission(String username, String appcode) {
         Set<IPermission> permissions = redisUserPermissionOps.get(getUserPermissionCacheKey(username, appcode));
@@ -176,7 +191,8 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
 
     /**
      * 清理用户权限
-     * @param user
+     * @param username
+     * @param appcode
      */
     public void removeCacheUserPermission(String username, String appcode) {
         Assert.notNull(username, "用户账号不允许为空!");
@@ -205,7 +221,6 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
      * @param username
      * @param appcode
      * @param isPermit
-     * @return
      */
     public void saveOrUpdateCacheUserAccess(String username, String appcode, Boolean isPermit) {
         Assert.notNull(username, "用户账号不允许为空!");
@@ -216,8 +231,9 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
 
     /**
      * 尝试从缓存中读取用户应用访问
-     * @param keyword
-     * @return
+     * @param username
+     * @param appcode
+     * @return Boolean
      */
     public Boolean loadCacheUserAccess(String username, String appcode) {
         Boolean isPermit = RedisUtil.getBeanGlobal(getAuthUserAccessGlobalKey(username, appcode), Boolean.class);
@@ -233,7 +249,8 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
 
     /**
      * 清理用户应用访问
-     * @param user
+     * @param username
+     * @param appcode
      */
     public void removeCacheUserAccess(String username, String appcode) {
         Assert.notNull(username, "用户账号不允许为空!");
@@ -262,7 +279,6 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
      * @param username
      * @param password
      * @param isRight
-     * @return
      */
     public void saveOrUpdateCacheUserPassword(String username, String password, Boolean isRight) {
         Assert.notNull(username, "用户账号不允许为空!");
@@ -276,8 +292,9 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
 
     /**
      * 尝试从缓存中读取用户密码
-     * @param keyword
-     * @return
+     * @param username
+     * @param password
+     * @return Boolean
      */
     public Boolean loadCacheUserPassword(String username, String password) {
         Boolean isRight = RedisUtil.getBeanGlobal(getAuthUserPasswordGlobalKey(username, password), Boolean.class);
@@ -293,7 +310,7 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
 
     /**
      * 清理用户应用访问
-     * @param user
+     * @param username
      */
     public void removeCacheUserPassword(String username) {
         Assert.notNull(username, "用户账号不允许为空!");

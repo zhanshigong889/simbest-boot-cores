@@ -47,7 +47,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     /**
      * 新增一个字典值
      * @param sysDictValue
-     * @return
+     * @return JsonResponse
      */
     //设置权限，后面再开启
     //@PreAuthorize ("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
@@ -63,7 +63,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     /**
      * 修改一个字典值
      * @param sysDictValue
-     * @return
+     * @return JsonResponse
      */
     //设置权限，后面再开启
     //@PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
@@ -79,11 +79,11 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     /**
      * 根据id逻辑删除
      * @param id
-     * @return
+     * @return JsonResponse
      */
     //@PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @ApiOperation(value = "根据id删除字典值", notes = "根据id删除字典值")
-    @ApiImplicitParam (name = "id", value = "字典值ID",  dataType = "Integer", paramType = "query")
+    @ApiImplicitParam (name = "id", value = "字典值ID",  dataType = "String", paramType = "query")
     public JsonResponse deleteById(@RequestParam(required = false) String id) {
         JsonResponse response = super.deleteById( id );
         if(response.getErrcode().equals(SUCCESS_CODE)) {
@@ -95,7 +95,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     /**
      * 先修改再逻辑删除字典值
      * @param sysDictValue
-     * @return
+     * @return JsonResponse
      */
     @ApiOperation(value = "先修改再逻辑删除字典值", notes = "先修改再逻辑删除字典值")
     public JsonResponse delete(SysDictValue sysDictValue) {
@@ -125,10 +125,10 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      *修改可见
      * @param id
      * @param enabled
-     * @return
+     * @return JsonResponse
      */
     @ApiOperation(value = "修改可见", notes = "修改可见")
-    @ApiImplicitParams ({@ApiImplicitParam(name = "id", value = "角色ID", required = true, dataType = "Integer", paramType = "query"),
+    @ApiImplicitParams ({@ApiImplicitParam(name = "id", value = "字典值ID", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "enabled", value = "是否可用", required = true, dataType = "Boolean", paramType = "query")
     })
     public JsonResponse updateEnable(@RequestParam(required = false) String id, @RequestParam(required = false) Boolean enabled) {
@@ -144,10 +144,10 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     /**
      *根据id查询字典值
      * @param id
-     * @return
+     * @return JsonResponse
      */
     @ApiOperation(value = "根据id查询字典值", notes = "根据id查询字典值")
-    @ApiImplicitParam(name = "id", value = "字典类型ID", dataType = "Integer", paramType = "query")
+    @ApiImplicitParam(name = "id", value = "字典类型ID", dataType = "String", paramType = "query")
     @PostMapping(value = {"/findById","/findById/sso","/findById/api"})
     public JsonResponse findById(@RequestParam(required = false) String id) {
         return super.findById( id );
@@ -160,7 +160,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @param direction
      * @param properties
      * @param sysDictValue
-     * @return
+     * @return JsonResponse
      */
     @ApiOperation(value = "获取字典值信息列表并分页", notes = "获取字典值信息列表并分页")
     @ApiImplicitParams({ //
@@ -186,7 +186,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
     /**
      * 新增子字典值
      * @param dictValue
-     * @return
+     * @return JsonResponse
      */
     //@PreAuthorize("hasAuthority('ROLE_ADMIN')")  // 指定角色权限才能操作方法
     @PostMapping(value = "/createChild")
@@ -201,13 +201,23 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return JsonResponse.defaultSuccessResponse();
     }
 
-
+    /**
+     *
+     * @param sysDictValue
+     * @return JsonResponse
+     */
     @ApiOperation (value = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
     @PostMapping(value = {"/findDictValue", "/findDictValue/sso", "/findDictValue/api"})
     public JsonResponse findDictValue(@RequestBody(required = false) SysDictValue sysDictValue){
         return JsonResponse.success(sysDictValueService.findDictValue(sysDictValue));
     }
 
+    /**
+     *
+     * @param dictType
+     * @param name
+     * @return JsonResponse
+     */
     @ApiOperation (value = "根据字典类型和字典值名称，获取字典值")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dictType", value = "字典类型", dataType = "String", paramType = "query", required = true),
@@ -218,6 +228,14 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return JsonResponse.success(sysDictValueService.findByDictTypeAndName(dictType, name));
     }
 
+    /**
+     *
+     * @param dictType
+     * @param name
+     * @param blocid
+     * @param corpid
+     * @return JsonResponse
+     */
     @ApiOperation (value = "根据字典类型和字典值名称，以及集团Id、企业Id，获取字典值")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dictType", value = "字典类型", dataType = "String", paramType = "query", required = true),
@@ -231,6 +249,10 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return JsonResponse.success(sysDictValueService.findByDictTypeAndNameAndBlocidAndCorpid(dictType, name, blocid, corpid));
     }
 
+    /**
+     *
+     * @return JsonResponse
+     */
     @ApiOperation(value = "查看数据字典的所有值", notes = "查看数据字典的所有值")
     @PostMapping(value = {"/findAllDictValue", "/findAllDictValue/sso", "/findAllDictValue/api"})
     public JsonResponse findAllDictValue(){

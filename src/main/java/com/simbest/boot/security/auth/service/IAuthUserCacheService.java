@@ -21,7 +21,6 @@ public interface IAuthUserCacheService {
     /**
      * 在缓存中新增或覆盖更新用户信息，并按照KeyType的定义，提供username、preferredMobile、openid三组键值定位
      * @param user
-     * @return
      */
     void saveOrUpdateCacheUser(IUser user);
 
@@ -47,20 +46,21 @@ public interface IAuthUserCacheService {
      * @param username
      * @param appcode
      * @param permissions
-     * @return
      */
     void saveOrUpdateCacheUserPermission(String username, String appcode, Set<IPermission> permissions);
 
     /**
      * 尝试从缓存中读取用户权限
-     * @param keyword
+     * @param username
+     * @param appcode
      * @return
      */
     Set<IPermission> loadCacheUserPermission(String username, String appcode);
 
     /**
      * 清理用户权限
-     * @param user
+     * @param username
+     * @param appcode
      */
     void removeCacheUserPermission(String username, String appcode);
     //===================================处理用户应用权限 END=========================================================//
@@ -72,39 +72,48 @@ public interface IAuthUserCacheService {
      * 在缓存中新增或覆盖更新用户应用访问
      * @param username
      * @param appcode
-     * @param permissions
-     * @return
+     * @param isPermit
      */
     void saveOrUpdateCacheUserAccess(String username, String appcode, Boolean isPermit);
 
     /**
      * 尝试从缓存中读取用户应用访问
-     * @param keyword
-     * @return
+     * @param username
+     * @param appcode
+     * @return Boolean
      */
     Boolean loadCacheUserAccess(String username, String appcode);
 
     /**
      * 清理用户应用访问
-     * @param user
+     * @param username
+     * @param appcode
      */
     void removeCacheUserAccess(String username, String appcode);
     //===================================处理用户应用访问 END=========================================================//
 
 
     //===================================处理用户密码 START=========================================================//
+
+    /**
+     * 更新用户密码
+     * @param username
+     * @param password
+     * @param isRight
+     */
     void saveOrUpdateCacheUserPassword(String username, String password, Boolean isRight);
 
     /**
      * 尝试从缓存中读取用户密码
-     * @param keyword
-     * @return
+     * @param username
+     * @param password
+     * @return Boolean
      */
     Boolean loadCacheUserPassword(String username, String password);
 
     /**
      * 清理用户应用访问
-     * @param user
+     * @param username
      */
     void removeCacheUserPassword(String username);
     //===================================处理用户密码 END=========================================================//

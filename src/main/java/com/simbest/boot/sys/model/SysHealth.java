@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ApiModel(value = "系统管理-统一文件管理")
+@ApiModel(value = "系统管理-系统健康检查模型")
 public class SysHealth {
 
     private Boolean result;

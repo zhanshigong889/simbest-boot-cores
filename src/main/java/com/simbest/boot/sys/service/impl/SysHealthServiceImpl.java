@@ -68,7 +68,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
     public void init(){
         StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
         if(!StoreLocation.fastdfs.equals(serverUploadLocation)) {
-            File localFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("testFile.txt"));
+            File localFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
             testFile = SysFile.builder().fileName(localFile.getName()).fileType("txt").filePath(localFile.getAbsolutePath())
                     .fileSize(localFile.length()).downLoadUrl(localFile.getAbsolutePath()).build();
             File file = appFileUtil.getFileFromSystem(testFile);
@@ -149,6 +149,9 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                     sysHealth.setResult(false);
                     sysHealth.setMessage("文件基于"+serverUploadLocation+"获取文件失败");
                 }
+                else{
+                    log.info("文件系统基于disk方式，读取文件【{}】测试OK", diskFile);
+                }
                 break;
             case fastdfs:
                 String fastdfsServerStr = extraConfig.getValue("fastdfs.tracker_servers");
@@ -185,6 +188,9 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                 if(null == sftpFile){
                     sysHealth.setResult(false);
                     sysHealth.setMessage("文件基于"+serverUploadLocation+"获取文件失败");
+                }
+                else{
+                    log.info("文件系统基于sftp方式，读取文件【{}】测试OK", sftpFile);
                 }
                 break;
         }

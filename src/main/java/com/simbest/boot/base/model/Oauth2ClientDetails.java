@@ -5,9 +5,6 @@ package com.simbest.boot.base.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
-import com.simbest.boot.base.annotations.EntityIdPrefix;
-import com.simbest.boot.base.model.GenericModel;
-import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.MySimpleGrantedAuthority;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.AllArgsConstructor;
@@ -18,15 +15,12 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.ClientDetails;
-import sun.net.www.content.text.Generic;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

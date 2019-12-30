@@ -17,8 +17,8 @@ public interface SsoAuthenticationService extends Comparable<SsoAuthenticationSe
 
     /**
      * 解密请求中的用户名
-     * @param request 验证请求
-     * @return 用户名
+     * @param encodeKeyword 加密关键字
+     * @return String 用户名
      */
     String decryptKeyword(String encodeKeyword);
 

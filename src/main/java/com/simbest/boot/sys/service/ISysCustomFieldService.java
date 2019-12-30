@@ -18,7 +18,7 @@ public interface ISysCustomFieldService extends ILogicService<SysCustomField, St
     /**
      * 获取系统有自定义字段的实体类型
      *
-     * @return
+     * @return Map
      */
     Map<String, String> getFieldClassifyMap();
 
@@ -26,7 +26,7 @@ public interface ISysCustomFieldService extends ILogicService<SysCustomField, St
      * 查询某个自定义字段
      *
      * @param fieldClassify 所属实体分类
-     * @return
+     * @return SysCustomField
      */
     SysCustomField findByFieldClassify(String fieldClassify);
 

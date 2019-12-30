@@ -47,11 +47,11 @@ import java.util.List;
  * <p>
  * 获取token请求（/oauth/token），请求所需参数：client_id、client_secret、grant_type
  * client模式：http://localhost:8080/uums/oauth/token?grant_type=client_credentials&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e
- * password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=d93df540143f68cf337deabc13a055f5
+ * password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=111.com
  * uums扩展后的password模式：http://10.92.80.72:8088/andhall/oauth/token?grant_type=uumspassword&scope=all&client_id=simbest_andhall&client_secret=338d6311c8efad8314b9212860adb12e&appcode=andhall&username=zhengxiaolei&password=pVOMsZTPznKFDU82BNN4BtaALbM4eQ/FphXo77BdSXnn+TTJU2yPqbVKhFoHCG5Kgcm7OuBBlhykzaRgUwGAn7xTXEKdU/uE3bBr4jRDKeOXJ8LxMyelqXFnPVOhF5/GqGCCbafp40BwMUDKdxqdqRVttZmjEST27DmX1U9Hqdc=
  * 注意：
  *  1、client的password的有两种方式：1、BCryptPasswordEncoder加密前的MD5值  2、SecurityUtils万能密码的MD5值
- *  2、client_secret对Simbest_2018做MD5加密得：338d6311c8efad8314b9212860adb12e，而数据库中client_secret需要进行BCryptPasswordEncoder加密后存放
+ *  2、client_secret对Simbest_2018做MD5加密得：338d6311c8efad8314b9212860adb12e，而数据库中client_secret需要进行BCryptPasswordEncoder加密后存放，即 $2a$12$.s06wfoiyPGWRCH6xwfdlOt8h.eWQXz97ZQQ/RSFjeReArJy8Ymg2
  *  3、uumspassword方式的password的值因为到主数据认证，所以需要对password进行RSA加密
  *
  * http://andaily.com/blog/?p=528 返回格式

@@ -59,6 +59,7 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
 
     /**
      * 查询全部记录
+     * @return Page
      */
     Page<T> findAll();
 
@@ -66,7 +67,7 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      * 分页查询（含排序功能）
      *
      * @param pageable
-     * @return
+     * @return Page
      */
     Page<T> findAll(Pageable pageable);
 
@@ -74,24 +75,27 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      * 根据排序字段查询全部记录
      *
      * @param sort 排序字段
-     * @return
+     * @return Page
      */
     Page<T> findAll(Sort sort);
+
     /**
      * 查询全部记录
+     * @return Iterable
      */
     Iterable<T> findAllNoPage();
 
     /**
      * 查询全部记录
+     * @param sort
+     * @return Iterable
      */
     Iterable<T> findAllNoPage(Sort sort);
 
     /**
      * 根据主键查询
-     *
      * @param ids
-     * @return
+     * @return Iterable
      */
     Iterable<T> findAllByIDs(Iterable<PK> ids);
 
@@ -100,14 +104,14 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      *
      * @param conditions
      * @param pageable
-     * @return
+     * @return Page
      */
     Page<T> findAll(Specification<T> conditions, Pageable pageable);
 
     /**
      * 按条件查询全部记录
      * @param conditions
-     * @return
+     * @return Iterable
      */
     Iterable<T> findAllNoPage(Specification<T> conditions);
 
@@ -115,21 +119,21 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      * 按条件查询全部记录，并排序
      * @param conditions
      * @param sort
-     * @return
+     * @return Iterable
      */
     Iterable<T> findAllNoPage(Specification<T> conditions, Sort sort);
 
     /**
      * 新增-不允许实体主键字段有值
      * @param o
-     * @return
+     * @return T
      */
     T insert(T o);
 
     /**
      * 修改-不允许实体主键字段无值
      * @param o
-     * @return
+     * @return T
      */
     T update(T o);
 
@@ -137,7 +141,7 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      * 强制执行持久化
      *
      * @param o
-     * @return
+     * @return T
      */
     T saveAndFlush(T o);
 
@@ -146,7 +150,7 @@ public interface IGenericService <T extends GenericModel,PK extends Serializable
      *
      * @param iterable
      * @param <S>
-     * @return
+     * @return List<T>
      */
     List<T> saveAll(Iterable<T> entities);
 

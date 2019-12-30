@@ -92,7 +92,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     /**
      * 根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值
      * @param dv
-     * @return
+     * @return List<SysDictValue>
      */
     @Override
     public List<SysDictValue> findDictValue (SysDictValue dv) {
@@ -201,7 +201,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
 
     /**
      * 查看数据字典的所有值
-     * @return
+     * @return List<Map<String, String>>
      */
     @Override
     public List<Map<String, String>> findAllDictValue () {
@@ -268,7 +268,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     @Override
     @Transactional
     public SysDictValue insert(SysDictValue source) {
-        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN,USER})) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN, USER})) {
             publicDictCheck(source);
             dvCacheUtil.expireAllCache();
             return super.insert(source);
@@ -280,7 +280,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     @Override
     @Transactional
     public SysDictValue update(SysDictValue source) {
-        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN,USER})) {
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN, USER})) {
             publicDictCheck(source);
             dvCacheUtil.expireAllCache();
             return super.update(source);

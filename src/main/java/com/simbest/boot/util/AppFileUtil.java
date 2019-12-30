@@ -102,7 +102,7 @@ public class AppFileUtil {
      * 判断是否允许上传
      *
      * @param fileName
-     * @return
+     * @return boolean
      */
     public static boolean validateUploadFileType(String fileName) {
         Matcher matcher = pattern.matcher(getFileSuffix(fileName).toLowerCase());
@@ -115,7 +115,7 @@ public class AppFileUtil {
      * 根据路径返回文件名，如：http://aaa/bbb.jpg C:/aaa/abc.jpg 返回abc.jpg
      *
      * @param pathToName
-     * @return
+     * @return String
      */
     public static String getFileName(String pathToName) {
         Assert.notNull(pathToName, pathToName+"文件名称不能为空");
@@ -127,7 +127,7 @@ public class AppFileUtil {
      * 根据路径返回文件名，如：http://aaa/bbb.jpg C:/aaa/abc.jpg 返回abc
      *
      * @param pathToName
-     * @return
+     * @return String
      */
     public static String getFileBaseName(String pathToName) {
         Assert.notNull(pathToName, pathToName+"文件名称不能为空");
@@ -139,7 +139,7 @@ public class AppFileUtil {
      * 根据路径返回文件后缀，如：http://aaa/bbb.jpg C:/aaa/abc.jpg 返回jpg
      *
      * @param fileName
-     * @return
+     * @return String
      */
     public static String getFileSuffix(String pathToName) {
         Assert.notNull(pathToName, pathToName+"文件名称不能为空");
@@ -172,7 +172,7 @@ public class AppFileUtil {
      * 上传单个文件
      * @param directory 相对路径
      * @param multipartFile
-     * @return
+     * @return SysFile
      * @throws Exception
      */
     public SysFile uploadFile(String directory, MultipartFile multipartFile) throws Exception {
@@ -184,7 +184,7 @@ public class AppFileUtil {
      * 上传多个文件
      * @param directory 相对路径
      * @param multipartFiles
-     * @return
+     * @return List<SysFile>
      * @throws Exception
      */
     public List<SysFile> uploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
@@ -240,7 +240,7 @@ public class AppFileUtil {
      * @param fileUrl   远程文件URL
      * @param fileName  存储文件名称
      * @param directory 相对路径
-     * @return 返回存储路径
+     * @return SysFile
      */
     public SysFile uploadFromUrl(String fileUrl, String directory) throws Exception {
         String filePath = null;
@@ -303,7 +303,7 @@ public class AppFileUtil {
      * 将本地文件上传至系统
      * @param localFile  系统临时目录的文件
      * @param directory 相对路径
-     * @return 返回存储路径
+     * @return SysFile
      */
     public SysFile uploadFromLocal(File localFile, String directory) {
         String filePath = null;
@@ -373,7 +373,7 @@ public class AppFileUtil {
      * @param imageFile 应用系统Context路径下的图片
      * @param quality   压缩质量
      * @param directory 相对路径
-     * @return 返回存储路径
+     * @return SysFile
      */
     public SysFile uploadCompressImage(File imageFile, float quality, String directory) {
         String filePath = null;
@@ -482,7 +482,7 @@ public class AppFileUtil {
      * @param imageUrl
      * @param quality
      * @param directory 相对路径
-     * @return
+     * @return SysFile
      */
     public SysFile uploadCompressImageFromUrl(String imageUrl, float quality, String directory) {
         File imageFile = downloadFromUrl(imageUrl);
@@ -514,7 +514,8 @@ public class AppFileUtil {
 
     /**
      * 创建临时目录
-     * @return
+     * @param dir
+     * @return File
      */
     public File createTempDirectory(String dir){
         File tempDirectory = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR)
@@ -531,8 +532,9 @@ public class AppFileUtil {
 
     /**
      * 创建指定文件名称的临时文件
+     * @param dir
      * @param filename
-     * @return
+     * @return File
      */
     public File createTempFile(String dir, String filename){
         File tempFile = null;
@@ -560,7 +562,7 @@ public class AppFileUtil {
     /**
      * 创建带后缀临时文件
      * @param suffix
-     * @return
+     * @return File
      */
     public File createTempFile(String suffix){
         File tempFile = null;
@@ -577,7 +579,7 @@ public class AppFileUtil {
     /**
      * 从系统中下载文件
      * @param sysFile
-     * @return
+     * @return File
      */
     public File getFileFromSystem(SysFile sysFile){
         if(null == sysFile.getStoreLocation()){
@@ -625,7 +627,7 @@ public class AppFileUtil {
     /**
      * 获取保存在FastDfs中的文件访问路径(免登陆)
      * @param filePath
-     * @return
+     * @return String
      */
     public String getFileUrlFromFastDfs(String filePath){
         return config.getAppHostPort() + ApplicationConstants.SLASH + filePath;
@@ -634,7 +636,7 @@ public class AppFileUtil {
     /**
      * 根据远程文件的url下载文件
      * @param fileUrl
-     * @return
+     * @return File
      */
     public File downloadFromUrl(String fileUrl) {
         File targetFile = null;
@@ -695,7 +697,7 @@ public class AppFileUtil {
     /**
      * 物理删除文件
      * @param sysFile
-     * @return
+     * @return boolean
      */
     public boolean deleteFile(SysFile sysFile) {
         if(null == sysFile.getStoreLocation()){
@@ -746,7 +748,7 @@ public class AppFileUtil {
      * 读取放置在项目resource目录下的文件，以二进制流的方式方法，
      *  因为项目打包后在读取项目里面的文件必须用流的方式获取，否则用其他方式获取会提示找不到文件
      * @param filePath
-     * @return
+     * @return byte[]
      */
     public static byte[] getFileByte(String filePath){
         byte[] fileByte = null;

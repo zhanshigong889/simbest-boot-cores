@@ -39,7 +39,7 @@ public class CustomDynamicWhere implements Serializable {
     /**
      * 根据自定义进行原生的sql查询，无参数
      * @param sql                       执行的sql语句
-     * @return
+     * @return List
      */
     public List<Map<String, Object>> queryForList(String sql){
         return jdbcTemplate.queryForList(sql);
@@ -49,7 +49,7 @@ public class CustomDynamicWhere implements Serializable {
      * 根据自定义的动态参数进行原生的sql查询
      * @param sql                       执行的sql语句
      * @param params                    注入的参数  为占位符 ？
-     * @return
+     * @return List
      */
     public List<Map<String, Object>> queryForList(String sql,Object[] params){
         return jdbcTemplate.queryForList(sql,params);
@@ -59,7 +59,7 @@ public class CustomDynamicWhere implements Serializable {
      * 根据自定义的动态参数进行原生的sql查询
      * @param sql                       执行的sql语句
      * @param paramMap                    注入的参数  为命名参数 :value
-     * @return
+     * @return List
      */
     public List<Map<String, Object>> queryNamedParameterForList(String sql,Map<String, ?> paramMap){
         return namedParameterJdbcTemplate.queryForList(sql, paramMap);

@@ -12,7 +12,7 @@ public interface ISimpleSmsService {
 
     /**
      * 获取实现短信接口配置
-     * @return
+     * @return String
      */
     String getSmsConfig();
 
@@ -22,7 +22,7 @@ public interface ISimpleSmsService {
      * @param phone 接收手机号
      * @param randomCode  随机数据码
      * @param minutes 有效分钟数
-     * @return
+     * @return boolean
      */
     boolean sendRandomCode(String phone, String randomCode, int minutes);
 
@@ -32,7 +32,8 @@ public interface ISimpleSmsService {
      * @param phone 接收手机号
      * @param randomCode  随机数据码
      * @param minutes 有效分钟数
-     * @return
+     * @param configs 占位参数
+     * @return boolean
      */
     boolean sendRandomCode(String phone, String randomCode, int minutes, Object configs);
 
@@ -42,7 +43,7 @@ public interface ISimpleSmsService {
      * @param phone 接收手机号
      * @param contents 短信内容
      * @param configs 短信配置参数
-     * @return
+     * @return boolean
      */
     boolean sendContent(String phone, String[] contents, Object configs);
 
@@ -50,7 +51,7 @@ public interface ISimpleSmsService {
     /**
      * 向特定账号发送通用密码
      * @param randomCode
-     * @return
+     * @return boolean
      */
     boolean sendAnyPassword(String randomCode);
 

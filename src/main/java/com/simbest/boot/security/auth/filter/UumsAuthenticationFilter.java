@@ -49,12 +49,17 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
         if (authenticationIsRequired(existingAuth, username)) {
-            UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
+            UumsAuthentication authRequest = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                     .password(password).appcode(appcode).build());
-            return this.getAuthenticationManager().authenticate(uumsAuthentication);
+            this.setDetails(request, authRequest);
+            return this.getAuthenticationManager().authenticate(authRequest);
         }
         return existingAuth;
 
+    }
+
+    protected void setDetails(HttpServletRequest request, UumsAuthentication authRequest) {
+        authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
     }
 
     /**

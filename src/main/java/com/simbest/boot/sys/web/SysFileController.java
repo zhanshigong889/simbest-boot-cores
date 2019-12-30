@@ -151,7 +151,7 @@ public class SysFileController extends LogicController<SysFile, String> {
      * 下载文件
      * @param request
      * @param id
-     * @return
+     * @return JsonResponse
      * @throws FileNotFoundException
      * @throws UnsupportedEncodingException
      */
@@ -188,7 +188,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     /**
      * 在线预览文件，仅适用于保存在FastDfs环境中的文件
      * @param id
-     * @return
+     * @return JsonResponse
      * @throws Exception
      */
     @GetMapping(value = {OPEN_URL, OPEN_URL_SSO, OPEN_URL_API})
@@ -203,7 +203,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     /**
      * 在线预览文件，支持任意免认证的URL
      * @param url
-     * @return
+     * @return JsonResponse
      * @throws Exception
      */
     @RequestMapping(value = {"/openurl", "/openurl/sso", "/openurl/api"}, method = {RequestMethod.POST, RequestMethod.GET})
@@ -214,7 +214,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     /**
      * 在线预览文件，支持任意免认证的URL,不进行重定向
      * @param url
-     * @return
+     * @return JsonResponse
      * @throws Exception
      */
     @RequestMapping(value = {"/get/url", "/get/url/sso", "/get/url/api"}, method = {RequestMethod.POST, RequestMethod.GET})

@@ -26,7 +26,7 @@ public class CustomWebResponseExceptionTranslator extends DefaultWebResponseExce
     /**
      * 异常将由CustomOauthExceptionSerializer进行处理
      * @param e
-     * @return
+     * @return ResponseEntity
      */
     @Override
     public ResponseEntity<OAuth2Exception> translate(Exception e) {

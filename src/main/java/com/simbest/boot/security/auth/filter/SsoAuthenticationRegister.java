@@ -4,6 +4,7 @@
 package com.simbest.boot.security.auth.filter;
 
 import com.google.common.collect.Sets;
+import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
@@ -20,6 +21,8 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.SortedSet;
 
+import static com.simbest.boot.constants.ApplicationConstants.UTF_8;
+
 /**
  * 用途：所有单点认证Token注册器
  * 作者: lishuyi
@@ -28,6 +31,9 @@ import java.util.SortedSet;
 @Slf4j
 @Component
 public class SsoAuthenticationRegister {
+
+    @Autowired
+    private AppConfig appConfig;
 
     @Autowired
     private ApplicationContext appContext;
@@ -48,7 +54,7 @@ public class SsoAuthenticationRegister {
             //防止从前端 加密后的参数通过浏览器后，+之类的字符变成空格
             try {
                 if ( UrlEncoderUtils.hasUrlEncoded( encodeKeyword ) ){
-                    encodeKeyword = URLDecoder.decode(encodeKeyword,"UTF-8");
+                    encodeKeyword = URLDecoder.decode(encodeKeyword,UTF_8);
                 }
             } catch ( UnsupportedEncodingException e ) {
                 //不支持该字符编码方式
@@ -57,7 +63,7 @@ public class SsoAuthenticationRegister {
             decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
             if(StringUtils.isNotEmpty(decodeKeyword)) {
                 log.debug("通过关键字【{}】解密后为【{}】", encodeKeyword, decodeKeyword);
-                IUser iUser = authService.findByKey(decodeKeyword, keyType);
+                IUser iUser = authService.findByKey(decodeKeyword, keyType, appConfig.getAppcode());
                 if (null != iUser) {
                     //成功返回
                     break;

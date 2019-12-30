@@ -8,6 +8,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.entryPoint.AccessDeniedEntryPoint;
 import com.simbest.boot.security.auth.filter.CaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.CustomAbstractAuthenticationProcessingFilter;
+import com.simbest.boot.security.auth.filter.RestAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RestCaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RestUumsAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RsaAuthenticationFilter;
@@ -164,6 +165,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(captchaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(restCaptchaAuthenticationFilter(), CaptchaAuthenticationFilter.class)
                 .addFilterBefore(uumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(restAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(restUumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(rsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(ssoAuthenticationFilter(), UumsAuthenticationFilter.class)
@@ -254,8 +256,25 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * 不基于UUMS主数据的单点登录拦截器
+     * @return RestAuthenticationFilter
+     * @throws Exception
+     */
+    @Bean
+    public RestAuthenticationFilter restAuthenticationFilter() throws Exception {
+        RestAuthenticationFilter filter = new RestAuthenticationFilter(new AntPathRequestMatcher(REST_LOGIN_PAGE, RequestMethod.POST.name()));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //记录成功登录日志
+        filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
+        //记录失败登录次数
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
+        filter.setEncryptor(rsaEncryptor);
+        return filter;
+    }
+
+    /**
      * 通过UUMS认证的应用认证拦截器，拦截/restuumslogin请求（REST方式）
-     * @return
+     * @return RestUumsAuthenticationFilter
      * @throws Exception
      */
     @Bean

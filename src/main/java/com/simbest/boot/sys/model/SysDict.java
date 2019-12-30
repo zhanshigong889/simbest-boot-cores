@@ -76,14 +76,5 @@ public class SysDict extends LogicModel {
     @Column
     private Boolean isPublic;
 
-    @ApiModelProperty(value = "集团id")
-    @Column(length = 40)
-    @Deprecated
-    private String blocid;
-
-    @ApiModelProperty(value = "企业id")
-    @Column(length = 40)
-    @Deprecated
-    private String corpid;
 
 }

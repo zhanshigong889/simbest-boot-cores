@@ -7,6 +7,7 @@ import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentInfo;
 import cn.hutool.http.useragent.UserAgentUtil;
 import com.simbest.boot.base.exception.Exceptions;
+import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
@@ -36,6 +37,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 
+import static com.simbest.boot.constants.ApplicationConstants.ZERO;
+
 /**
  * 用途：登录工具类
  * 作者: lishuyi
@@ -44,6 +47,8 @@ import java.util.Set;
 @Slf4j
 @Component
 public class LoginUtils {
+    @Autowired
+    private AppConfig appConfig;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -95,7 +100,7 @@ public class LoginUtils {
      */
     public void adminLogin() {
         log.debug("通过管理账号【{}】进行系统自动登录", ApplicationConstants.ADMINISTRATOR);
-        IUser iUser = authService.findByKey(ApplicationConstants.ADMINISTRATOR, IAuthService.KeyType.username);
+        IUser iUser = authService.findByKey(ApplicationConstants.ADMINISTRATOR, IAuthService.KeyType.username, appConfig.getAppcode());
         GenericAuthentication auth = new GenericAuthentication(iUser, null, iUser.getAuthorities());
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
@@ -106,8 +111,8 @@ public class LoginUtils {
             IUser iUser = (IUser)authentication.getPrincipal();
             SysLogLogin logLogin = SysLogLogin.builder()
                     .account(iUser.getUsername())
-                    .loginEntry(0) //PC登录入口
-                    .loginType(0)  //用户名登录方式
+                    .loginEntry(ZERO) //PC登录入口
+                    .loginType(ZERO)  //用户名登录方式
                     .loginTime(DateUtil.getCurrent())
                     .isSuccess(true)
                     .ip(HostUtil.getClientIpAddress(request))

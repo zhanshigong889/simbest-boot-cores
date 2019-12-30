@@ -23,14 +23,14 @@ public interface ISysOperateLogService extends ILogicService<SysOperateLog,Strin
     /**
      * 保存系统操作日志
      * @param sysOperateLog         操作日志对象
-     * @return
+     * @return SysOperateLog
      */
     SysOperateLog saveLog(SysOperateLog sysOperateLog);
 
     /**
      * 保存系统操作日志
-     * @param sysOperateLog         操作日志对象
-     * @return
+     * @param sysOperateLogParam         操作日志对象
+     * @return SysOperateLog
      */
     SysOperateLog saveLog( Map<String,Object> sysOperateLogParam);
 }

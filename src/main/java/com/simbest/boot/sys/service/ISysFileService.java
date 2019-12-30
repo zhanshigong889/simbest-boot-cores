@@ -22,17 +22,17 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
-     * @return
+     * @return SysFile
      */
     SysFile uploadProcessFile(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart);
 
     /**
      * 上传并保存多个文件
-     * @param multipartFile 上传文件
+     * @param multipartFiles 上传文件
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
-     * @return
+     * @return List<SysFile>
      */
     List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart);
 
@@ -45,7 +45,7 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param clazz 导入对象类
      * @param sheetName sheet页名称
      * @param <T>
-     * @return
+     * @return UploadFileResponse
      */
     <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName);
 
@@ -59,7 +59,7 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param sheetName sheet页名称
      * @param inputRow 起始导入行数
      * @param <T>
-     * @return
+     * @return UploadFileResponse
      */
     <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz, String sheetName,int inputRow);
 
@@ -71,14 +71,14 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsTypePart 流程区块
      * @param clazz 导入对象类
      * @param <T>
-     * @return
+     * @return UploadFileResponse
      */
     <T> UploadFileResponse importExcel(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart, Class<T> clazz);
 
     /**
      * 通过SysFile的ID获取实际文件
      * @param id
-     * @return
+     * @return File
      */
     File getRealFileById(String id);
 }

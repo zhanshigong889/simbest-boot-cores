@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
- * 用途：基于UUMS主数据的单点登录拦截器
+ * 用途：REST方式基于UUMS主数据的单点登录拦截器
  * 作者: lishuyi
  * 时间: 2018/1/20  15:05
  */

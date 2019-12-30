@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 /**
  * @功能描述 消息模板枚举类。
- * @date 20180108
  * @author LJW
  * 
  */
@@ -73,11 +72,11 @@ public enum MessageEnum {
     MB000005("文件导入失败！"),
 
 	/**
-	 * @param companyName	        : 公司名称。
-	 * @param departmentName		: 部门名称。
-	 * @param trueName			    : 审批人姓名。
-     * @param positionName			: 职务名称。
-	 * @消息内容 工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理。
+	 * companyName	        : 公司名称。
+	 * departmentName		: 部门名称。
+	 * trueName			    : 审批人姓名。
+     * positionName			: 职务名称。
+	 * 消息内容 工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理。
 	 */
     MW000001("工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理"),
 
@@ -87,53 +86,53 @@ public enum MessageEnum {
     MW000002("流程提交失败！"),
 
     /**
-     * @param appName	            : 系统名称。
-     * @param fromUser		        : 发送人。
-     * @param itemSubject			: 事项主题。
-     * @消息内容 协作配合:您收到汪祥向您发送的"关于台前分公司拆除楼顶消防水箱的请示"的事件，请及时处理。
+     * appName	            : 系统名称。
+     * fromUser		        : 发送人。
+     * itemSubject			: 事项主题。
+     * 消息内容 协作配合:您收到汪祥向您发送的"关于台前分公司拆除楼顶消防水箱的请示"的事件，请及时处理。
      */
     MT000001("${appName}:您收到${fromUser}向您发送的[${itemSubject}]的${appName}事件，请及时处理。"),
 
     /**
-     * @param appName       系统名称
-     * @param managerUser   管理员类型
-     * @param documentType  档案类型
-     * @消息内容 专利管理提醒：档案室管理员提醒您，您借阅的专利实物档案已经到期，请及时归还
+     * appName       系统名称
+     * managerUser   管理员类型
+     * documentType  档案类型
+     * 消息内容 专利管理提醒：档案室管理员提醒您，您借阅的专利实物档案已经到期，请及时归还
      */
     MT000002("${appName}提醒:${managerUser}提醒您，您借阅的${documentType}已经到期，请及时归还。"),
 
     /**
-     * @param appName       系统名称
-     * @param managerUser   管理员类型
-     * @param documentType  档案类型
-     * @消息内容 专利管理提醒：档案室管理员提醒您，请及时归还您借阅的专利实物档案
+     * appName       系统名称
+     * managerUser   管理员类型
+     * documentType  档案类型
+     * 消息内容 专利管理提醒：档案室管理员提醒您，请及时归还您借阅的专利实物档案
      */
     MT000003("${appName}提醒:${managerUser}提醒您，请及时归还您借阅的{documentType}。"),
 
     /**
-     * @param appName           系统名称
-     * @param serialNumber      编号
-     * @param approveResult     审批结果
-     * @消息内容 专利管理提醒：档案室管理员提醒您，请及时归还您借阅的专利实物档案
+     * appName           系统名称
+     * serialNumber      编号
+     * approveResult     审批结果
+     * 消息内容 专利管理提醒：档案室管理员提醒您，请及时归还您借阅的专利实物档案
      */
     MT000004("【${appName}】您提交的“${serialNumber}”${appName}申请，已完成审批。审批结果：${approveResult}。请登录系统查看"),
 
     /**
-     * @param appName	            系统名称。
-     * @param fromUser		        发送人。
-     * @param itemSubject			事项主题。
-     * @param description           事件描述
-     * @消息内容 协作配合:您收到汪祥向您发送的"关于台前分公司拆除楼顶消防水箱的请示"的督办事件，请及时处理。
+     * appName	            系统名称。
+     * fromUser		        发送人。
+     * itemSubject			事项主题。
+     * description           事件描述
+     * 消息内容 协作配合:您收到汪祥向您发送的"关于台前分公司拆除楼顶消防水箱的请示"的督办事件，请及时处理。
      */
     MT000006("${appName}:您收到${fromUser}向您发送的[${itemSubject}]的${appName}${description}事件，请及时处理。"),
 
     /**
      * 工单流转时有代理人的提示信息
-     * @param companyName	        : 公司名称。
-     * @param departmentName		: 部门名称。
-     * @param trueName			    : 审批人姓名。
-     * @param positionName			: 职务名称。
-     * @消息内容 工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理。
+     * companyName	        : 公司名称。
+     * departmentName		: 部门名称。
+     * trueName			    : 审批人姓名。
+     * positionName			: 职务名称。
+     * 消息内容 工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理。
      */
     MW000005("工单已流转至${companyName}${departmentName}-${trueName}${positionName}进行办理,被代理人为：${agentedCompanyName}${agentedDepartmentName}-${agentedTrueName}${agentedPositionName}"),
 
@@ -149,8 +148,7 @@ public enum MessageEnum {
     private String message;
 
     /**
-     * 私有构造方法①，不指定消息显示类型。
-     *
+     * 私有构造方法，不指定消息显示类型。
      * @param message
      */
     MessageEnum ( String message ) {
@@ -162,10 +160,10 @@ public enum MessageEnum {
 	 */
 	public static final Pattern pattern = Pattern.compile("\\$\\{(\\w+)\\}");
 
-	/**
-	 * 解析Enum，生成前台json格式字符串。
-	 * @return
-	 */
+    /**
+     * 解析Enum，生成前台json格式字符串。
+     * @return String
+     */
 	public static String getObjStrForJS(){
 		StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("{");
@@ -194,7 +192,7 @@ public enum MessageEnum {
 	/**
 	 * 无参调用。
 	 * 
-	 * @return
+	 * @return String
 	 */
 	public String getMessage() {
 		return pattern.matcher(message).replaceAll("");
@@ -203,7 +201,7 @@ public enum MessageEnum {
 	/**
 	 * 有参调用，map内的参数请参考Enum实例的注释。
 	 * 
-	 * @return
+	 * @return String
 	 */
 	public String getMessage( CharSequence onlyParam) {
 		if (onlyParam != null) {
@@ -219,12 +217,11 @@ public enum MessageEnum {
 		return this.getMessage();
 	}
 
-	/**
-	 * 有参调用，map内的参数请参考Enum实例的注释。
-	 * 
-	 * @param paramMap
-	 * @return
-	 */
+    /**
+     * 有参调用，map内的参数请参考Enum实例的注释。
+     * @param paramMap
+     * @return String
+     */
 	public String getMessage( Map<String, ? extends Object> paramMap) {
 		if (paramMap != null && !paramMap.isEmpty()) {
 			Matcher matcher = pattern.matcher(this.message);
@@ -244,8 +241,9 @@ public enum MessageEnum {
 
     /**
      * 根据name获取消息
+     * @param prefix
      * @param stateNum
-     * @return
+     * @return String
      */
     public static String getMessageByName(String prefix,String stateNum){
 	    String stateNumStr = prefix + stateNum;

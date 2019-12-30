@@ -49,7 +49,7 @@ public class SysOperateLogService extends LogicService<SysOperateLog,String> imp
     /**
      * 保存系统操作日志
      * @param sysOperateLog         操作日志对象
-     * @return
+     * @return SysOperateLog
      */
     @Override
     public SysOperateLog saveLog ( SysOperateLog sysOperateLog ) {

@@ -55,7 +55,7 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
      *
      * @param page       条件-当前页码，必须大于0，从1开始
      * @param size       条件-每页条数，必须大于0，每页最多不超过100
-     * @return
+     * @return Pageable
      */
     default Pageable getPageable(int page, int size){
         return getPageable(page, size, null, null);
@@ -273,7 +273,7 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
      *
      * @param rawObject   原始对象
      * @param newObject   更新对象
-     * @return
+     * @return boolean
      */
     default boolean updateNotNullField(Object rawObject, Object newObject) {
         //如果两个对象不一致。不进行更新字段值的操作

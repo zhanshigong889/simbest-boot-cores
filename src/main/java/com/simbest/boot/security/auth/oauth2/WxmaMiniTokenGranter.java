@@ -55,7 +55,7 @@ public class WxmaMiniTokenGranter extends AbstractTokenGranter {
      * 抛出的异常将在CustomWebResponseExceptionTranslator进行处理
      * @param client
      * @param tokenRequest
-     * @return
+     * @return OAuth2Authentication
      */
     @Override
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {

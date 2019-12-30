@@ -46,21 +46,21 @@ public class GenericAuthenticationChecker {
      *
      * @param authentication
      * @param appcode
-     * @return
+     * @return Authentication
      */
     public Authentication authChek(Authentication authentication, String appcode) {
         IUser authUser = null;
         try {
             if (authentication instanceof UsernamePasswordAuthenticationToken || authentication instanceof UumsAuthentication) {
-                authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.username);
+                authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.username, appcode);
             }
             else if (authentication instanceof SsoUsernameAuthentication) {
                 if (authentication.getPrincipal() instanceof UsernamePrincipal) {
                     UsernamePrincipal principal = (UsernamePrincipal) authentication.getPrincipal();
-                    authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.username);
+                    authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.username, appcode);
                 } else if (authentication.getPrincipal() instanceof KeyTypePrincipal) {
                     KeyTypePrincipal principal = (KeyTypePrincipal) authentication.getPrincipal();
-                    authUser = authService.findByKey(principal.getKeyword(), principal.getKeyType());
+                    authUser = authService.findByKey(principal.getKeyword(), principal.getKeyType(), appcode);
                 }
             }
         } catch (Exception e){

@@ -21,7 +21,7 @@ public class MessageOperatorUtil {
     /**
      *  查询流程类的消息
      * @param messageCode   消息模板编码
-     * @return
+     * @return String
      */
     public String queryWorkFlowMessage(Long messageCode){
         String messageCodeStr = String.valueOf(Math.abs( messageCode ));
