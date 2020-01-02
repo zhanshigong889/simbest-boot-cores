@@ -13,7 +13,7 @@ import lombok.Setter;
  */
 public enum StoreLocation implements GenericEnum {
 
-    disk("disk"),  fastdfs("fastdfs"), sftp("sftp");
+    disk("disk"),  fastdfs("fastdfs"), ftp("ftp"), sftp("sftp");
 
     @Setter @Getter
     private String value;

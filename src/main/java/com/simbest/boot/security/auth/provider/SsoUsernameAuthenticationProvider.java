@@ -34,8 +34,7 @@ public class SsoUsernameAuthenticationProvider implements AuthenticationProvider
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        SsoUsernameAuthentication ssoUsernameAuthentication = (SsoUsernameAuthentication)authentication;
-        return genericAuthenticationChecker.authChek(authentication, ssoUsernameAuthentication.getCredentials().toString());
+        return genericAuthenticationChecker.authChek(authentication, authentication.getCredentials().toString());
     }
 
     @Override

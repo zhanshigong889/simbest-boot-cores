@@ -95,6 +95,10 @@ public class AppConfig {
     @Value("${app.captcha.enable}")
     private boolean isOpenValidateCode = true;
 
+    // 是否开启验证码功能
+    @Value("${app.heart.check.enable:false}")
+    private boolean isOpenHeartCheck;
+
     @Value("${app.uums.address}")
     private String uumsAddress;
 
@@ -165,6 +169,7 @@ public class AppConfig {
         log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
         uploadTmpFileLocation = System.getProperty("user.dir").concat("/springboottmp").concat(contextPath);
         log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
+        log.info("心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
     }
 
 

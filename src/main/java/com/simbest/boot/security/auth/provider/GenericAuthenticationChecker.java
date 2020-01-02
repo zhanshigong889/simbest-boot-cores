@@ -77,21 +77,27 @@ public class GenericAuthenticationChecker {
         preAuthenticationChecks.check(authUser);
         boolean accessApp = authService.checkUserAccessApp(authUser.getUsername(), appcode);
         if (accessApp) {
-            //追加权限
-            Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(authUser.getUsername(), appcode);
-            if (null != appPermission && !appPermission.isEmpty()) {
-                log.debug("即将为用户【{}】在应用【{}】追加【{}】项权限，追加的具体权限为【{}】",
-                        authUser.getUsername(), appcode, appPermission.size(), StringUtils.joinWith(ApplicationConstants.COMMA, appPermission));
-                authUser.addAppPermissions(appPermission);
-                authUser.addAppAuthorities(appPermission);
-            }
-            //定制用户信息
-            authUser = authService.customUserForApp(authUser, appcode);
             //返回Authentication进入Session上下文
             GenericAuthentication result = new GenericAuthentication(authUser, UumsAuthenticationCredentials.builder()
                     .password(authUser.getPassword()).appcode(appcode).build(), authUser.getAuthorities());
-            result.setDetails(authentication.getDetails());
-            log.info("用户【{}】访问【{}】认证成功！", authUser.getUsername(), appcode);
+            //单点认证不加载应用特殊权限和定制用户信息
+            if (!(authentication instanceof SsoUsernameAuthentication)) {
+                //追加权限
+                Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(authUser.getUsername(), appcode);
+                if (null != appPermission && !appPermission.isEmpty()) {
+                    log.debug("即将为用户【{}】在应用【{}】追加【{}】项权限，追加的具体权限为【{}】",
+                            authUser.getUsername(), appcode, appPermission.size(), StringUtils.joinWith(ApplicationConstants.COMMA, appPermission));
+                    authUser.addAppPermissions(appPermission);
+                    authUser.addAppAuthorities(appPermission);
+                }
+                //定制用户信息
+                authUser = authService.customUserForApp(authUser, appcode);
+                //重新构建Authentication以包括用户最新的基本信息、角色、权限等信息
+                result = new GenericAuthentication(authUser, UumsAuthenticationCredentials.builder()
+                        .password(authUser.getPassword()).appcode(appcode).build(), authUser.getAuthorities());
+                result.setDetails(authentication.getDetails());
+                log.info("用户【{}】访问【{}】认证成功！", authUser.getUsername(), appcode);
+            }
             return result;
         } else {
             throw new

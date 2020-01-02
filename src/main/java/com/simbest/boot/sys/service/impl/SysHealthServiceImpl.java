@@ -64,17 +64,21 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
 
     private SysFile testFile;
 
+
     @PostConstruct
     public void init(){
         StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
         if(!StoreLocation.fastdfs.equals(serverUploadLocation)) {
             File localFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
-            testFile = SysFile.builder().fileName(localFile.getName()).fileType("txt").filePath(localFile.getAbsolutePath())
-                    .fileSize(localFile.length()).downLoadUrl(localFile.getAbsolutePath()).build();
+            if(null == testFile) {
+                testFile = SysFile.builder().fileName(localFile.getName()).fileType("txt").filePath(localFile.getAbsolutePath())
+                        .fileSize(localFile.length()).downLoadUrl(localFile.getAbsolutePath()).build();
+            }
             File file = appFileUtil.getFileFromSystem(testFile);
             if (null == file) {
                 FileUtil.writeString(ApplicationConstants.MSG_SUCCESS, localFile, ApplicationConstants.UTF_8);
-                testFile = appFileUtil.uploadFromLocal(localFile, "tmp");
+                testFile = appFileUtil.uploadFromLocal(localFile, "hearttemps");
+                log.info("测试文件已上传：【{}】", testFile);
             }
         }
     }
@@ -87,8 +91,10 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                 log.info("数据库连接【{}】测试OK", config.getDatasourceUrl());
                 return SysHealth.builder().result(true).build();
             }
-            else
+            else {
+                log.error("数据库连接【{}】测试Fail", config.getDatasourceUrl());
                 return SysHealth.builder().result(false).message("validation-query返回错误").build();
+            }
         }
         catch (Exception e){
             Exceptions.printException(e);
@@ -130,10 +136,12 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                 return SysHealth.builder().result(true).build();
             }
             else{
+                log.error("Redis主机【{}】端口【{}】测试Fail，集群主控节点为【{}】端口【{}】", redisHost, redisPort, masterHost, masterPort);
                 return SysHealth.builder().result(false).message("缓存读取错误").build();
             }
         }
         else {
+            log.error("Redis主机【{}】端口【{}】测试Fail，心跳不通，集群主控节点为【{}】端口【{}】", redisHost, redisPort);
             return SysHealth.builder().result(false).message("Redis主机".concat(redisHost).concat("端口").concat(redisPort.toString()).concat("心跳不通")).build();
         }
     }
@@ -146,8 +154,9 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
             case disk:
                 File diskFile = appFileUtil.getFileFromSystem(testFile);
                 if(null == diskFile){
+                    log.error("文件基于【{}】读取文件Fail", serverUploadLocation);
                     sysHealth.setResult(false);
-                    sysHealth.setMessage("文件基于"+serverUploadLocation+"获取文件失败");
+                    sysHealth.setMessage("文件基于"+serverUploadLocation+"读取文件失败");
                 }
                 else{
                     log.info("文件系统基于disk方式，读取文件【{}】测试OK", diskFile);
@@ -164,6 +173,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                         try {
                             boolean fastdfsResult = ProtoCommon.activeTest(FastDfsClient.getTrackerServer().getSocket());
                             if(!fastdfsResult){
+                                log.error("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString())+"官方SDK检测失败!");
                                 sysHealth.setResult(false);
                                 sb.append("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString())+"官方SDK检测失败!");
                             }
@@ -172,22 +182,27 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                             }
                         }
                         catch(Exception e){
+                            log.error("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString())+"检测异常：".concat(e.getMessage()));
                             sysHealth.setResult(false);
                             sb.append("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString())+"检测异常：".concat(e.getMessage()));
                         }
                     }
                     else{
+                        log.error("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString()).concat("网络连接不通"));
                         sysHealth.setResult(false);
                         sb.append("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString()).concat("网络连接不通"));
                     }
                 }
                 sysHealth.setMessage(sb.toString());
                 break;
+            case ftp:
+                log.info("基于ftp，方式同sftp");
             case sftp:
                 File sftpFile = appFileUtil.getFileFromSystem(testFile);
                 if(null == sftpFile){
+                    log.error("文件基于"+serverUploadLocation+"读取取文件失败");
                     sysHealth.setResult(false);
-                    sysHealth.setMessage("文件基于"+serverUploadLocation+"获取文件失败");
+                    sysHealth.setMessage("文件基于"+serverUploadLocation+"读取取文件失败");
                 }
                 else{
                     log.info("文件系统基于sftp方式，读取文件【{}】测试OK", sftpFile);

@@ -99,7 +99,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前时间戳
+     * @return long 当前时间戳
      */
 	public static long getNow(){
 		return System.currentTimeMillis();
@@ -107,7 +107,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前日期对象
+     * @return Date 当前日期对象
      */
 	public static Date getCurrent(){
 		return new Date(System.currentTimeMillis());
@@ -115,7 +115,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前日期字符串 2018-03-14
+     * @return String 当前日期字符串 2018-03-14
      */
     public static String getCurrentStr() {
         return getDate(getCurrent());
@@ -123,7 +123,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前时间戳字符串 2018-03-14 17:13:08
+     * @return String 当前时间戳字符串 2018-03-14 17:13:08
      */
     public static String getCurrentTimestamp() {
         return getDate(getCurrent(), timestampPattern1);
@@ -132,7 +132,7 @@ public final class DateUtil {
     /**
      *
      * @param pattern 指定类型
-     * @return 当前日期字符串 2018-03-14
+     * @return String 当前日期字符串 2018-03-14
      */
     public static String getDateStr(String pattern) {
         return getDate(getCurrent(), pattern);
@@ -140,7 +140,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 获取今天的开始时间：比如：2014-06-19 00:00:00
+     * @return Date 获取今天的开始时间：比如：2014-06-19 00:00:00
      */
 	public static Date getTodayTimestamp() {
 		return DateUtil.startTimeOfDay(DateUtil.getCurrent()).toDate();
@@ -148,7 +148,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前昨日日期字符串 2018-03-14
+     * @return String 当前昨日日期字符串 2018-03-14
      */
 	public static String getYesterday() {
 		Calendar cal = Calendar.getInstance();
@@ -159,7 +159,7 @@ public final class DateUtil {
     /**
      *
      * @param pattern 指定类型
-     * @return 当前昨日日期字符串 2018-03-14
+     * @return String 当前昨日日期字符串 2018-03-14
      */
 	public static String getYesterday(String pattern) {
 		Calendar cal = Calendar.getInstance();  
@@ -232,7 +232,7 @@ public final class DateUtil {
      * @param nowTime 当前时间
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return
+     * @return boolean
      */
     public static boolean belongTimeZone(Date nowTime, Date startTime, Date endTime) {
         nowTime = removeDate(nowTime);
@@ -247,7 +247,7 @@ public final class DateUtil {
      * @param nowTime 当前时间
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return
+     * @return boolean
      */
     public static boolean belongDate(Date nowTime, Date startTime, Date endTime) {
         if (nowTime.getTime() == startTime.getTime()
@@ -274,7 +274,7 @@ public final class DateUtil {
 	// ===========================时间计算==================================
 	/**
 	 * 当前年
-	 * @return 2014
+	 * @return String 2014
 	 */
 	public static String getCurrYear() {
 		Calendar cal = Calendar.getInstance();
@@ -285,7 +285,7 @@ public final class DateUtil {
 
     /**
      * 当前月 2014-08
-     * @return
+     * @return String
      */
 	public static String getCurrMonth() {
 		Calendar cal = Calendar.getInstance();
@@ -295,7 +295,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前月08
+     * @return String 当前月08
      */
 	public static String getCurrSimpleMonth() {
 		Calendar cal = Calendar.getInstance();
@@ -305,7 +305,7 @@ public final class DateUtil {
 
     /**
      *
-     * @return 当前日28
+     * @return String 当前日28
      */
     public static String getCurrSimpleDay() {
         Calendar cal = Calendar.getInstance();
@@ -315,7 +315,7 @@ public final class DateUtil {
 
 	/**
 	 * 上一个月
-	 * @return 2014-08
+	 * @return String 2014-08
 	 */
 	public static String getLastMonth() {
 		Calendar cal = Calendar.getInstance();
@@ -326,7 +326,7 @@ public final class DateUtil {
 
 	/**
 	 * 下一个月
-	 * @return 2014-08
+	 * @return String 2014-08
 	 */
 	public static String getNextMonth() {
 		Calendar cal = Calendar.getInstance();
@@ -337,7 +337,7 @@ public final class DateUtil {
 
 	/**
 	 * 当前月第一天
-	 * @return 2014-08-01
+	 * @return String 2014-08-01
 	 */
 	public static String getCurrMonthFirstDay() {
         DateTime dt = new DateTime();
@@ -347,7 +347,7 @@ public final class DateUtil {
 
 	/**
 	 * 当前月最后一天
-	 * @return 2014-08-31
+	 * @return String 2014-08-31
 	 */
 	public static String getCurrMonthLastDay() {
         DateTime dt = new DateTime();
@@ -357,7 +357,7 @@ public final class DateUtil {
 
 	/**
 	 * 上月第一天
-	 * @return 2014-08-01
+	 * @return String 2014-08-01
 	 */
 	public static String getLastMonthFirstDay() {
         DateTime dt = new DateTime();
@@ -368,7 +368,7 @@ public final class DateUtil {
 
 	/**
 	 * 上月最后一天
-	 * @return 2014-08-31
+	 * @return String 2014-08-31
 	 */
 	public static String getLastMonthLastDay() {
         DateTime dt = new DateTime();
@@ -379,7 +379,7 @@ public final class DateUtil {
 
 	/**
 	 * 下月第一天
-	 * @return 2014-08-01
+	 * @return String 2014-08-01
 	 */
 	public static String getNextMonthFirstDay() {
         DateTime dt = new DateTime();
@@ -390,7 +390,7 @@ public final class DateUtil {
 
 	/**
 	 * 下月最后一天
-	 * @return 2014-08-31
+	 * @return String 2014-08-31
 	 */
 	public static String getNextMonthLastDay() {
         DateTime dt = new DateTime();
@@ -440,7 +440,7 @@ public final class DateUtil {
 	/**
 	 * 当前时间向前增加天数
 	 * @param days
-	 * @return
+	 * @return Date
 	 */
 	public static Date addDays(int days) {
 		DateTime dateTime = new DateTime();
@@ -451,7 +451,7 @@ public final class DateUtil {
 	/**
 	 * 当前时间向后减少天数
 	 * @param days
-	 * @return
+	 * @return Date
 	 */
 	public static Date subDays(int days) {
 		DateTime dateTime = new DateTime();
@@ -463,7 +463,7 @@ public final class DateUtil {
 	 * 指定时间向前增加天数
 	 * @param date
 	 * @param days
-	 * @return
+	 * @return Date
 	 */
 	public static Date addDays(Date date, int days) {
 		DateTime dateTime = new DateTime(date);
@@ -475,7 +475,7 @@ public final class DateUtil {
 	 * 指定时间向后减少天数
 	 * @param date
 	 * @param days
-	 * @return
+	 * @return Date
 	 */
 	public static Date subDays(Date date, int days) {
 		Calendar cal = Calendar.getInstance();
@@ -487,7 +487,7 @@ public final class DateUtil {
 	/**
 	 * 在当前时间增加时间
 	 * @param minutes
-	 * @return
+	 * @return Date
 	 */
 	public static Date addMinutes(int minutes) {
 		Calendar cal = Calendar.getInstance();
@@ -498,7 +498,7 @@ public final class DateUtil {
 	/**
 	 * 在当前时间向后减少时间
 	 * @param minutes
-	 * @return
+	 * @return Date
 	 */
 	public static Date subMinutes(int minutes) {
 		Calendar cal = Calendar.getInstance();
@@ -510,7 +510,7 @@ public final class DateUtil {
 	 * 指定时间增加时间
 	 * @param date
 	 * @param minutes
-	 * @return
+	 * @return Date
 	 */
 	public static Date addMinutes(Date date, int minutes) {
 		Calendar cal = Calendar.getInstance();
@@ -523,7 +523,7 @@ public final class DateUtil {
 	 * 在指定时间向后减少
 	 * @param date
 	 * @param minutes
-	 * @return
+	 * @return Date
 	 */
 	public static Date subMinutes(Date date, int minutes) {
 		Calendar cal = Calendar.getInstance();
@@ -535,7 +535,7 @@ public final class DateUtil {
 	/**
 	 * 时间置零
 	 * @param date
-	 * @return
+	 * @return Date
 	 */
 	public static Date removeTime(Date date) {
 		return DateUtil.parseDate(DateUtil.getDate(date));
@@ -544,7 +544,7 @@ public final class DateUtil {
     /**
      * 日期置零
      * @param date
-     * @return
+     * @return Date
      */
     public static Date removeDate(Date date) {
         Calendar cal = Calendar.getInstance();
@@ -560,7 +560,7 @@ public final class DateUtil {
 	/**
 	 * 获取今天的开始时间：比如：2014-06-19 00:00:00
 	 * @param date
-	 * @return
+	 * @return DateTime
 	 */
 	public static DateTime startTimeOfDay(Date date){
 		DateTime nowTime = new DateTime(date.getTime());
@@ -570,7 +570,7 @@ public final class DateUtil {
 	/**
 	 * 获取今天的结束时间：比如：2014-06-19 23:59:59
 	 * @param date
-	 * @return
+	 * @return DateTime
 	 */
 	public static DateTime endTimeOfDay(Date date){
 		DateTime nowTime = new DateTime(date.getTime());
@@ -579,7 +579,7 @@ public final class DateUtil {
 
 	/**
 	 * 获取现在距离今天结束还有多长时间
-	 * @return
+	 * @return long
 	 */
 	public static long overTimeOfToday(){
 		DateTime nowTime = new DateTime();
@@ -592,7 +592,7 @@ public final class DateUtil {
 	 *
 	 * @param startDate 2006-03-01
 	 * @param endDate 2006-05-01
-	 * @return n 61
+	 * @return int 61
 	 */
 	public static int daysBetweenDates(Date startDate, Date endDate) {
 		DateTime startTime = new DateTime(startDate.getTime());
@@ -604,7 +604,7 @@ public final class DateUtil {
 	 * 计算两个时间相差的分钟数
 	 * @param startDate
 	 * @param endDate
-	 * @return
+	 * @return long
 	 */
 	public static long minuteBetweenDates(Date startDate, Date endDate) {
 	    long seconds = (endDate.getTime() - startDate.getTime()) / 1000;
@@ -615,7 +615,7 @@ public final class DateUtil {
      * 计算两个时间相差的秒数
      * @param startDate
      * @param endDate
-     * @return
+     * @return long
      */
     public static long secondBetweenDates(Date startDate, Date endDate) {
         return (endDate.getTime() - startDate.getTime()) / 1000L;
@@ -625,7 +625,7 @@ public final class DateUtil {
 	 * 计算两个时间相差的天数、小时数、分数
 	 * @param startDate
 	 * @param endDate
-	 * @return
+	 * @return long[]
 	 */
 	public static long[] timeBetweenDates(Date startDate, Date endDate) {
 		  long diff = endDate.getTime() - startDate.getTime(); //这样得到的差值是微秒级别
@@ -640,7 +640,7 @@ public final class DateUtil {
      * 返回两个时间相差的天数、小时数、分数的中文描述
      * @param startDate
      * @param endDate
-     * @return
+     * @return String
      */
     public static String descBetweenDates(Date startDate, Date endDate) {
         long[] requestTimeDurations = timeBetweenDates(startDate, endDate);
@@ -670,7 +670,7 @@ public final class DateUtil {
     /**
      * 获取日期在一个星期的周几
      * @param date
-     * @return
+     * @return String
      */
     public static String dateToWeek(Date date) {
         String[] weekDays = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
@@ -710,7 +710,7 @@ public final class DateUtil {
     /**
      * 返回当前年（2位）+当前天在当前年的第几天（3位）+当前小时（2位）
      * @param date
-     * @return 1836517
+     * @return String 1836517
      */
     public static String getDateHourPrefix(Date date) {
         Calendar c = Calendar.getInstance();
@@ -728,7 +728,7 @@ public final class DateUtil {
     /**
      * 返回当前年（2位）+当前日期（4位）
      * @param date
-     * @return 181231
+     * @return String 181231
      */
     public static String getDatePrefix(Date date) {
         return DateUtil.getDate(date, DateUtil.datePattern4);
@@ -737,7 +737,7 @@ public final class DateUtil {
     /**
      * 将Date类转换为XMLGregorianCalendar
      * @param date
-     * @return
+     * @return XMLGregorianCalendar
      */
     public static XMLGregorianCalendar date2XmlDate(Date date){
         Calendar cal = Calendar.getInstance();
@@ -761,7 +761,7 @@ public final class DateUtil {
     /**
      * 将XMLGregorianCalendar转换为Date
      * @param cal
-     * @return
+     * @return Date
      */
     public static Date xmlDate2Date(XMLGregorianCalendar cal){
         return cal.toGregorianCalendar().getTime();
@@ -770,7 +770,7 @@ public final class DateUtil {
     /**
      * 将Date转换为LocalDateTime
      * @param date
-     * @return
+     * @return Date
      */
     public static LocalDateTime date2LocalDateTime(Date date) {
         Instant instant = date.toInstant();
@@ -782,7 +782,7 @@ public final class DateUtil {
     /**
      * 将LocalDateTime转换为Date
      * @param localDateTime
-     * @return
+     * @return Date
      */
     public static Date localDateTime2Date(LocalDateTime localDateTime) {
         ZoneId zoneId = ZoneId.systemDefault();
@@ -794,7 +794,7 @@ public final class DateUtil {
     /**
      * 将LocalDateTime类转换为XMLGregorianCalendar
      * @param localDateTime
-     * @return
+     * @return XMLGregorianCalendar
      */
     public static XMLGregorianCalendar localDateTimeToXmlDate(LocalDateTime localDateTime){
         ZoneId zoneId = ZoneId.systemDefault();
@@ -806,7 +806,7 @@ public final class DateUtil {
     /**
      * 将XMLGregorianCalendar转换为LocalDateTime
      * @param cal
-     * @return
+     * @return LocalDateTime
      */
     public static LocalDateTime xmlDate2LocalDateTime(XMLGregorianCalendar cal){
         Date date = xmlDate2Date(cal);
@@ -820,7 +820,7 @@ public final class DateUtil {
      *      Eg：2017年9月20日 09:30  结果为：nums = {"2017","9","20","09","30"}
      *
      * @param dateStr    格式为 2017年9月20日 09:30
-     * @return
+     * @return String[]
      */
     public static String[] getDateStrNumByGroups(String dateStr){
         String[] nums = new String[6];

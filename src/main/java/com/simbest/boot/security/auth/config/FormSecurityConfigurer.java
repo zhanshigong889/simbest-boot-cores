@@ -8,7 +8,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.entryPoint.AccessDeniedEntryPoint;
 import com.simbest.boot.security.auth.filter.CaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.CustomAbstractAuthenticationProcessingFilter;
-import com.simbest.boot.security.auth.filter.RestAuthenticationFilter;
+import com.simbest.boot.security.auth.filter.RestRsaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RestCaptchaAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RestUumsAuthenticationFilter;
 import com.simbest.boot.security.auth.filter.RsaAuthenticationFilter;
@@ -23,6 +23,8 @@ import com.simbest.boot.security.auth.handle.RestSuccessLogoutHandler;
 import com.simbest.boot.security.auth.handle.SsoSuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SuccessLoginHandler;
 import com.simbest.boot.security.auth.handle.SuccessLogoutHandler;
+import com.simbest.boot.security.auth.provider.GenericAuthenticationChecker;
+import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +113,12 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Autowired
     private IAuthService authService;
 
+    @Autowired
+    private IAuthUserCacheService authUserCacheService;
+
+    @Autowired
+    private GenericAuthenticationChecker genericAuthenticationChecker;
+
     @Bean
     public SpringSessionBackedSessionRegistry sessionRegistry() {
         return new SpringSessionBackedSessionRegistry(sessionRepository);
@@ -165,9 +173,9 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(captchaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(restCaptchaAuthenticationFilter(), CaptchaAuthenticationFilter.class)
                 .addFilterBefore(uumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(restAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(restUumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(rsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(restRsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(ssoAuthenticationFilter(), UumsAuthenticationFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
@@ -203,7 +211,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * UUMS主数据登录认证拦截器，拦截/login请求
+     * 基于数据库的主数据登录认证拦截器，拦截/login请求
      * @return
      * @throws Exception
      */
@@ -217,7 +225,29 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedLoginHandler);
         filter.setEncryptor(rsaEncryptor);
+        filter.setAuthUserCacheService(authUserCacheService);
+        filter.setGenericAuthenticationChecker(genericAuthenticationChecker);
        return filter;
+    }
+
+
+    /**
+     * REST方式，基于数据库的主数据登录认证拦截器，拦截/restlogin请求
+     * @return RestRsaAuthenticationFilter
+     * @throws Exception
+     */
+    @Bean
+    public RestRsaAuthenticationFilter restRsaAuthenticationFilter() throws Exception {
+        RestRsaAuthenticationFilter filter = new RestRsaAuthenticationFilter();
+        filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(REST_LOGIN_PAGE, RequestMethod.POST.name()));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //记录成功登录日志
+        filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
+        //记录失败登录次数
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
+        filter.setEncryptor(rsaEncryptor);
+        filter.setGenericAuthenticationChecker(genericAuthenticationChecker);
+        return filter;
     }
 
     /**
@@ -252,23 +282,6 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_PAGE));
         //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
-        return filter;
-    }
-
-    /**
-     * 不基于UUMS主数据的单点登录拦截器
-     * @return RestAuthenticationFilter
-     * @throws Exception
-     */
-    @Bean
-    public RestAuthenticationFilter restAuthenticationFilter() throws Exception {
-        RestAuthenticationFilter filter = new RestAuthenticationFilter(new AntPathRequestMatcher(REST_LOGIN_PAGE, RequestMethod.POST.name()));
-        filter.setAuthenticationManager(authenticationManagerBean());
-        //记录成功登录日志
-        filter.setAuthenticationSuccessHandler(restSuccessLoginHandler);
-        //记录失败登录次数
-        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
-        filter.setEncryptor(rsaEncryptor);
         return filter;
     }
 

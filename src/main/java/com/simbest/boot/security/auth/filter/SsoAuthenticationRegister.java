@@ -33,9 +33,6 @@ import static com.simbest.boot.constants.ApplicationConstants.UTF_8;
 public class SsoAuthenticationRegister {
 
     @Autowired
-    private AppConfig appConfig;
-
-    @Autowired
     private ApplicationContext appContext;
 
     @Autowired
@@ -48,7 +45,7 @@ public class SsoAuthenticationRegister {
         return sortedSet;
     }
 
-    public String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType) {
+    public String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType, String appcode) {
         String decodeKeyword = null;
         for(SsoAuthenticationService decryptService : getSsoAuthenticationService()) {
             //防止从前端 加密后的参数通过浏览器后，+之类的字符变成空格
@@ -63,7 +60,7 @@ public class SsoAuthenticationRegister {
             decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
             if(StringUtils.isNotEmpty(decodeKeyword)) {
                 log.debug("通过关键字【{}】解密后为【{}】", encodeKeyword, decodeKeyword);
-                IUser iUser = authService.findByKey(decodeKeyword, keyType, appConfig.getAppcode());
+                IUser iUser = authService.findByKey(decodeKeyword, keyType, appcode);
                 if (null != iUser) {
                     //成功返回
                     break;

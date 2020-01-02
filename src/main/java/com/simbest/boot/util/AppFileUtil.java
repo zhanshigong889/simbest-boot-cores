@@ -40,8 +40,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -216,6 +218,8 @@ public class AppFileUtil {
                         filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(multipartFile.getInputStream()),
                                 filename, getFileSuffix(filename));
                         break;
+                    case ftp:
+                        log.debug("基于ftp，方式同sftp");
                     case sftp:
                         sftpUtil.upload(createUploadDirectoryPath(directory), filename, multipartFile.getBytes());
                         filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + filename;
@@ -272,6 +276,8 @@ public class AppFileUtil {
                             fileName, getFileSuffix(fileName));
                     fileSize = tmpFile.length();
                     break;
+                case ftp:
+                    log.debug("基于ftp，方式同sftp");
                 case sftp:
                     File tmpFile1 = createTempFile();
                     FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile1);
@@ -319,6 +325,8 @@ public class AppFileUtil {
                 case fastdfs:
                     filePath = FastDfsClient.uploadLocalFile(localFile.getAbsolutePath());
                     break;
+                case ftp:
+                    log.debug("基于ftp，方式同sftp");
                 case sftp:
                     sftpUtil.upload(createUploadDirectoryPath(directory), fileName, localFile);
                     filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + fileName;
@@ -438,6 +446,8 @@ public class AppFileUtil {
                     filePath = FastDfsClient.uploadLocalFile(tmpFile.getAbsolutePath());
                     tmpFile.deleteOnExit();
                     break;
+                case ftp:
+                    log.debug("基于ftp，方式同sftp");
                 case sftp:
                     ios = ImageIO.createImageOutputStream(baos);
                     tmpFile = createTempFile(getFileSuffix(imageFile.getName()));
@@ -604,6 +614,8 @@ public class AppFileUtil {
             case fastdfs:
                 realFile = downloadFromUrl(getFileUrlFromFastDfs(filePath));
                 break;
+            case ftp:
+                log.debug("基于ftp，方式同sftp");
             case sftp:
                 //下载文件时每次打开-关闭FTP太费资源。因此，隐藏下面代码，改为配置Nginx的虚拟目录，直接提供URL进行下载
 //                String directory = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SLASH);
@@ -611,12 +623,12 @@ public class AppFileUtil {
 //                realFile = sftpUtil.download2File(directory, downloadFile, createTempFile(getFileSuffix(filePath)));
 
                 //Nginx的虚拟目录参考
-//                location  /应用上下文名称/anyfile/ {
-//                        alias app.file.upload.path/;
+//                location  /staticfiles/ {
+//                        alias ${app.file.upload.path};
 //                        autoindex on;
 //                }
-                String nginxFileUrl = StringUtils.replace(filePath, config.getUploadPath(), config.getAppHostPort()
-                        .concat(config.getContextPath()).concat("/anyfile"));
+                String nginxFileUrl = StringUtils.replace(filePath, config.getUploadPath(), config.getAppHostPort().concat("/staticfiles"));
+                nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", "/");
                 log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
                 realFile = downloadFromUrl(nginxFileUrl);
                 break;
@@ -639,16 +651,21 @@ public class AppFileUtil {
      * @return File
      */
     public File downloadFromUrl(String fileUrl) {
+        Assert.notNull(fileUrl, "下载链接地址不可为空");
         File targetFile = null;
         HttpURLConnection urlConnection = null;
         try {
             UrlFile urlFile = openAndConnectUrl(fileUrl);
             urlConnection = urlFile.getConn();
-            targetFile = createTempFile(urlFile.getFileSuffix());
-            if (urlFile.getConn().getContentLengthLong() != 0) {
-                FileUtils.copyURLToFile(urlFile.getConnUrl(), targetFile);
-                urlFile.getConn().disconnect();
-                log.debug("即将从路径【{}】 下载文件保存至【{}】", fileUrl, targetFile.getAbsolutePath());
+            if (null != urlConnection && urlConnection.getContentLengthLong() != 0) {
+                try {
+                    targetFile = createTempFile(urlFile.getFileSuffix());
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), targetFile);
+                    log.debug("即将从路径【{}】 下载文件保存至【{}】", fileUrl, targetFile.getAbsolutePath());
+                }catch (FileNotFoundException e){
+                    log.warn("URL目标文件不存在【{}】，错误信息为【{}】", urlFile.getConnUrl(), e.getMessage());
+                    targetFile = null;
+                }
             } else {
                 log.error("从路径【{}】下载文件发生异常", fileUrl);
             }
@@ -678,19 +695,27 @@ public class AppFileUtil {
             }
         }
         log.debug("即将从地址【{}】下载文件", urlStr);
-        URL connUrl = new URL(urlStr);
-        HttpURLConnection urlConnection = (HttpURLConnection) connUrl.openConnection();
-        urlConnection.setDoInput(true);
-        urlConnection.setRequestMethod(ApplicationConstants.HTTPGET);
-        urlConnection.connect();
-        String suffix = getFileSuffix(remoteFileUrl);
-        if(StringUtils.isEmpty(suffix)){
-            BufferedInputStream bis = new BufferedInputStream(urlConnection.getInputStream());
-            String contentType = HttpURLConnection.guessContentTypeFromStream(bis);
-            if(contentType.trim().startsWith("image")){
-                suffix = StringUtils.substringAfter(contentType, ApplicationConstants.SLASH);
+        URL connUrl = null;
+        HttpURLConnection urlConnection = null;
+        String suffix = null;
+        try {
+            connUrl = new URL(urlStr);
+            urlConnection = (HttpURLConnection) connUrl.openConnection();
+            urlConnection.setDoInput(true);
+            urlConnection.setRequestMethod(ApplicationConstants.HTTPGET);
+            urlConnection.connect();
+            suffix = getFileSuffix(remoteFileUrl);
+            if(StringUtils.isEmpty(suffix)){
+                BufferedInputStream bis = new BufferedInputStream(urlConnection.getInputStream());
+                String contentType = HttpURLConnection.guessContentTypeFromStream(bis);
+                if(contentType.trim().startsWith("image")){
+                    suffix = StringUtils.substringAfter(contentType, ApplicationConstants.SLASH);
+                }
             }
+        } catch (MalformedURLException e){
+            log.warn("URL地址错误【{}】，错误信息为【{}】", urlStr, e.getMessage());
         }
+
         return UrlFile.builder().remoteFileUrl(remoteFileUrl).conn(urlConnection).connUrl(connUrl).fileName(fileName).fileSuffix(suffix).build();
     }
 
@@ -730,9 +755,11 @@ public class AppFileUtil {
                     Exceptions.printException(e);
                 }
                 break;
+            case ftp:
+                log.debug("基于ftp，方式同sftp");
             case sftp:
                 try {
-                    sftpUtil.delFile(filePath);
+                    sftpUtil.deleteFile(filePath);
                 } catch (Exception e) {
                     result = ApplicationConstants.FALSE;
                     Exceptions.printException(e);

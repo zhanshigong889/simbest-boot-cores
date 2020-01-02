@@ -8,31 +8,30 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import com.simbest.boot.base.annotations.ConditionalOnPropertyNotEmpty;
+import com.simbest.boot.base.enums.StoreLocation;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
@@ -43,11 +42,15 @@ import java.util.Properties;
  */
 @Slf4j
 @Component
-@ConditionalOnPropertyNotEmpty("app.file.sftp.username")
+//@ConditionalOnPropertyNotEmpty("app.file.sftp.username")
+//@ConditionalOnProperty(name = "app.file.upload.location", havingValue = "sftp")
+@ConditionalOnExpression("'${app.file.upload.location}'=='ftp' || '${app.file.upload.location}'=='sftp'")
 public class AppFileSftpUtil {
 
     @Autowired
     private AppConfig config;
+
+    public StoreLocation serverUploadLocation;
 
     @Value("${app.file.sftp.username}")
     private String username;
@@ -67,18 +70,20 @@ public class AppFileSftpUtil {
     @Value("${app.file.sftp.passphrase}")
     private String passphrase;
 
-    private ChannelSftp sftp;
+    private ChannelSftp sftp1;
     private Session sshSession;
 
     @PostConstruct
     public void init() {
-        log.info("Congratulations------------------------------------------------SFTP配置加载完成");
+        serverUploadLocation = Enum.valueOf(StoreLocation.class, config.getUploadLocation());
+        log.info("上传方式【{}】", serverUploadLocation);
         log.info("用户名【{}】", username);
         log.info("密码【{}】", password);
         log.info("主机【{}】", host);
         log.info("端口【{}】", port);
         log.info("私钥文件【{}】", keyFilePath);
         log.info("私钥密码【{}】", passphrase);
+        log.info("Congratulations------------------------------------------------SFTP配置加载完成");
     }
 
     /**
@@ -86,7 +91,7 @@ public class AppFileSftpUtil {
      * 如果connect过程出现：Kerberos username [xxx]   Kerberos password
      * 解决办法：移步https://blog.csdn.net/a718515028/article/details/80356337
      */
-    public void connect() {
+    private void connect() {
         try {
             JSch jsch = new JSch();
             log.debug("即将通过用户名【{}】、密码【{}】、私钥文件【{}】、私钥密码【{}】连接SFTP服务器主机【{}】端口【{}】", username,password,keyFilePath,passphrase,host,port);
@@ -112,13 +117,13 @@ public class AppFileSftpUtil {
             sshSession.connect();
             Channel channel = sshSession.openChannel("sftp");
             channel.connect();
-            sftp = (ChannelSftp) channel;
+            sftp1 = (ChannelSftp) channel;
             //设置编码 https://blog.csdn.net/liuhenghui5201/article/details/50970492
             Class cl = ChannelSftp.class;
             Field f1 = cl.getDeclaredField("server_version");
             f1.setAccessible(true);
-            f1.set(sftp, 2);
-            sftp.setFilenameEncoding(ApplicationConstants.UTF_8);
+            f1.set(sftp1, 2);
+            sftp1.setFilenameEncoding(ApplicationConstants.UTF_8);
             log.debug("连接到SFTP成功.Host: " + host);
         } catch (Exception e) {
             log.error("连接SFTP失败：" + e.getMessage());
@@ -129,13 +134,13 @@ public class AppFileSftpUtil {
     /**
      * 关闭连接 server
      */
-    public void disconnect() {
-        if (sftp != null) {
-            if (sftp.isConnected()) {
-                sftp.disconnect();
+    private void disconnect() {
+        if (sftp1 != null) {
+            if (sftp1.isConnected()) {
+                sftp1.disconnect();
                 sshSession.disconnect();
                 log.debug("Congratulations-----------------------------------------------SFTP连接通道已关闭");
-            } else if (sftp.isClosed()) {
+            } else if (sftp1.isClosed()) {
                 log.debug("Congratulations-----------------------------------------------SFTP连接通道已关闭，不用重复操作");
             }
         }
@@ -145,32 +150,103 @@ public class AppFileSftpUtil {
      * 将输入流的数据上传到sftp作为文件
      *
      * @param directory    上传到该目录
-     * @param sftpFileName sftp端文件名
+     * @param fileName  sftp端文件名
      * @param input        输入流
      * @throws Exception
      */
-    public void upload(String directory, String sftpFileName, InputStream input) throws Exception {
+    public void upload(String directory, String fileName, InputStream input) throws Exception {
+        Assert.notNull(directory, "路径不能为空");
+        Assert.notNull(fileName, "文件名不能为空");
+        Assert.notNull(input, "文件流不能为空");
+        switch (serverUploadLocation) {
+            case ftp:
+                ftpUpload(directory, fileName, input);
+                break;
+            case sftp:
+                sftpUpload(directory, fileName, input);
+                break;
+        }
+    }
+
+    private void ftpUpload(String directory, String filename, InputStream input) throws Exception {
+        directory = config.getUploadPath()+directory;
+        FTPClient ftp = new FTPClient();
         try {
-            connect();
-            try {// 如果cd报异常，说明目录不存在，就创建目录
-                sftp.cd(config.getUploadPath());
-                sftp.cd(directory);
+            int reply;
+            ftp.connect(host, port);// 连接FTP服务器
+            // 如果采用默认端口，可以使用ftp.connect(host)的方式直接连接FTP服务器
+            ftp.login(username, password);// 登录
+            reply = ftp.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                ftp.disconnect();
+                log.error("FTP上传失败！文件名：" + filename);
+                throw new RuntimeException("FTP服务器无法连通");
             }
-            catch (Exception e) {
-                String[] folders = StringUtils.removeFirst(directory,ApplicationConstants.SLASH ).split( ApplicationConstants.SLASH );
-                for ( String folder : folders ) {
-                    if ( folder.length() > 0 ) {
-                        try {
-                            sftp.cd( folder );
-                        }
-                        catch ( SftpException se ) {
-                            sftp.mkdir( folder );
-                            sftp.cd( folder );
+            //切换到上传目录
+            if (!ftp.changeWorkingDirectory(directory)) {
+                //如果目录不存在创建目录
+                directory = StringUtils.replace(directory, "\\", "/");
+                String[] dirs = directory.split("/");
+                String tempPath = "";
+                for (String dir : dirs) {
+                    if (null == dir || "".equals(dir)) continue;
+                    tempPath += "/" + dir;
+                    if (!ftp.changeWorkingDirectory(tempPath)) {  //进不去目录，说明该目录不存在
+                        if (!ftp.makeDirectory(tempPath)) { //创建目录
+                            //如果创建文件目录失败，则返回
+                            log.error("FTP上传失败！文件名：" + filename);
+                            throw new RuntimeException("创建文件目录" + tempPath + "失败");
+                        } else {
+                            //目录存在，则直接进入该目录
+                            ftp.changeWorkingDirectory(tempPath);
                         }
                     }
                 }
             }
-            sftp.put(input, sftpFileName);
+            //设置上传文件的类型为二进制类型
+            ftp.setFileType(FTP.BINARY_FILE_TYPE);
+            //上传文件
+            if (!ftp.storeFile(filename, input)) {
+                log.error("FTP上传失败！文件名：" + filename);
+                throw new RuntimeException("上传文件失败");
+            }
+            input.close();
+            ftp.logout();
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        } finally {
+            if (ftp.isConnected()) {
+                try {
+                    ftp.disconnect();
+                } catch (IOException ioe) {
+                    Exceptions.printException(ioe);
+                }
+            }
+        }
+    }
+
+    private void sftpUpload(String directory, String sftpFileName, InputStream input) throws Exception {
+        try {
+            connect();
+            try {// 如果cd报异常，说明目录不存在，就创建目录
+                sftp1.cd(config.getUploadPath());
+                sftp1.cd(directory);
+            }
+            catch (Exception e) {
+                String[] folders = StringUtils.removeFirst(directory, ApplicationConstants.SLASH ).split( ApplicationConstants.SLASH );
+                for ( String folder : folders ) {
+                    if ( folder.length() > 0 ) {
+                        try {
+                            sftp1.cd( folder );
+                        }
+                        catch ( SftpException se ) {
+                            sftp1.mkdir( folder );
+                            sftp1.cd( folder );
+                        }
+                    }
+                }
+            }
+            sftp1.put(input, sftpFileName);
             log.debug("SFTP上传成功！文件名：" + sftpFileName);
         } catch (Exception e) {
             log.error("SFTP上传失败！文件名：" + sftpFileName);
@@ -183,17 +259,18 @@ public class AppFileSftpUtil {
     }
 
     /**
-     * 上传单个文件
+     * 将输入流的数据上传到sftp作为文件
      *
-     * @param directory  上传到sftp目录
-     * @param uploadFile 要上传的文件,包括路径
+     * @param directory    上传到该目录
+     * @param fileName     sftp端文件名
+     * @param uploadFile   文件
      * @throws Exception
      */
-    public void upload(String directory, String sftpFileName, File uploadFile) throws Exception {
+    public void upload(String directory, String fileName, File uploadFile) throws Exception {
         FileInputStream in = null;
         try {
             in = new FileInputStream(uploadFile);
-            upload(directory, sftpFileName, in);
+            upload(directory, fileName, in);
         } catch (Exception ex) {
             if (in != null) {
                 in.close();
@@ -205,13 +282,14 @@ public class AppFileSftpUtil {
      * 将byte[]上传到sftp，作为文件。注意:从String生成byte[]是，要指定字符集。
      *
      * @param directory    上传到sftp目录
-     * @param sftpFileName 文件在sftp端的命名
+     * @param fileName 文件在sftp端的命名
      * @param byteArr      要上传的字节数组
      * @throws Exception
      */
-    public void upload(String directory, String sftpFileName, byte[] byteArr) throws Exception {
-        upload(directory, sftpFileName, new ByteArrayInputStream(byteArr));
+    public void upload(String directory, String fileName, byte[] byteArr) throws Exception {
+        upload(directory, fileName, new ByteArrayInputStream(byteArr));
     }
+
 
     /**
      * 下载文件
@@ -221,14 +299,67 @@ public class AppFileSftpUtil {
      * @throws Exception
      */
     public byte[] download2Byte(String directory, String downloadFile) {
+        Assert.notNull(directory, "路径不能为空");
+        Assert.notNull(downloadFile, "文件名不能为空");
+        byte[] fileData = null;
+        switch (serverUploadLocation) {
+            case ftp:
+                fileData = ftpDownload2Byte(directory, downloadFile);
+                break;
+            case sftp:
+                fileData = sftpDownload2Byte(directory, downloadFile);
+                break;
+        }
+        return fileData;
+    }
+
+    private byte[] ftpDownload2Byte(String directory, String downloadFile) {
+        byte[] fileData = null;
+        FTPClient ftp = new FTPClient();
+        try {
+            int reply;
+            ftp.connect(host, port);
+            // 如果采用默认端口，可以使用ftp.connect(host)的方式直接连接FTP服务器
+            ftp.login(username, password);// 登录
+            reply = ftp.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                ftp.disconnect();
+                log.error("FTP上传失败！文件名：" + downloadFile);
+                throw new RuntimeException("FTP服务器无法连通");
+            }
+            ftp.changeWorkingDirectory(directory);// 转移到FTP服务器目录
+            FTPFile[] fs = ftp.listFiles();
+            for (FTPFile ff : fs) {
+                if (ff.getName().equals(downloadFile)) {
+                    ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+                    ftp.retrieveFile(ff.getName(), outSteam);
+                    fileData = outSteam.toByteArray();
+                }
+            }
+            ftp.logout();
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        } finally {
+            if (ftp.isConnected()) {
+                try {
+                    ftp.disconnect();
+                } catch (IOException ioe) {
+                    Exceptions.printException(ioe);
+                }
+            }
+        }
+        return fileData;
+    }
+
+    private byte[] sftpDownload2Byte(String directory, String downloadFile) {
         connect();
         byte[] fileData = null;
         ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
         InputStream is = null;
         try {
             synchronized (this) {
-                sftp.cd(directory);
-                sftp.get(downloadFile, outSteam);
+                sftp1.cd(directory);
+                sftp1.get(downloadFile, outSteam);
                 fileData = outSteam.toByteArray();
             }
             log.debug("SFTP下载文件成功！文件名：" + downloadFile);
@@ -260,15 +391,52 @@ public class AppFileSftpUtil {
         return saveFile;
     }
 
-    /**
-     * 删除文件
-     * @param filePathAndName
-     * @return
-     */
-    public boolean delFile(String filePathAndName){
-        Assert.notNull(filePathAndName, "文件不能为空");
+    public void deleteFile(String filePath){
+        Assert.notNull(filePath, "文件路径不能为空");
+        String directory = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SEPARATOR);
+        String fileName = StringUtils.substringAfterLast(filePath, ApplicationConstants.SEPARATOR);
+        switch (serverUploadLocation) {
+            case ftp:
+                ftpDeleteFile(directory, fileName);
+                break;
+            case sftp:
+                sftpDeleteFile(directory, fileName);
+                break;
+        }
+    }
+
+    private void ftpDeleteFile(String directory, String fileName){
+        FTPClient ftp = new FTPClient();
         try {
-            sftp.rm(filePathAndName);
+            int reply;
+            ftp.connect(host, port);// 连接FTP服务器
+            // 如果采用默认端口，可以使用ftp.connect(host)的方式直接连接FTP服务器
+            ftp.login(username, password);// 登录
+            reply = ftp.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                ftp.disconnect();
+                log.error("FTP上传失败！文件名：" + fileName);
+                throw new RuntimeException("FTP服务器无法连通");
+            }
+            ftp.changeWorkingDirectory(directory);
+            ftp.dele(fileName);
+            ftp.logout();
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        } finally {
+            if (ftp.isConnected()) {
+                try {
+                    ftp.disconnect();
+                } catch (IOException ioe) {
+                    Exceptions.printException(ioe);
+                }
+            }
+        }
+    }
+
+    private boolean sftpDeleteFile(String directory, String fileName){
+        try {
+            sftp1.rm(directory+fileName);
             return true;
         }
         catch (SftpException e) {

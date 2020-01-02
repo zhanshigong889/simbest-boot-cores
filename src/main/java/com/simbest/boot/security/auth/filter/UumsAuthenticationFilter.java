@@ -7,6 +7,7 @@ import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
+import com.simbest.boot.security.util.AuthenticationUtil;
 import com.simbest.boot.util.redis.RedisRetryLoginCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -48,7 +49,7 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
         }
 
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-        if (authenticationIsRequired(existingAuth, username)) {
+        if (AuthenticationUtil.authenticationIsRequired(existingAuth, username)) {
             UumsAuthentication authRequest = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                     .password(password).appcode(appcode).build());
             this.setDetails(request, authRequest);
@@ -60,31 +61,6 @@ public class UumsAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
     protected void setDetails(HttpServletRequest request, UumsAuthentication authRequest) {
         authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
-    }
-
-    /**
-     * 判断单点用户名是否需要验证
-     *
-     * @param username 用户名
-     * @return true/false
-     */
-    protected boolean authenticationIsRequired(Authentication existingAuth, String username) {
-        if (existingAuth == null || !existingAuth.isAuthenticated()) {
-            return true;
-        }
-        else if (existingAuth instanceof UumsAuthentication
-                && !existingAuth.getName().equals(username)) {
-            return true;
-        }
-        else if (existingAuth instanceof UsernamePasswordAuthenticationToken
-                && !existingAuth.getName().equals(username)) {
-            return true;
-        }
-        else if (existingAuth instanceof GenericAuthentication
-                && !existingAuth.getName().equals(username)) {
-            return true;
-        }
-        return false;
     }
 
 

@@ -5,6 +5,7 @@ package com.simbest.boot.security.auth.oauth2;
 
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AccountStatusException;
@@ -30,6 +31,7 @@ import java.util.Map;
  * 作者: lishuyi
  * 时间: 2019/3/27  16:57
  */
+@Slf4j
 public class UumsTokenGranter extends AbstractTokenGranter {
 
     private static final String GRANT_TYPE = "uumspassword";
@@ -49,7 +51,6 @@ public class UumsTokenGranter extends AbstractTokenGranter {
 
     @Override
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
-
         Map<String, String> parameters = new LinkedHashMap<String, String>(tokenRequest.getRequestParameters());
         String username = parameters.get("username");
         String password = parameters.get("password");
@@ -59,7 +60,7 @@ public class UumsTokenGranter extends AbstractTokenGranter {
         String appcode = parameters.get("appcode");
         // Protect from downstream leaks of password
         parameters.remove("password");
-
+        log.debug("OAUTH2即将通过UumsAuthentication进行认证，用户名【{}】密码【{}】应用【{}】", username, password, appcode);
         Authentication userAuth = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                 .password(password).appcode(appcode).build());
         ((AbstractAuthenticationToken) userAuth).setDetails(parameters);

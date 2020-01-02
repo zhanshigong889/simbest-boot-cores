@@ -49,22 +49,24 @@ public class HeartTestTask extends AbstractTaskSchedule {
 
     @Override
     public String execute() {
-        Map<String, IHeartTestService> heartTests = appContext.getBeansOfType(IHeartTestService.class);
-        if(heartTests.size() > 0){
-            for (Map.Entry<String, IHeartTestService> entry : heartTests.entrySet()) {
-                entry.getValue().doTest();
-            }
-        } else {
-            String testUrl = "http://localhost:" + hostUtil.getRunningPort() + config.getContextPath() + ApplicationConstants.LOGIN_PAGE;
-            String response = HttpClient
-                    // 请求方式和请求url
-                    .get(testUrl)
-                    .asString();
-            if(StringUtils.contains(response, "username")){
-                log.debug("Heart test login url check ok!");
+        if(config.isOpenHeartCheck()) {
+            Map<String, IHeartTestService> heartTests = appContext.getBeansOfType(IHeartTestService.class);
+            if (heartTests.size() > 0) {
+                for (Map.Entry<String, IHeartTestService> entry : heartTests.entrySet()) {
+                    entry.getValue().doTest();
+                }
             } else {
-                log.debug("Heart test login url check failed!");
-                return CHECK_FAILED;
+                String testUrl = "http://localhost:" + hostUtil.getRunningPort() + config.getContextPath() + ApplicationConstants.LOGIN_PAGE;
+                String response = HttpClient
+                        // 请求方式和请求url
+                        .get(testUrl)
+                        .asString();
+                if (StringUtils.contains(response, "username")) {
+                    log.debug("Heart test login url check ok!");
+                } else {
+                    log.debug("Heart test login url check failed!");
+                    return CHECK_FAILED;
+                }
             }
         }
         return CHECK_SUCCESS;

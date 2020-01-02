@@ -103,8 +103,6 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                 }
                 if(authResult){
                     log.info(LOGTAG + "UUMS主数据认证器处理用户【{}】访问【{}】成功！", principal, uumsCredentials.getAppcode());
-                    UumsAuthentication uumsAuthentication = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
-                            .password(password).appcode(appcode).build());
                     return genericAuthenticationChecker.authChek(authentication, appcode);
                 }
                 else{
