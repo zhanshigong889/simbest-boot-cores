@@ -58,7 +58,7 @@ public class SsoAuthenticationFilter extends AbstractAuthenticationProcessingFil
      * 特殊单点方法-2
      * /findByKey/sso?keyword=keyword加密串&keytype=keytype&appcode=nma
      * @param request
-     * @return
+     * @return Principal
      */
     protected Principal obtainPrincipal(HttpServletRequest request, String appcode) {
         Principal principal = null;

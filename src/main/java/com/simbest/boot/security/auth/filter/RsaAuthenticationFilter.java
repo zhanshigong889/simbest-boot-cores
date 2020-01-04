@@ -44,7 +44,7 @@ public class RsaAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     /**
      * 前端RSA加密，后端验证时，先RSA解密，再进行FormSecurityConfigurer的认证
      * @param request
-     * @return
+     * @return String
      */
     @Override
     protected String obtainPassword(HttpServletRequest request) {
@@ -54,7 +54,7 @@ public class RsaAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     /**
      * @param request
      * @param response
-     * @return
+     * @return Authentication
      * @throws AuthenticationException
      */
     @Override

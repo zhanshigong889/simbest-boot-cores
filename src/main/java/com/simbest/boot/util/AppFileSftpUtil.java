@@ -35,6 +35,8 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+import static com.simbest.boot.constants.ApplicationConstants.SLASH;
+
 /**
  * 用途：
  * 作者: lishuyi
@@ -170,6 +172,7 @@ public class AppFileSftpUtil {
 
     private void ftpUpload(String directory, String filename, InputStream input) throws Exception {
         directory = config.getUploadPath()+directory;
+        directory = StringUtils.replace(directory, "\\", SLASH);
         FTPClient ftp = new FTPClient();
         try {
             int reply;
@@ -185,7 +188,6 @@ public class AppFileSftpUtil {
             //切换到上传目录
             if (!ftp.changeWorkingDirectory(directory)) {
                 //如果目录不存在创建目录
-                directory = StringUtils.replace(directory, "\\", "/");
                 String[] dirs = directory.split("/");
                 String tempPath = "";
                 for (String dir : dirs) {
@@ -226,6 +228,7 @@ public class AppFileSftpUtil {
     }
 
     private void sftpUpload(String directory, String sftpFileName, InputStream input) throws Exception {
+        directory = StringUtils.replace(directory, "\\", SLASH);
         try {
             connect();
             try {// 如果cd报异常，说明目录不存在，就创建目录
@@ -233,7 +236,7 @@ public class AppFileSftpUtil {
                 sftp1.cd(directory);
             }
             catch (Exception e) {
-                String[] folders = StringUtils.removeFirst(directory, ApplicationConstants.SLASH ).split( ApplicationConstants.SLASH );
+                String[] folders = StringUtils.removeFirst(directory, SLASH ).split( SLASH );
                 for ( String folder : folders ) {
                     if ( folder.length() > 0 ) {
                         try {

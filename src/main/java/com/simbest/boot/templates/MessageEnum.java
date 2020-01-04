@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @功能描述 消息模板枚举类。
+ * 功能描述 消息模板枚举类。
  * @author LJW
  * 
  */

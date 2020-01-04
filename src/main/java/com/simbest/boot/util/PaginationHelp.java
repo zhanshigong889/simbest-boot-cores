@@ -30,7 +30,7 @@ public class PaginationHelp {
      * @param size              当前页数量
      * @param direction         排序字段
      * @param properties        排序规则 desc、asc
-     * @return
+     * @return Pageable
      */
     public Pageable getPageable( int page, int size, String direction, String properties) {
         int pagePage = page < 1 ? 0 : (page - 1);
@@ -69,7 +69,7 @@ public class PaginationHelp {
      * @param pageSize          每页数量
      * @param direction         排序字段
      * @param properties        排序规则 desc、asc
-     * @return
+     * @return Page<List<Map<String, Object>>>
      */
     public Page<List<Map<String, Object>>> getPageList( List<Map<String, Object>> mapList,
                                                         Integer pageIndex, Integer pageSize,

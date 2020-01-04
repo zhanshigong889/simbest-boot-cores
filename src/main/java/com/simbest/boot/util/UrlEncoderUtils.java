@@ -50,7 +50,7 @@ public class UrlEncoderUtils {
      * 不做encode吧，担心出错，做encode吧，又怕重复了<Br>
      *
      * @param str
-     * @return
+     * @return boolean
      */
     public static boolean hasUrlEncoded(String str) {
         /**

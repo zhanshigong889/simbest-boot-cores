@@ -42,7 +42,7 @@ public class CustomOauthException extends OAuth2Exception {
 
     /**
      * 与OauthExceptionEntryPoint配合
-     * @return
+     * @return int
      */
     @Override
     public int getHttpErrorCode() {

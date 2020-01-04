@@ -17,7 +17,7 @@ public class BrowserUtil {
     /**
      * 判断是否为微软浏览器
      * @param request
-     * @return
+     * @return boolean
      */
     public static boolean isMSBrowser(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");

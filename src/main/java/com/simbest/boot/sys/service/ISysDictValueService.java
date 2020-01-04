@@ -23,7 +23,7 @@ public interface ISysDictValueService extends ILogicService<SysDictValue,String>
      * @param name
      * @param blocid
      * @param corpid
-     * @return
+     * @return SysDictValue
      */
     SysDictValue findByDictTypeAndNameAndBlocidAndCorpid(String dictType, String name, String blocid, String corpid);
 
@@ -31,14 +31,14 @@ public interface ISysDictValueService extends ILogicService<SysDictValue,String>
      * 根据字典类型和字典值名称，获取字典值
      * @param dictType
      * @param name
-     * @return
+     * @return SysDictValue
      */
     SysDictValue findByDictTypeAndName(String dictType, String name);
 
     /**
      * 根据字典类型，获取字典值
      * @param dictType
-     * @return
+     * @return List<SysDictValue>
      */
     List<SysDictValue> findByDictType(String dictType);
 

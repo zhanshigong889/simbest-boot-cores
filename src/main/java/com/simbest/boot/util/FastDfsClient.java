@@ -101,7 +101,7 @@ public class FastDfsClient {
      * @param fileContent 文件字节流
      * @param extName 文件后缀
      * @param metas 文件元数据
-     * @return
+     * @return String
      * @throws Exception
      */
     public static String uploadFile(byte[] fileContent, String extName, NameValuePair[] metas) throws Exception {
@@ -116,6 +116,13 @@ public class FastDfsClient {
         return group + ApplicationConstants.SLASH + filePath;
     }
 
+    /**
+     * 删除文件
+     * @param storagePath
+     * @return Integer
+     * @throws IOException
+     * @throws MyException
+     */
     public static Integer deleteFile(String storagePath) throws IOException, MyException {
         String group = StringUtils.substringBefore(storagePath, ApplicationConstants.SLASH);
         String filename = StringUtils.substringAfter(storagePath, ApplicationConstants.SLASH);
@@ -128,7 +135,7 @@ public class FastDfsClient {
      *
      * @param group group1
      * @param path M00/00/7F/ClcNWlt2PliAGyTyAAAClS5uADs678.txt
-     * @return
+     * @return FileInfo
      */
     public static FileInfo getFileInfo(String group, String path){
         FileInfo fileInfo = null;
@@ -147,7 +154,7 @@ public class FastDfsClient {
      * 获取文件上传时的元数据
      * @param group group1
      * @param path M00/00/7F/ClcNWlt2PliAGyTyAAAClS5uADs678.txt
-     * @return
+     * @return NameValuePair[]
      */
     public static NameValuePair[] getMetadata(String group, String path){
         NameValuePair[] metadata = null;
@@ -173,7 +180,7 @@ public class FastDfsClient {
      * @param local_fileName 文件全路径
      * @param extName 文件扩展名，不包含（.）
      * @param metas 文件扩展信息
-     * @return
+     * @return String
      * @throws Exception
      */
     public static String uploadLocalFile(String local_fileName, String extName, NameValuePair[] metas) throws Exception {

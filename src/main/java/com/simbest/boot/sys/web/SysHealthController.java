@@ -35,6 +35,12 @@ public class SysHealthController {
         return JsonResponse.defaultSuccessResponse();
     }
 
+    @ApiOperation(value = "系统心跳健康检查", notes = "系统心跳健康检查")
+    @RequestMapping(value = "/anonymous/headHeart", method = {RequestMethod.HEAD})
+    public JsonResponse healthHeadCheck() {
+        SysHealth sysHealth = heartTestService.doTest();
+        return JsonResponse.defaultSuccessResponse();
+    }
 
     @ApiOperation(value = "系统健康检查", notes = "系统健康检查")
     @PostMapping(value = "/anonymous/check")

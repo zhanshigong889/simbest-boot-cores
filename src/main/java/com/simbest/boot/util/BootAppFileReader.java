@@ -32,7 +32,7 @@ public class BootAppFileReader {
     /**
      * 读取文件并转换为BufferedReader
      * @param filepath
-     * @return
+     * @return BufferedReader
      */
     public static BufferedReader getClasspathFile(String filepath){
         filepath = ResourceUtils.CLASSPATH_URL_PREFIX + filepath;
@@ -56,7 +56,7 @@ public class BootAppFileReader {
     /**
      * 读取文件并转换为字符串
      * @param filepath
-     * @return
+     * @return String
      */
     public static String getClasspathFileToString(String filepath){
         BufferedReader bufferedReader = getClasspathFile(filepath);
@@ -68,7 +68,7 @@ public class BootAppFileReader {
     /**
      * 读取文件
      * @param filepath
-     * @return
+     * @return File
      */
     public static File getClasspathFileToFile(String filepath){
         try {

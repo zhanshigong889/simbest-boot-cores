@@ -36,7 +36,7 @@ public class CodeGenerator {
     /**
      * 获取系统UUID，格式bd1bf93cd7e5401883693e3e7019884f
      *
-     * @return
+     * @return String
      */
     public static String systemUUID() {
         return UUID.randomUUID().toString()
@@ -45,7 +45,7 @@ public class CodeGenerator {
 
     /**
      * @param num 返回随机数的位数, 如3则可能返回029
-     * @return
+     * @return String
      */
     public static String randomInt(int num) {
         StringBuffer sb = new StringBuffer();
@@ -59,7 +59,7 @@ public class CodeGenerator {
      * 生成指定范围内的随机数
      * @param min
      * @param max
-     * @return
+     * @return int
      */
     public static int randomInt(int min, int max) {
         Random rand = new Random();
@@ -76,7 +76,7 @@ public class CodeGenerator {
      * 随机生成 a 到 b (包含b)的整数:
      * (int)(Math.random()*(b-a+1))+a;
      *
-     * @return
+     * @return String
      */
     public static synchronized String timestampRandomLast() {
         return String.format("%1$tY%1$tm%1$td%1$tH%1$tM%1$tS%2$03d", DateUtil.getCurrent(), (int) (Math.random() * (899)) + 100);
@@ -91,7 +91,7 @@ public class CodeGenerator {
      *
      * @param num   长度
      * @param value 值
-     * @return
+     * @return String
      */
     public static String addLeftZeroForNum(int num, int value) {
         return String.format("%" + num + "d", value).replace(" ", "0");

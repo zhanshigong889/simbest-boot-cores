@@ -70,7 +70,7 @@ public class BigIntegerEncryptor {
      * 加密
      * @param source 值
      * @param dictionary 加密字典
-     * @return
+     * @return String
      */
     public static String encryptor(BigInteger source, char[] dictionary) {
         List<Character> result = new ArrayList<Character>();
@@ -100,7 +100,7 @@ public class BigIntegerEncryptor {
      * 解密
      * @param code 编码
      * @param dictionary 字典
-     * @return
+     * @return BigInteger
      */
     public static BigInteger decryptor(String code, char[] dictionary) {
         char[] chars = new char[code.length()];

@@ -27,7 +27,7 @@ public class ReflectionUtils {
      * 获取所有的属性（遍历所有父类）
      *
      * @param clazz
-     * @return
+     * @return Field[]
      */
     public static Field[] getAllDeclaredFields(Class<?> clazz) {
         return getAllDeclaredFields(clazz, null);
@@ -37,7 +37,7 @@ public class ReflectionUtils {
      * 获取所有的属性（遍历所有父类）
      *
      * @param clazz
-     * @return
+     * @return Map<String, Field>
      */
     public static Map<String, Field> getFieldMap(Class<?> clazz) {
         return getFieldMap(clazz, null);
@@ -47,7 +47,7 @@ public class ReflectionUtils {
      * 获取指定的属性（包括父类），没有则返回空
      *
      * @param clazz
-     * @return
+     * @return Field
      */
     public static Field getField(Class<?> clazz, String fieldName) {
         return getField(clazz, null, fieldName);
@@ -57,7 +57,7 @@ public class ReflectionUtils {
      * 获取所有的属性（遍历所有父类,直到topClazz为止,不包括topClazz中的属性），如果子类、父类中有相同的属性名，则以子类为准
      *
      * @param clazz
-     * @return
+     * @return Field[]
      */
     public static Field[] getAllDeclaredFields(Class<?> clazz, Class<?> topClazz) {
         Map<String, Field> fieldMap = getFieldMap(clazz, topClazz);
@@ -74,7 +74,7 @@ public class ReflectionUtils {
      * 获取所有的属性（遍历所有父类,直到topClazz为止,不包括topClazz中的属性），如果子类、父类中有相同的属性名，则以子类为准
      *
      * @param clazz
-     * @return
+     * @return Map<String, Field>
      */
     public static Map<String, Field> getFieldMap(Class<?> clazz, Class<?> topClazz) {
         if (topClazz == null) {
@@ -107,7 +107,7 @@ public class ReflectionUtils {
      * 获取指定的属性（包括父类），没有则返回空
      *
      * @param clazz
-     * @return
+     * @return Field
      */
     public static Field getField(Class<?> clazz, Class<?> topClazz, String fieldName) {
         Map<String, Field> fieldMap = getFieldMap(clazz, topClazz);
@@ -119,7 +119,7 @@ public class ReflectionUtils {
      *
      * @param targetClazz
      * @param fieldName 属性名
-     * @return
+     * @return Method
      */
     public static Method findGetMethod(Class<?> targetClazz, String fieldName) {
         String getMethodName = "get" + StringUtils.capitalize(fieldName);
@@ -132,7 +132,7 @@ public class ReflectionUtils {
      * @param targetClazz
      * @param fieldName 属性名
      * @param paramType set方法的参数类型
-     * @return
+     * @return Method
      */
     public static Method findSetMethod(Class<?> targetClazz, String fieldName, Class<?> paramType) {
         String setMethodName = "set" + StringUtils.capitalize(fieldName);
@@ -146,7 +146,7 @@ public class ReflectionUtils {
      * @param targetClazz
      * @param methodName 函数名称
      * @param paramTypes 参数类型
-     * @return
+     * @return Method
      */
     public static Method findMethod(Class<?> targetClazz, String methodName, Class<?>... paramTypes) {
         try {
@@ -162,7 +162,7 @@ public class ReflectionUtils {
      *
      * @param targetObj 对象示例
      * @param fieldName 属性名
-     * @return
+     * @return Object
      */
     public static Object invokeGetMethod(Object targetObj, String fieldName) {
         Method getMethod = findGetMethod(targetObj.getClass(), fieldName);
@@ -187,7 +187,7 @@ public class ReflectionUtils {
      * @param targetObj
      * @param method
      * @param paramValues
-     * @return
+     * @return Object
      */
     public static Object invokeMethod(Object targetObj, Method method, Object... paramValues) {
         try {
@@ -208,7 +208,7 @@ public class ReflectionUtils {
      * @param targetObj
      * @param methodName 该方法如果有参数，则不能定义成基本类型，如int应该定义成Integer，否则会报错
      * @param paramValues
-     * @return
+     * @return Object
      */
     public static Object invokeMethod(Object targetObj, String methodName, Object... paramValues) {
         try {

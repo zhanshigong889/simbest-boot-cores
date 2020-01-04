@@ -212,7 +212,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     /**
      * 基于数据库的主数据登录认证拦截器，拦截/login请求
-     * @return
+     * @return RsaAuthenticationFilter
      * @throws Exception
      */
     @Bean
@@ -246,13 +246,14 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         //记录失败登录次数
         filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         filter.setEncryptor(rsaEncryptor);
+        filter.setAuthUserCacheService(authUserCacheService);
         filter.setGenericAuthenticationChecker(genericAuthenticationChecker);
         return filter;
     }
 
     /**
      * 通过UUMS认证的应用认证拦截器，拦截/uumslogin请求（WEB方式）
-     * @return
+     * @return UumsAuthenticationFilter
      * @throws Exception
      */
     @Bean
@@ -268,7 +269,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     /**
      * 通过SSO单点的认证拦截器，拦截url请求中包含/sso的请求
-     * @return
+     * @return SsoAuthenticationFilter
      * @throws Exception
      */
     @Bean
@@ -303,7 +304,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     /**
      * REST方式退出登录，拦截/restuumslogout请求
-     * @return
+     * @return LogoutFilter
      */
     @Bean
     public LogoutFilter restUumsLogoutFilter() {
@@ -314,7 +315,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     /**
      * 验证码
-     * @return
+     * @return CaptchaAuthenticationFilter
      * @throws Exception
      */
     @Bean
@@ -332,7 +333,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     /** 验证码
-     * @return
+     * @return RestCaptchaAuthenticationFilter
      * @throws Exception
      */
     @Bean
@@ -350,7 +351,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     /**
      * 向外暴露Spring Security的AuthenticationManager
-     * @return
+     * @return AuthenticationManager
      * @throws Exception
      */
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)

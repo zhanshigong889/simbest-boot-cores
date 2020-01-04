@@ -18,7 +18,7 @@ public class AppSessionUtil {
      * 获取默认HttpSession, 超时时间基于server.servlet.session.timeout
      * 参考 com.simbest.boot.config.RedisConfiguration
      * @param request
-     * @return
+     * @return HttpSession
      */
     public static HttpSession getSession(HttpServletRequest request) {
         return request.getSession();
@@ -27,7 +27,7 @@ public class AppSessionUtil {
     /**
      * 返回五分钟内有效的短Session
      * @param request
-     * @return
+     * @return HttpSession
      */
     public static HttpSession getShortSession(HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -39,7 +39,7 @@ public class AppSessionUtil {
      * 返回任意时间超时的Session， 超时单位：秒
      * @param request
      * @param timeout
-     * @return
+     * @return HttpSession
      */
     public static HttpSession getCustomSession(HttpServletRequest request, int timeout) {
         HttpSession session = request.getSession();
@@ -50,7 +50,7 @@ public class AppSessionUtil {
      * 获取默认HttpSession, 超时时间基于server.servlet.session.timeout
      * 参考 com.simbest.boot.config.RedisConfiguration
      * @param request
-     * @return
+     * @return HttpSession
      */
     public static HttpSession getNewSession(HttpServletRequest request) {
         return request.getSession(true);
@@ -59,7 +59,7 @@ public class AppSessionUtil {
     /**
      * 返回五分钟内有效的短Session
      * @param request
-     * @return
+     * @return HttpSession
      */
     public static HttpSession getNewShortSession(HttpServletRequest request) {
         HttpSession session = getNewSession(request);
@@ -71,7 +71,7 @@ public class AppSessionUtil {
      * 返回任意时间超时的Session， 超时单位：秒
      * @param request
      * @param timeout
-     * @return
+     * @return HttpSession
      */
     public static HttpSession getNewCustomSession(HttpServletRequest request, int timeout) {
         HttpSession session = getNewSession(request);

@@ -33,7 +33,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
      * 判断对象的所有属性是否均为空
      *
      * @param obj
-     * @return
+     * @return boolean
      */
     public static boolean isEmpty(Object obj) {
         for (PropertyDescriptor pd : PropertyUtils.getPropertyDescriptors(obj)) {
@@ -67,7 +67,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
      * 获取持久化对象的主键Id字段
      *
      * @param obj
-     * @return
+     * @return Field
      */
     public static Field getEntityIdField(Object obj) {
         Field id = null;
@@ -83,7 +83,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
     /**
      * 获取持久化对象的主键Id字段值
      * @param obj
-     * @return
+     * @return Object
      */
     public static Object getEntityIdVaue(Object obj) {
         try {
@@ -120,7 +120,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
     /**
      * 获取数据库主键EntityIdPrefix的定义前缀值
      * @param obj
-     * @return
+     * @return String
      */
     public static String getEntityIdPrefixVaue(Object obj) {
         Field id = getEntityIdField(obj);
@@ -134,7 +134,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
     /**
      * 获取被Column标注的持久化字段
      * @param obj
-     * @return
+     * @return Set<Field>
      */
     public static Set<Field> getEntityPersistentFieldExceptId(Object obj) {
         Set<Field> fields = Sets.newHashSet();
@@ -152,7 +152,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
     /**
      * 获取被Column标注的持久化字段值
      * @param obj
-     * @return
+     * @return Map<String, Object>
      */
     public static Map<String, Object> getEntityPersistentFieldValueExceptId(Object obj) {
         Map<String, Object> persistentFieldValues = Maps.newHashMap();
@@ -183,7 +183,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
      * 获取指定字段的Field
      * @param obj
      * @param fieldName
-     * @return
+     * @return Field
      */
     public static Field getIndicateField(Object obj, String fieldName) {
         Field indicateField = null;
@@ -199,7 +199,7 @@ public class ObjectUtil extends org.apache.commons.lang3.ObjectUtils {
     /**
      * 获取被Transient标注的非持久化字段
      * @param obj
-     * @return
+     * @return Set<Field>
      */
     public static Set<Field> getEntityTransientField(Object obj) {
         Set<Field> fields = Sets.newHashSet();

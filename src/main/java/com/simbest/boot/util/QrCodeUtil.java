@@ -246,7 +246,7 @@ public class QrCodeUtil {
      *
      * @param file
      *            二维码图片
-     * @return
+     * @return String
      * @throws Exception
      */
     public static String decode(File file) throws Exception {
@@ -270,7 +270,7 @@ public class QrCodeUtil {
      *
      * @param path
      *            二维码图片地址
-     * @return
+     * @return String
      * @throws Exception
      */
     public static String decode(String path) throws Exception {

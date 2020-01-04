@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
 
+import static com.simbest.boot.constants.ApplicationConstants.UTF_8;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
 /**
@@ -76,7 +77,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
             }
             File file = appFileUtil.getFileFromSystem(testFile);
             if (null == file) {
-                FileUtil.writeString(ApplicationConstants.MSG_SUCCESS, localFile, ApplicationConstants.UTF_8);
+                FileUtil.writeString(ApplicationConstants.TEST, localFile, UTF_8);
                 testFile = appFileUtil.uploadFromLocal(localFile, "hearttemps");
                 log.info("测试文件已上传：【{}】", testFile);
             }
@@ -159,7 +160,15 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                     sysHealth.setMessage("文件基于"+serverUploadLocation+"读取文件失败");
                 }
                 else{
-                    log.info("文件系统基于disk方式，读取文件【{}】测试OK", diskFile);
+                    String content = FileUtil.readString(diskFile, UTF_8);
+                    if(ApplicationConstants.TEST.equals(content)) {
+                        log.info("文件系统基于disk方式，读取文件【{}】测试OK", diskFile);
+                    }
+                    else{
+                        log.error("文件基于【{}】读取文件内容Fail", serverUploadLocation);
+                        sysHealth.setResult(false);
+                        sysHealth.setMessage("文件基于"+serverUploadLocation+"读取文件内容失败");
+                    }
                 }
                 break;
             case fastdfs:
@@ -205,7 +214,15 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                     sysHealth.setMessage("文件基于"+serverUploadLocation+"读取取文件失败");
                 }
                 else{
-                    log.info("文件系统基于sftp方式，读取文件【{}】测试OK", sftpFile);
+                    String content = FileUtil.readString(sftpFile, UTF_8);
+                    if(ApplicationConstants.TEST.equals(content)) {
+                        log.info("文件系统基于【{}】方式，读取文件【{}】测试OK", serverUploadLocation, sftpFile);
+                    }
+                    else{
+                        log.error("文件基于【{}】读取文件内容Fail", serverUploadLocation);
+                        sysHealth.setResult(false);
+                        sysHealth.setMessage("文件基于"+serverUploadLocation+"读取文件内容失败");
+                    }
                 }
                 break;
         }

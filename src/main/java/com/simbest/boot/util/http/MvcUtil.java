@@ -29,7 +29,7 @@ public class MvcUtil {
      * 根据请求头获取用户名及密码
      *
      * @param httpHeaders
-     * @return
+     * @return IUser
      * @throws UnsupportedEncodingException
      */
     public static IUser obtainUserFormHeader(HttpHeaders httpHeaders) throws UnsupportedEncodingException {

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.simbest.boot.constants.ApplicationConstants.SLASH;
 import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL;
 import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_ANONYMOUS;
 import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
@@ -140,7 +141,7 @@ public class AppFileUtil {
     /**
      * 根据路径返回文件后缀，如：http://aaa/bbb.jpg C:/aaa/abc.jpg 返回jpg
      *
-     * @param fileName
+     * @param pathToName
      * @return String
      */
     public static String getFileSuffix(String pathToName) {
@@ -242,7 +243,6 @@ public class AppFileUtil {
     /**
      * 将文件在远程URL读取后，再上传
      * @param fileUrl   远程文件URL
-     * @param fileName  存储文件名称
      * @param directory 相对路径
      * @return SysFile
      */
@@ -298,7 +298,7 @@ public class AppFileUtil {
                 urlConnection = null;
             }
         }
-        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(urlFile.getFileSuffix())
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(urlFile.getFileSuffix()).storeLocation(serverUploadLocation)
                 .filePath(filePath).fileSize(fileSize).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
                 .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
         log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
@@ -337,7 +337,7 @@ public class AppFileUtil {
         } catch (Exception e) {
             Exceptions.printException(e);
         }
-        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(localFile.getAbsolutePath()))
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(localFile.getAbsolutePath())).storeLocation(serverUploadLocation)
                 .filePath(filePath).fileSize(localFile.length()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
                 .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
         log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
@@ -480,7 +480,7 @@ public class AppFileUtil {
                     e1.printStackTrace();
                 }
         }
-        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(imageFile.getAbsolutePath()))
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(getFileSuffix(imageFile.getAbsolutePath())).storeLocation(serverUploadLocation)
                 .filePath(filePath).fileSize(imageFile.length()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
                 .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
         log.debug("上传文件成功，具体信息为【{}】", sysFile.toString());
@@ -563,7 +563,7 @@ public class AppFileUtil {
 
     /**
      * 创建临时后缀临时文件
-     * @return
+     * @return File
      */
     public File createTempFile(){
         return createTempFile(CodeGenerator.randomChar(4));
@@ -610,6 +610,9 @@ public class AppFileUtil {
         switch (serverUploadLocation) {
             case disk:
                 realFile = new File(filePath);
+                if(!realFile.exists()){
+                    realFile = null;
+                }
                 break;
             case fastdfs:
                 realFile = downloadFromUrl(getFileUrlFromFastDfs(filePath));
@@ -628,7 +631,7 @@ public class AppFileUtil {
 //                        autoindex on;
 //                }
                 String nginxFileUrl = StringUtils.replace(filePath, config.getUploadPath(), config.getAppHostPort().concat("/staticfiles"));
-                nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", "/");
+                nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
                 log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
                 realFile = downloadFromUrl(nginxFileUrl);
                 break;

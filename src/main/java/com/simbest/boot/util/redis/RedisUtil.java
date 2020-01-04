@@ -137,7 +137,7 @@ public class RedisUtil {
 	 * 序列化key
 	 * 
 	 * @param key
-	 * @return
+	 * @return byte[]
 	 */
 	public static byte[] dump(String key) {
 		return cacheUtils.redisTemplate.dump(prefix+key);
@@ -147,7 +147,7 @@ public class RedisUtil {
 	 * 是否存在key
 	 * 
 	 * @param key
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean hasKey(String key) {
 		return cacheUtils.redisTemplate.hasKey(prefix+key);
@@ -159,7 +159,7 @@ public class RedisUtil {
 	 * @param key
 	 * @param timeout
 	 * @param unit
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean expire(String key, long timeout, TimeUnit unit) {
 		return cacheUtils.redisTemplate.expire(prefix+key, timeout, unit);
@@ -174,7 +174,7 @@ public class RedisUtil {
 	 *
 	 * @param key
 	 * @param date
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean expireAt(String key, Date date) {
 		return cacheUtils.redisTemplate.expireAt(prefix+key, date);
@@ -185,7 +185,7 @@ public class RedisUtil {
      *
      * @param key
      * @param date
-     * @return
+     * @return Boolean
      */
     public static Boolean expireGlobalAt(String key, Date date) {
         return cacheUtils.redisTemplate.expireAt(key, date);
@@ -195,7 +195,7 @@ public class RedisUtil {
 	 * 查找匹配的key
 	 * 
 	 * @param pattern
-	 * @return
+	 * @return Set<String>
 	 */
 	public static Set<String> keys(String pattern) {
 		return cacheUtils.redisTemplate.keys(prefix+pattern);
@@ -210,7 +210,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param dbIndex
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean move(String key, int dbIndex) {
 		return cacheUtils.redisTemplate.move(prefix+key, dbIndex);
@@ -220,7 +220,7 @@ public class RedisUtil {
 	 * 移除 key 的过期时间，key 将持久保持
 	 * 
 	 * @param key
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean persist(String key) {
 		return cacheUtils.redisTemplate.persist(prefix+key);
@@ -231,7 +231,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param unit
-	 * @return
+	 * @return Long
 	 */
 	public static Long getExpire(String key, TimeUnit unit) {
 		return cacheUtils.redisTemplate.getExpire(prefix+key, unit);
@@ -241,7 +241,7 @@ public class RedisUtil {
 	 * 返回 key 的剩余的过期时间
 	 * 
 	 * @param key
-	 * @return
+	 * @return Long
 	 */
 	public static Long getExpire(String key) {
 		return cacheUtils.redisTemplate.getExpire(prefix+key);
@@ -250,7 +250,7 @@ public class RedisUtil {
 	/**
 	 * 从当前数据库中随机返回一个 key
 	 * 
-	 * @return
+	 * @return String
 	 */
 	public static String randomKey() {
 		return cacheUtils.redisTemplate.randomKey();
@@ -271,7 +271,7 @@ public class RedisUtil {
 	 * 
 	 * @param oldKey
 	 * @param newKey
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean renameIfAbsent(String oldKey, String newKey) {
 		return cacheUtils.redisTemplate.renameIfAbsent(prefix+oldKey, prefix+newKey);
@@ -281,7 +281,7 @@ public class RedisUtil {
 	 * 返回 key 所储存的值的类型
 	 * 
 	 * @param key
-	 * @return
+	 * @return DataType
 	 */
 	public static DataType type(String key) {
 		return cacheUtils.redisTemplate.type(prefix+key);
@@ -323,7 +323,7 @@ public class RedisUtil {
 	/**
 	 * 获取指定 key 的值
 	 * @param key
-	 * @return
+	 * @return String
 	 */
 	public static String get(String key) {
 		return cacheUtils.redisTemplate.opsForValue().get(prefix+key);
@@ -370,7 +370,7 @@ public class RedisUtil {
      * @param prefix + key
      * @param obj
      * @param clazz
-     * @return
+     * @return T
      */
     public static <T> T getBean(String key, Class<T> clazz) {
         String value = cacheUtils.redisTemplate.opsForValue().get(prefix + key);
@@ -395,7 +395,7 @@ public class RedisUtil {
 	 * @param key
 	 * @param start
 	 * @param end
-	 * @return
+	 * @return String
 	 */
 	public static String getRange(String key, long start, long end) {
 		return cacheUtils.redisTemplate.opsForValue().get(prefix+key, start, end);
@@ -406,7 +406,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return String
 	 */
 	public static String getAndSet(String key, String value) {
 		return cacheUtils.redisTemplate.opsForValue().getAndSet(prefix+key, value);
@@ -417,7 +417,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param offset
-	 * @return
+	 * @return Boolean
 	 */
 	public static Boolean getBit(String key, long offset) {
 		return cacheUtils.redisTemplate.opsForValue().getBit(prefix+key, offset);
@@ -427,7 +427,7 @@ public class RedisUtil {
 	 * 批量获取
 	 * 
 	 * @param keys
-	 * @return
+	 * @return List<String>
 	 */
 	public static List<String> multiGet(Collection<String> keys) {
         Collection<String> realKeys = Sets.newHashSet();
@@ -445,7 +445,7 @@ public class RedisUtil {
 	 *            位置
 	 * @param value
 	 *            值,true为1, false为0
-	 * @return
+	 * @return boolean
 	 */
 	public static boolean setBit(String key, long offset, boolean value) {
 		return cacheUtils.redisTemplate.opsForValue().setBit(prefix+key, offset, value);
@@ -471,7 +471,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return 之前已经存在返回false,不存在返回true
+	 * @return boolean 之前已经存在返回false,不存在返回true
 	 */
 	public static boolean setIfAbsent(String key, String value) {
 		return cacheUtils.redisTemplate.opsForValue().setIfAbsent(prefix+key, value);
@@ -493,7 +493,7 @@ public class RedisUtil {
 	 * 获取字符串的长度
 	 * 
 	 * @param key
-	 * @return
+	 * @return Long
 	 */
 	public static Long size(String key) {
 		return cacheUtils.redisTemplate.opsForValue().size(prefix+key);
@@ -516,7 +516,7 @@ public class RedisUtil {
 	 * 同时设置一个或多个 key-value 对，当且仅当所有给定 key 都不存在
 	 * 
 	 * @param maps
-	 * @return 之前已经存在返回false,不存在返回true
+	 * @return boolean 之前已经存在返回false,不存在返回true
 	 */
 	public static boolean multiSetIfAbsent(Map<String, String> maps) {
         Map<String, String> realMaps = Maps.newHashMap();
@@ -529,7 +529,7 @@ public class RedisUtil {
     /**
      * 增加(自增长)
      * @param key
-     * @return
+     * @return Long
      */
     public static Long incrBy(String key) {
         return cacheUtils.cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection ->
@@ -541,7 +541,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return Long
 	 */
 	public static Long incrBy(String key, long increment) {
 		return cacheUtils.redisTemplate.opsForValue().increment(prefix+key, increment);
@@ -550,7 +550,7 @@ public class RedisUtil {
     /**
      * 减少(自减少)
      * @param key
-     * @return
+     * @return Long
      */
     public static Long decrBy(String key) {
         return cacheUtils.cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection ->
@@ -562,7 +562,7 @@ public class RedisUtil {
      *
      * @param key
      * @param value
-     * @return
+     * @return Long
      */
     public static Long decrBy(String key, long increment) {
         return cacheUtils.redisTemplate.opsForValue().increment(prefix+key, increment*-1);
@@ -573,7 +573,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return Integer
 	 */
 	public static Integer append(String key, String value) {
 		return cacheUtils.redisTemplate.opsForValue().append(prefix+key, value);
@@ -583,10 +583,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取存储在哈希表中指定字段的值
-	 * 
-	 * @param key
-	 * @param field
-	 * @return
+	 *
 	 */
 	public static Object hGet(String key, Object hkey) {
 		return cacheUtils.redisTemplate.opsForHash().get(prefix+key, hkey);
@@ -594,9 +591,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取所有给定字段的值
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Map<Object, Object> hGetAll(String key) {
 		return cacheUtils.redisTemplate.opsForHash().entries(prefix+key);
@@ -604,10 +599,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取所有给定字段的值
-	 * 
-	 * @param key
-	 * @param fields
-	 * @return
+	 *
 	 */
 	public static List<Object> hMultiGet(String key, Collection<Object> hkeys) {
 		return cacheUtils.redisTemplate.opsForHash().multiGet(prefix+key, hkeys);
@@ -623,11 +615,7 @@ public class RedisUtil {
 
 	/**
 	 * 仅当hashKey不存在时才设置
-	 * 
-	 * @param key
-	 * @param hashKey
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Boolean hPutIfAbsent(String key, Object hkey, Object value) {
 		return cacheUtils.redisTemplate.opsForHash().putIfAbsent(prefix+key, hkey, value);
@@ -635,10 +623,7 @@ public class RedisUtil {
 
 	/**
 	 * 删除一个或多个哈希表字段
-	 * 
-	 * @param key
-	 * @param fields
-	 * @return
+	 *
 	 */
 	public static Long hDelete(String key, Object... hkeys) {
 		return cacheUtils.redisTemplate.opsForHash().delete(prefix+key, hkeys);
@@ -646,10 +631,7 @@ public class RedisUtil {
 
 	/**
 	 * 查看哈希表 key 中，指定的字段是否存在
-	 * 
-	 * @param key
-	 * @param field
-	 * @return
+	 *
 	 */
 	public static boolean hExists(String key, Object hkey) {
 		return cacheUtils.redisTemplate.opsForHash().hasKey(prefix+key, hkey);
@@ -657,11 +639,7 @@ public class RedisUtil {
 
 	/**
 	 * 为哈希表 key 中的指定字段的整数值加上增量 increment
-	 * 
-	 * @param key
-	 * @param field
-	 * @param increment
-	 * @return
+	 *
 	 */
 	public static Long hIncrBy(String key, Object hkey, long increment) {
 		return cacheUtils.redisTemplate.opsForHash().increment(prefix+key, hkey, increment);
@@ -669,11 +647,6 @@ public class RedisUtil {
 
 	/**
 	 * 为哈希表 key 中的指定字段的整数值加上增量 increment
-	 * 
-	 * @param key
-	 * @param field
-	 * @param delta
-	 * @return
 	 */
 	public static Double hIncrByFloat(String key, Object field, double delta) {
 		return cacheUtils.redisTemplate.opsForHash().increment(prefix+key, field, delta);
@@ -681,9 +654,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取所有哈希表中的字段
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Set<Object> hKeys(String key) {
 		return cacheUtils.redisTemplate.opsForHash().keys(prefix+key);
@@ -691,9 +662,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取哈希表中字段的数量
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Long hSize(String key) {
 		return cacheUtils.redisTemplate.opsForHash().size(prefix+key);
@@ -701,9 +670,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取哈希表中所有值
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static List<Object> hValues(String key) {
 		return cacheUtils.redisTemplate.opsForHash().values(prefix+key);
@@ -711,10 +678,7 @@ public class RedisUtil {
 
 	/**
 	 * 迭代哈希表中的键值对
-	 * 
-	 * @param key
-	 * @param options
-	 * @return
+	 *
 	 */
 	public static Cursor<Entry<Object, Object>> hScan(String key, ScanOptions options) {
 		return cacheUtils.redisTemplate.opsForHash().scan(prefix+key, options);
@@ -724,10 +688,7 @@ public class RedisUtil {
 
 	/**
 	 * 通过索引获取列表中的元素
-	 * 
-	 * @param key
-	 * @param index
-	 * @return
+	 *
 	 */
 	public static String lIndex(String key, long index) {
 		return cacheUtils.redisTemplate.opsForList().index(prefix+key, index);
@@ -741,7 +702,7 @@ public class RedisUtil {
 	 *            开始位置, 0是开始位置
 	 * @param end
 	 *            结束位置, -1返回所有
-	 * @return
+	 * @return List<String>
 	 */
 	public static List<String> lRange(String key, long start, long end) {
 		return cacheUtils.redisTemplate.opsForList().range(prefix+key, start, end);
@@ -749,31 +710,16 @@ public class RedisUtil {
 
 	/**
 	 * 存储在list头部
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Long lLeftPush(String key, String value) {
 		return cacheUtils.redisTemplate.opsForList().leftPush(prefix+key, value);
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
-	 */
 	public static Long lLeftPushAll(String key, String... value) {
 		return cacheUtils.redisTemplate.opsForList().leftPushAll(prefix+key, value);
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
-	 */
 	public static Long lLeftPushAll(String key, Collection<String> value) {
 		return cacheUtils.redisTemplate.opsForList().leftPushAll(prefix+key, value);
 	}
@@ -783,7 +729,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return Long
 	 */
 	public static Long lLeftPushIfPresent(String key, String value) {
 		return cacheUtils.redisTemplate.opsForList().leftPushIfPresent(prefix+key, value);
@@ -795,7 +741,7 @@ public class RedisUtil {
 	 * @param key
 	 * @param pivot
 	 * @param value
-	 * @return
+	 * @return Long
 	 */
 	public static Long lLeftPush(String key, String pivot, String value) {
 		return cacheUtils.redisTemplate.opsForList().leftPush(prefix+key, pivot, value);
@@ -805,7 +751,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return Long
 	 */
 	public static Long lRightPush(String key, String value) {
 		return cacheUtils.redisTemplate.opsForList().rightPush(prefix+key, value);
@@ -815,17 +761,14 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return Long
 	 */
 	public static Long lRightPushAll(String key, String... value) {
 		return cacheUtils.redisTemplate.opsForList().rightPushAll(prefix+key, value);
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Long lRightPushAll(String key, Collection<String> value) {
 		return cacheUtils.redisTemplate.opsForList().rightPushAll(prefix+key, value);
@@ -833,10 +776,7 @@ public class RedisUtil {
 
 	/**
 	 * 为已存在的列表添加值
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Long lRightPushIfPresent(String key, String value) {
 		return cacheUtils.redisTemplate.opsForList().rightPushIfPresent(prefix+key, value);
@@ -844,11 +784,7 @@ public class RedisUtil {
 
 	/**
 	 * 在pivot元素的右边添加值
-	 * 
-	 * @param key
-	 * @param pivot
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Long lRightPush(String key, String pivot, String value) {
 		return cacheUtils.redisTemplate.opsForList().rightPush(prefix+key, pivot, value);
@@ -858,8 +794,7 @@ public class RedisUtil {
 	 * 通过索引设置列表元素的值
 	 * 
 	 * @param key
-	 * @param index
-	 *            位置
+	 * @param index 位置
 	 * @param value
 	 */
 	public static void lSet(String key, long index, String value) {
@@ -880,11 +815,9 @@ public class RedisUtil {
 	 * 移出并获取列表的第一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止
 	 * 
 	 * @param key
-	 * @param timeout
-	 *            等待时间
-	 * @param unit
-	 *            时间单位
-	 * @return
+	 * @param timeout 等待时间
+	 * @param unit 时间单位
+	 * @return String
 	 */
 	public static String lBLeftPop(String key, long timeout, TimeUnit unit) {
 		return cacheUtils.redisTemplate.opsForList().leftPop(prefix+key, timeout, unit);
@@ -894,7 +827,7 @@ public class RedisUtil {
 	 * 移除并获取列表最后一个元素
 	 * 
 	 * @param key
-	 * @return 删除的元素
+	 * @return String 删除的元素
 	 */
 	public static String lRightPop(String key) {
 		return cacheUtils.redisTemplate.opsForList().rightPop(prefix+key);
@@ -904,11 +837,9 @@ public class RedisUtil {
 	 * 移出并获取列表的最后一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止
 	 * 
 	 * @param key
-	 * @param timeout
-	 *            等待时间
-	 * @param unit
-	 *            时间单位
-	 * @return
+	 * @param timeout 等待时间
+	 * @param unit 时间单位
+	 * @return String
 	 */
 	public static String lBRightPop(String key, long timeout, TimeUnit unit) {
 		return cacheUtils.redisTemplate.opsForList().rightPop(prefix+key, timeout, unit);
@@ -916,10 +847,7 @@ public class RedisUtil {
 
 	/**
 	 * 移除列表的最后一个元素，并将该元素添加到另一个列表并返回
-	 * 
-	 * @param sourceKey
-	 * @param destinationKey
-	 * @return
+	 *
 	 */
 	public static String lRightPopAndLeftPush(String sourceKey, String destinationKey) {
 		return cacheUtils.redisTemplate.opsForList().rightPopAndLeftPush(prefix+sourceKey,
@@ -928,12 +856,7 @@ public class RedisUtil {
 
 	/**
 	 * 从列表中弹出一个值，将弹出的元素插入到另外一个列表中并返回它； 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止
-	 * 
-	 * @param sourceKey
-	 * @param destinationKey
-	 * @param timeout
-	 * @param unit
-	 * @return
+	 *
 	 */
 	public static String lBRightPopAndLeftPush(String sourceKey, String destinationKey,
 			long timeout, TimeUnit unit) {
@@ -949,7 +872,7 @@ public class RedisUtil {
 	 *            index=0, 删除所有值等于value的元素; index>0, 从头部开始删除第一个值等于value的元素;
 	 *            index<0, 从尾部开始删除第一个值等于value的元素;
 	 * @param value
-	 * @return
+	 * @return Long
 	 */
 	public static Long lRemove(String key, long index, String value) {
 		return cacheUtils.redisTemplate.opsForList().remove(prefix+key, index, value);
@@ -957,10 +880,7 @@ public class RedisUtil {
 
 	/**
 	 * 裁剪list
-	 * 
-	 * @param key
-	 * @param start
-	 * @param end
+	 *
 	 */
 	public static void lTrim(String key, long start, long end) {
 		cacheUtils.redisTemplate.opsForList().trim(prefix+key, start, end);
@@ -968,9 +888,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取列表长度
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Long lLen(String key) {
 		return cacheUtils.redisTemplate.opsForList().size(prefix+key);
@@ -980,10 +898,7 @@ public class RedisUtil {
 
 	/**
 	 * set添加元素
-	 * 
-	 * @param key
-	 * @param values
-	 * @return
+	 *
 	 */
 	public static Long sAdd(String key, String... values) {
 		return cacheUtils.redisTemplate.opsForSet().add(prefix+key, values);
@@ -991,10 +906,7 @@ public class RedisUtil {
 
 	/**
 	 * set移除元素
-	 * 
-	 * @param key
-	 * @param values
-	 * @return
+	 *
 	 */
 	public static Long sRemove(String key, Object... values) {
 		return cacheUtils.redisTemplate.opsForSet().remove(prefix+key, values);
@@ -1002,9 +914,7 @@ public class RedisUtil {
 
 	/**
 	 * 移除并返回集合的一个随机元素
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static String sPop(String key) {
 		return cacheUtils.redisTemplate.opsForSet().pop(prefix+key);
@@ -1012,11 +922,7 @@ public class RedisUtil {
 
 	/**
 	 * 将元素value从一个集合移到另一个集合
-	 * 
-	 * @param key
-	 * @param value
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Boolean sMove(String key, String value, String destKey) {
 		return cacheUtils.redisTemplate.opsForSet().move(prefix+key, value, prefix+destKey);
@@ -1024,9 +930,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合的大小
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Long sSize(String key) {
 		return cacheUtils.redisTemplate.opsForSet().size(prefix+key);
@@ -1034,10 +938,7 @@ public class RedisUtil {
 
 	/**
 	 * 判断集合是否包含value
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Boolean sIsMember(String key, Object value) {
 		return cacheUtils.redisTemplate.opsForSet().isMember(prefix+key, value);
@@ -1045,10 +946,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取两个集合的交集
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @return
+	 *
 	 */
 	public static Set<String> sIntersect(String key, String otherKey) {
 		return cacheUtils.redisTemplate.opsForSet().intersect(prefix+key, prefix+otherKey);
@@ -1056,10 +954,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取key集合与多个集合的交集
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @return
+	 *
 	 */
 	public static Set<String> sIntersect(String key, Collection<String> otherKeys) {
         Collection<String> realKeys = Sets.newHashSet();
@@ -1071,11 +966,7 @@ public class RedisUtil {
 
 	/**
 	 * key集合与otherKey集合的交集存储到destKey集合中
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long sIntersectAndStore(String key, String otherKey, String destKey) {
 		return cacheUtils.redisTemplate.opsForSet().intersectAndStore(prefix+key, prefix+otherKey,
@@ -1084,11 +975,7 @@ public class RedisUtil {
 
 	/**
 	 * key集合与多个集合的交集存储到destKey集合中
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long sIntersectAndStore(String key, Collection<String> otherKeys,
 			String destKey) {
@@ -1102,10 +989,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取两个集合的并集
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @return
+	 *
 	 */
 	public static Set<String> sUnion(String key, String otherKey) {
 		return cacheUtils.redisTemplate.opsForSet().union(prefix+key, prefix+otherKey);
@@ -1113,10 +997,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取key集合与多个集合的并集
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @return
+	 *
 	 */
 	public static Set<String> sUnion(String key, Collection<String> otherKeys) {
         Collection<String> realKeys = Sets.newHashSet();
@@ -1128,11 +1009,7 @@ public class RedisUtil {
 
 	/**
 	 * key集合与otherKey集合的并集存储到destKey中
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long sUnionAndStore(String key, String otherKey, String destKey) {
 		return cacheUtils.redisTemplate.opsForSet().unionAndStore(prefix+key, prefix+otherKey, prefix+destKey);
@@ -1140,11 +1017,7 @@ public class RedisUtil {
 
 	/**
 	 * key集合与多个集合的并集存储到destKey中
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long sUnionAndStore(String key, Collection<String> otherKeys,
 			String destKey) {
@@ -1157,10 +1030,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取两个集合的差集
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @return
+	 *
 	 */
 	public static Set<String> sDifference(String key, String otherKey) {
 		return cacheUtils.redisTemplate.opsForSet().difference(prefix+key, prefix+otherKey);
@@ -1168,10 +1038,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取key集合与多个集合的差集
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @return
+	 *
 	 */
 	public static Set<String> sDifference(String key, Collection<String> otherKeys) {
         Collection<String> realKeys = Sets.newHashSet();
@@ -1183,11 +1050,7 @@ public class RedisUtil {
 
 	/**
 	 * key集合与otherKey集合的差集存储到destKey中
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long sDifference(String key, String otherKey, String destKey) {
 		return cacheUtils.redisTemplate.opsForSet().differenceAndStore(prefix+key, prefix+otherKey,
@@ -1196,11 +1059,7 @@ public class RedisUtil {
 
 	/**
 	 * key集合与多个集合的差集存储到destKey中
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long sDifference(String key, Collection<String> otherKeys,
 			String destKey) {
@@ -1214,11 +1073,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合所有元素
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Set<String> setMembers(String key) {
 		return cacheUtils.redisTemplate.opsForSet().members(prefix+key);
@@ -1226,9 +1081,7 @@ public class RedisUtil {
 
 	/**
 	 * 随机获取集合中的一个元素
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static String sRandomMember(String key) {
 		return cacheUtils.redisTemplate.opsForSet().randomMember(prefix+key);
@@ -1236,10 +1089,7 @@ public class RedisUtil {
 
 	/**
 	 * 随机获取集合中count个元素
-	 * 
-	 * @param key
-	 * @param count
-	 * @return
+	 *
 	 */
 	public static List<String> sRandomMembers(String key, long count) {
 		return cacheUtils.redisTemplate.opsForSet().randomMembers(prefix+key, count);
@@ -1247,20 +1097,14 @@ public class RedisUtil {
 
 	/**
 	 * 随机获取集合中count个元素并且去除重复的
-	 * 
-	 * @param key
-	 * @param count
-	 * @return
+	 *
 	 */
 	public static Set<String> sDistinctRandomMembers(String key, long count) {
 		return cacheUtils.redisTemplate.opsForSet().distinctRandomMembers(prefix+key, count);
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @param options
-	 * @return
+	 *
 	 */
 	public static Cursor<String> sScan(String key, ScanOptions options) {
 		return cacheUtils.redisTemplate.opsForSet().scan(prefix+key, options);
@@ -1270,11 +1114,6 @@ public class RedisUtil {
 	
 	/**
 	 * 添加元素,有序集合是按照元素的score值由小到大排列
-	 * 
-	 * @param key
-	 * @param value
-	 * @param score
-	 * @return
 	 */
 	public static Boolean zAdd(String key, String value, double score) {
 		return cacheUtils.redisTemplate.opsForZSet().add(prefix+key, value, score);
@@ -1291,10 +1130,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @param values
-	 * @return
+	 *
 	 */
 	public static Long zRemove(String key, Object... values) {
 		return cacheUtils.redisTemplate.opsForZSet().remove(prefix+key, values);
@@ -1302,11 +1138,7 @@ public class RedisUtil {
 
 	/**
 	 * 增加元素的score值，并返回增加后的值
-	 * 
-	 * @param key
-	 * @param value
-	 * @param delta
-	 * @return
+	 *
 	 */
 	public static Double zIncrementScore(String key, String value, double delta) {
 		return cacheUtils.redisTemplate.opsForZSet().incrementScore(prefix+key, value, delta);
@@ -1317,7 +1149,7 @@ public class RedisUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @return 0表示第一位
+	 * @return Long 0表示第一位
 	 */
 	public static Long zRank(String key, Object value) {
 		return cacheUtils.redisTemplate.opsForZSet().rank(prefix+key, value);
@@ -1325,10 +1157,7 @@ public class RedisUtil {
 
 	/**
 	 * 返回元素在集合的排名,按元素的score值由大到小排列
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Long zReverseRank(String key, Object value) {
 		return cacheUtils.redisTemplate.opsForZSet().reverseRank(prefix+key, value);
@@ -1342,7 +1171,7 @@ public class RedisUtil {
 	 *            开始位置
 	 * @param end
 	 *            结束位置, -1查询所有
-	 * @return
+	 * @return Set<String>
 	 */
 	public static Set<String> zRange(String key, long start, long end) {
 		return cacheUtils.redisTemplate.opsForZSet().range(prefix+key, start, end);
@@ -1350,11 +1179,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合元素, 并且把score值也获取
-	 * 
-	 * @param key
-	 * @param start
-	 * @param end
-	 * @return
+	 *
 	 */
 	public static Set<TypedTuple<String>> zRangeWithScores(String key, long start,
 			long end) {
@@ -1363,13 +1188,7 @@ public class RedisUtil {
 
 	/**
 	 * 根据Score值查询集合元素
-	 * 
-	 * @param key
-	 * @param min
-	 *            最小值
-	 * @param max
-	 *            最大值
-	 * @return
+	 *
 	 */
 	public static Set<String> zRangeByScore(String key, double min, double max) {
 		return cacheUtils.redisTemplate.opsForZSet().rangeByScore(prefix+key, min, max);
@@ -1377,13 +1196,7 @@ public class RedisUtil {
 
 	/**
 	 * 根据Score值查询集合元素, 从小到大排序
-	 * 
-	 * @param key
-	 * @param min
-	 *            最小值
-	 * @param max
-	 *            最大值
-	 * @return
+	 *
 	 */
 	public static Set<TypedTuple<String>> zRangeByScoreWithScores(String key,
 			double min, double max) {
@@ -1391,13 +1204,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @param min
-	 * @param max
-	 * @param start
-	 * @param end
-	 * @return
+	 *
 	 */
 	public static Set<TypedTuple<String>> zRangeByScoreWithScores(String key,
 			double min, double max, long start, long end) {
@@ -1407,11 +1214,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合的元素, 从大到小排序
-	 * 
-	 * @param key
-	 * @param start
-	 * @param end
-	 * @return
+	 *
 	 */
 	public static Set<String> zReverseRange(String key, long start, long end) {
 		return cacheUtils.redisTemplate.opsForZSet().reverseRange(prefix+key, start, end);
@@ -1419,11 +1222,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合的元素, 从大到小排序, 并返回score值
-	 * 
-	 * @param key
-	 * @param start
-	 * @param end
-	 * @return
+	 *
 	 */
 	public static Set<TypedTuple<String>> zReverseRangeWithScores(String key,
 			long start, long end) {
@@ -1433,11 +1232,7 @@ public class RedisUtil {
 
 	/**
 	 * 根据Score值查询集合元素, 从大到小排序
-	 * 
-	 * @param key
-	 * @param min
-	 * @param max
-	 * @return
+	 *
 	 */
 	public static Set<String> zReverseRangeByScore(String key, double min,
 			double max) {
@@ -1446,11 +1241,7 @@ public class RedisUtil {
 
 	/**
 	 * 根据Score值查询集合元素, 从大到小排序
-	 * 
-	 * @param key
-	 * @param min
-	 * @param max
-	 * @return
+	 *
 	 */
 	public static Set<TypedTuple<String>> zReverseRangeByScoreWithScores(
 			String key, double min, double max) {
@@ -1459,13 +1250,7 @@ public class RedisUtil {
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @param min
-	 * @param max
-	 * @param start
-	 * @param end
-	 * @return
+	 *
 	 */
 	public static Set<String> zReverseRangeByScore(String key, double min,
 			double max, long start, long end) {
@@ -1475,11 +1260,7 @@ public class RedisUtil {
 
 	/**
 	 * 根据score值获取集合元素数量
-	 * 
-	 * @param key
-	 * @param min
-	 * @param max
-	 * @return
+	 *
 	 */
 	public static Long zCount(String key, double min, double max) {
 		return cacheUtils.redisTemplate.opsForZSet().count(prefix+key, min, max);
@@ -1487,9 +1268,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合大小
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Long zSize(String key) {
 		return cacheUtils.redisTemplate.opsForZSet().size(prefix+key);
@@ -1497,9 +1276,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合大小
-	 * 
-	 * @param key
-	 * @return
+	 *
 	 */
 	public static Long zZCard(String key) {
 		return cacheUtils.redisTemplate.opsForZSet().zCard(prefix+key);
@@ -1507,10 +1284,7 @@ public class RedisUtil {
 
 	/**
 	 * 获取集合中value元素的score值
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 *
 	 */
 	public static Double zScore(String key, Object value) {
 		return cacheUtils.redisTemplate.opsForZSet().score(prefix+key, value);
@@ -1518,11 +1292,7 @@ public class RedisUtil {
 
 	/**
 	 * 移除指定索引位置的成员
-	 * 
-	 * @param key
-	 * @param start
-	 * @param end
-	 * @return
+	 *
 	 */
 	public static Long zRemoveRange(String key, long start, long end) {
 		return cacheUtils.redisTemplate.opsForZSet().removeRange(prefix+key, start, end);
@@ -1530,11 +1300,7 @@ public class RedisUtil {
 
 	/**
 	 * 根据指定的score值的范围来移除成员
-	 * 
-	 * @param key
-	 * @param min
-	 * @param max
-	 * @return
+	 *
 	 */
 	public static Long zRemoveRangeByScore(String key, double min, double max) {
 		return cacheUtils.redisTemplate.opsForZSet().removeRangeByScore(prefix+key, min, max);
@@ -1542,22 +1308,14 @@ public class RedisUtil {
 
 	/**
 	 * 获取key和otherKey的并集并存储在destKey中
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long zUnionAndStore(String key, String otherKey, String destKey) {
 		return cacheUtils.redisTemplate.opsForZSet().unionAndStore(prefix+key, otherKey, destKey);
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long zUnionAndStore(String key, Collection<String> otherKeys,
 			String destKey) {
@@ -1571,11 +1329,7 @@ public class RedisUtil {
 
 	/**
 	 * 交集
-	 * 
-	 * @param key
-	 * @param otherKey
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long zIntersectAndStore(String key, String otherKey,
 			String destKey) {
@@ -1585,11 +1339,7 @@ public class RedisUtil {
 
 	/**
 	 * 交集
-	 * 
-	 * @param key
-	 * @param otherKeys
-	 * @param destKey
-	 * @return
+	 *
 	 */
 	public static Long zIntersectAndStore(String key, Collection<String> otherKeys,
 			String destKey) {
@@ -1601,12 +1351,7 @@ public class RedisUtil {
                 prefix+destKey);
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @param options
-	 * @return
-	 */
+
 	public static Cursor<TypedTuple<String>> zScan(String key, ScanOptions options) {
 		return cacheUtils.redisTemplate.opsForZSet().scan(prefix+key, options);
 	}
@@ -1616,7 +1361,6 @@ public class RedisUtil {
      * redisson_lock_timeout:{cache:key:nzl:master_lock}
      * redisson_lock_queue:{cache:key:nzl:master_lock}
      * redisson_lock_key_prefix_cache:key:nzl:TaskName
-     * @return
      */
 	public static Long cleanRedisLock(){
         String searchLockKey = REDISSON_REDIS_LOCK + ApplicationConstants.STAR + appcode + ApplicationConstants.STAR;

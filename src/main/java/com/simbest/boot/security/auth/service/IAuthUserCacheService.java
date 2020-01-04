@@ -27,7 +27,7 @@ public interface IAuthUserCacheService {
     /**
      * 尝试从缓存中读取用户信息
      * @param keyword
-     * @return
+     * @return IUser
      */
     IUser loadCacheUser(String keyword);
 
@@ -53,7 +53,7 @@ public interface IAuthUserCacheService {
      * 尝试从缓存中读取用户权限
      * @param username
      * @param appcode
-     * @return
+     * @return Set<IPermission>
      */
     Set<IPermission> loadCacheUserPermission(String username, String appcode);
 

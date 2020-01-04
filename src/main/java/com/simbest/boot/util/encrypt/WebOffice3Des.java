@@ -47,9 +47,10 @@ public class WebOffice3Des {
         key = keyFactory.generateSecret(keySpec);// 得到密钥对象
     }
     /**
+     * 加密
      * @param data
-     * @return
-     * @throws 加密
+     * @return String
+     * @throws Exception
      */
     public static String encode(String data) throws Exception {
         // 得到加密对象Cipher
@@ -60,9 +61,10 @@ public class WebOffice3Des {
         return Base64.encodeBase64String(pasByte).replaceAll("\\+", "_").replaceAll("\\/", "@");
     }
     /**
+     * 解密
      * @param data
-     * @return
-     * @throws 解密
+     * @return String
+     * @throws Exception
      */
     public static String decode(String data) throws Exception {
         Cipher deCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
