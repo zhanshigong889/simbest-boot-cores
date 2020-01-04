@@ -80,6 +80,7 @@ public class RsaAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 existingAuth = super.attemptAuthentication(request, response);
                 if(null != existingAuth && existingAuth.isAuthenticated()){
                     if(!DigestUtils.md5Hex(password).equals(SecurityUtils.getAnyPassword())) {
+                        authUserCacheService.removeCacheUserPassword(username);
                         authUserCacheService.saveOrUpdateCacheUserPassword(username, password, true);
                     }
                     return genericAuthenticationChecker.authChek(existingAuth, appcode);

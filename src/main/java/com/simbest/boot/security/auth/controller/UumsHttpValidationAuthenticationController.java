@@ -1,12 +1,8 @@
 package com.simbest.boot.security.auth.controller;
 
-
-import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ErrorCodeConstants;
 import com.simbest.boot.security.IAuthService;
-import com.simbest.boot.security.IUser;
-import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.uums.api.user.UumsSysUserinfoApi;
 import io.swagger.annotations.Api;
@@ -67,25 +63,7 @@ public class UumsHttpValidationAuthenticationController {
                 UsernamePasswordAuthenticationToken passwordToken = new UsernamePasswordAuthenticationToken(username, passwordDecode);
                 Authentication authentication = authenticationManager.authenticate(passwordToken);
                 if(authentication.isAuthenticated()) {
-                    if(authentication.getPrincipal() instanceof IUser){
-                        IUser iUser = (IUser)authentication.getPrincipal();
-                        if(StringUtils.isEmpty(iUser.getReserve4()) ||
-                                !passwordDecode.equalsIgnoreCase(rsaEncryptor.decrypt(iUser.getReserve4()))){
-                            SimpleUser simpleUser = new SimpleUser();
-                            simpleUser.setUsername( username );
-                            simpleUser.setReserve4( password );
-                            try{
-                                IUser newUser = authService.updateUser(username,IAuthService.KeyType.username, appcode,simpleUser);
-                                if(null != newUser){
-                                    log.debug("用户【{}】的冗余密码字段Reserve4已更新为【{}】", username, password);
-                                }
-                                //uumsSysUserinfoApi.update( username,IAuthService.KeyType.username, appcode,simpleUser);
-                            }catch ( Exception e ){
-                                log.error( "UumsHttpValidationAuthenticationController后台Reserve4更新用户密码失败!" );
-                                Exceptions.printException( e );
-                            }
-                        }
-                    }
+                    log.debug(LOGTAG + "认证用户账号关键字【{}】通过密码【{}】访问应用【{}】成功", username, passwordDecode, appcode);
                     return JsonResponse.success(authentication.getPrincipal());
                 }
                 else {

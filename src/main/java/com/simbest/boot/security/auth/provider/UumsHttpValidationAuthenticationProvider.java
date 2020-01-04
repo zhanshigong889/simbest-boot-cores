@@ -17,8 +17,10 @@ import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -98,7 +100,10 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                     if (!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
                         authResult = false;
                     }else{
-                        authUserCacheService.saveOrUpdateCacheUserPassword(username, passwordDecode, true);
+                        if(!DigestUtils.md5Hex(passwordDecode).equals(SecurityUtils.getAnyPassword())) {
+                            authUserCacheService.removeCacheUserPassword(username);
+                            authUserCacheService.saveOrUpdateCacheUserPassword(username, passwordDecode, true);
+                        }
                     }
                 }
                 if(authResult){
