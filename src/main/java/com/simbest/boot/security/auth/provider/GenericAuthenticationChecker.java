@@ -11,6 +11,8 @@ import com.simbest.boot.exceptions.AccesssAppDeniedException;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.security.SimplePermission;
+import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
@@ -20,6 +22,7 @@ import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -52,7 +55,9 @@ public class GenericAuthenticationChecker {
         if (null == user) {
             user = authService.findByKey(keyword, keyType, appcode);
             if (null != user) {
-                authUserCacheService.saveOrUpdateCacheUser(user);
+                SimpleUser simpleUser = new SimpleUser();
+                BeanUtils.copyProperties(user, simpleUser);
+                authUserCacheService.saveOrUpdateCacheUser(simpleUser);
             }
         }
         log.debug("通过关键字【{}】和关键字类型【{}】应用代码【{}】获取用户信息为【{}】", keyword, keyType.name(), appcode, user);
@@ -74,8 +79,10 @@ public class GenericAuthenticationChecker {
             permissions = Sets.newHashSet();
             Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(username, appcode);
             if (null != appPermission && !appPermission.isEmpty()) {
-                for (IPermission s : appPermission) {
-                    permissions.add(s);
+                for (IPermission permission : appPermission) {
+                    SimplePermission simplePermission = new SimplePermission();
+                    BeanUtils.copyProperties(permission, simplePermission);
+                    permissions.add(simplePermission);
                 }
             }
             authUserCacheService.saveOrUpdateCacheUserPermission(username, appcode, permissions);
