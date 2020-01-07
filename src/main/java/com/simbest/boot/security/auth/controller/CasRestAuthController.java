@@ -3,7 +3,6 @@
  */
 package com.simbest.boot.security.auth.controller;
 
-import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.authentication.CasUser;
@@ -21,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,9 +39,6 @@ import java.io.UnsupportedEncodingException;
 @RestController
 @RequestMapping(value = "/anonymous/cas")
 public class CasRestAuthController {
-
-    @Autowired
-    private AppConfig appConfig;
 
     @Autowired
     private IAuthService authService;
@@ -71,7 +66,7 @@ public class CasRestAuthController {
                 result = new ResponseEntity<CasUser>(HttpStatus.NOT_FOUND);
             }
             //数据库查找
-            IUser dbUser = this.authService.findByKey(userWeb.getUsername(), IAuthService.KeyType.username, appConfig.getAppcode());
+            IUser dbUser = this.authService.findByKey(userWeb.getUsername(), IAuthService.KeyType.username);
             if (dbUser != null) {
                 String rawPassword = des3Encryptor.decrypt(userWeb.getPassword());
 //                rawPassword = md5Encryptor.encrypt(rawPassword);

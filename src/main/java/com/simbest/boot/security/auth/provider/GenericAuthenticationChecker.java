@@ -3,7 +3,6 @@
  */
 package com.simbest.boot.security.auth.provider;
 
-import com.google.common.collect.Sets;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.constants.ErrorCodeConstants;
@@ -11,18 +10,14 @@ import com.simbest.boot.exceptions.AccesssAppDeniedException;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
-import com.simbest.boot.security.SimplePermission;
-import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.security.auth.authentication.GenericAuthentication;
 import com.simbest.boot.security.auth.authentication.SsoUsernameAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.authentication.principal.KeyTypePrincipal;
 import com.simbest.boot.security.auth.authentication.principal.UsernamePrincipal;
-import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -45,51 +40,7 @@ public class GenericAuthenticationChecker {
     @Autowired
     private IAuthService authService;
 
-    @Autowired
-    protected IAuthUserCacheService authUserCacheService;
-
     private UserDetailsChecker preAuthenticationChecks = new AccountStatusUserDetailsChecker();
-
-    private IUser findByKey(String keyword, IAuthService.KeyType keyType, String appcode) {
-        IUser user = authUserCacheService.loadCacheUser(keyword);
-        if (null == user) {
-            user = authService.findByKey(keyword, keyType, appcode);
-            if (null != user) {
-                SimpleUser simpleUser = new SimpleUser();
-                BeanUtils.copyProperties(user, simpleUser);
-                authUserCacheService.saveOrUpdateCacheUser(simpleUser);
-            }
-        }
-        log.debug("通过关键字【{}】和关键字类型【{}】应用代码【{}】获取用户信息为【{}】", keyword, keyType.name(), appcode, user);
-        return user;
-    }
-
-    private boolean checkUserAccessApp(String username, String appcode) {
-        Boolean isPermit = authUserCacheService.loadCacheUserAccess(username, appcode);
-        if (null == isPermit) {
-            isPermit = authService.checkUserAccessApp(username, appcode);
-            authUserCacheService.saveOrUpdateCacheUserAccess(username, appcode, isPermit);
-        }
-        return isPermit;
-    }
-
-    private Set<? extends IPermission> findUserPermissionByAppcode(String username, String appcode) {
-        Set<IPermission> permissions = authUserCacheService.loadCacheUserPermission(username, appcode);
-        if (null == permissions) {
-            permissions = Sets.newHashSet();
-            Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(username, appcode);
-            if (null != appPermission && !appPermission.isEmpty()) {
-                for (IPermission permission : appPermission) {
-                    SimplePermission simplePermission = new SimplePermission();
-                    BeanUtils.copyProperties(permission, simplePermission);
-                    permissions.add(simplePermission);
-                }
-            }
-            authUserCacheService.saveOrUpdateCacheUserPermission(username, appcode, permissions);
-        }
-        log.debug("用户【{}】从应用【{}】获取到【{}】权限", username, appcode, permissions.size());
-        return permissions;
-    }
 
     /**
      * @param authentication
@@ -100,14 +51,14 @@ public class GenericAuthenticationChecker {
         IUser authUser = null;
         try {
             if (authentication instanceof UsernamePasswordAuthenticationToken || authentication instanceof UumsAuthentication) {
-                authUser = findByKey(authentication.getName(), IAuthService.KeyType.username, appcode);
+                authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.username);
             } else if (authentication instanceof SsoUsernameAuthentication) {
                 if (authentication.getPrincipal() instanceof UsernamePrincipal) {
                     UsernamePrincipal principal = (UsernamePrincipal) authentication.getPrincipal();
-                    authUser = findByKey(principal.getUsername(), IAuthService.KeyType.username, appcode);
+                    authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.username);
                 } else if (authentication.getPrincipal() instanceof KeyTypePrincipal) {
                     KeyTypePrincipal principal = (KeyTypePrincipal) authentication.getPrincipal();
-                    authUser = findByKey(principal.getKeyword(), principal.getKeyType(), appcode);
+                    authUser = authService.findByKey(principal.getKeyword(), principal.getKeyType());
                 }
             }
         } catch (Exception e) {
@@ -122,10 +73,10 @@ public class GenericAuthenticationChecker {
                     BadCredentialsException(ErrorCodeConstants.LOGIN_ERROR_INVALIDATE_USER);
         }
         preAuthenticationChecks.check(authUser);
-        boolean accessApp = checkUserAccessApp(authUser.getUsername(), appcode);
+        boolean accessApp = authService.checkUserAccessApp(authUser.getUsername(), appcode);
         if (accessApp) {
             //追加权限
-            Set<? extends IPermission> appPermission = findUserPermissionByAppcode(authUser.getUsername(), appcode);
+            Set<? extends IPermission> appPermission = authService.findUserPermissionByAppcode(authUser.getUsername(), appcode);
             if (null != appPermission && !appPermission.isEmpty()) {
                 log.debug("即将为用户【{}】在应用【{}】追加【{}】项权限，追加的具体权限为【{}】",
                         authUser.getUsername(), appcode, appPermission.size(), StringUtils.joinWith(ApplicationConstants.COMMA, appPermission));
@@ -133,7 +84,10 @@ public class GenericAuthenticationChecker {
                 authUser.addAppAuthorities(appPermission);
             }
             //定制用户信息
-            authUser = authService.customUserForApp(authUser, appcode);
+            IUser customUser = authService.customUserForApp(authUser, appcode);
+            if(null != customUser){
+                authUser = customUser;
+            }
             //重新构建Authentication以包括用户最新的基本信息、角色、权限等信息
             GenericAuthentication result = new GenericAuthentication(authUser, UumsAuthenticationCredentials.builder()
                     .password(authUser.getPassword()).appcode(appcode).build(), authUser.getAuthorities());

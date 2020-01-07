@@ -75,15 +75,15 @@ public abstract class AbstractAuthService implements IAuthService {
     }
 
     @Override
-    public IUser findByKey(String keyword, KeyType keyType, String appcode) {
+    public IUser findByKey(String keyword, KeyType keyType) {
         IUser user = authUserCacheService.loadCacheUser(keyword);
         if(null == user) {
-            user = userinfoApi.findByKey(keyword, keyType, appcode);
+            user = userinfoApi.findByKey(keyword, keyType, appConfig.getAppcode());
             if(null != user) {
                 authUserCacheService.saveOrUpdateCacheUser(user);
             }
         }
-        log.debug("通过关键字【{}】和关键字类型【{}】应用代码【{}】获取用户信息为【{}】", keyword, keyType.name(), appcode, user);
+        log.debug("通过关键字【{}】和关键字类型【{}】应用代码【{}】获取用户信息为【{}】", keyword, keyType.name(), appConfig.getAppcode(), user);
         return user;
     }
 
@@ -189,10 +189,10 @@ public abstract class AbstractAuthService implements IAuthService {
         UserDetails userDetails = null;
         try {
             if (PhoneCheckUtil.isPhoneLegal(username)) {
-                userDetails = findByKey(username, KeyType.preferredMobile, appConfig.getAppcode());
+                userDetails = findByKey(username, KeyType.preferredMobile);
             }
             if (null == userDetails) {
-                userDetails = findByKey(username, KeyType.username, appConfig.getAppcode());
+                userDetails = findByKey(username, KeyType.username);
             }
         } catch (Exception e){
             log.debug("通过SSO单点调用findByKey获取用户认证主体信息发生异常【{}】", e.getMessage());

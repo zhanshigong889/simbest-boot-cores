@@ -29,7 +29,7 @@ public class UrlEncryptor extends AbstractEncryptor {
     /**
      * 加密，编码默认为UTF-8
      * @param source 原值
-     * @return 编码
+     * @return String
      */
     @Override
     protected String encryptSource(String source) {
@@ -44,7 +44,7 @@ public class UrlEncryptor extends AbstractEncryptor {
      * 加密
      * @param source 原值
      * @param encoding 字符集
-     * @return 加密值
+     * @return String 加密值
      */
     public String encrypt(String source, String encoding) {
         try {
@@ -57,7 +57,7 @@ public class UrlEncryptor extends AbstractEncryptor {
     /**
      * 解密
      * @param code 编码默认为UTF-8
-     * @return 解密值
+     * @return String 解密值
      */
     @Override
     protected String decryptCode(String code) {
@@ -65,6 +65,7 @@ public class UrlEncryptor extends AbstractEncryptor {
         try {
             return URLDecoder.decode(code, DEFAULT_URL_ENCODING);
         } catch (UnsupportedEncodingException e) {
+            log.warn("解密【{}】失败", code);
             throw Exceptions.unchecked(e);
         }
     }
@@ -73,13 +74,14 @@ public class UrlEncryptor extends AbstractEncryptor {
      * 解密
      * @param code 编码
      * @param encoding 字符集
-     * @return 解密值
+     * @return String 解密值
      */
     public static String decrypt(String code, String encoding) {
 
         try {
             return URLDecoder.decode(code, encoding);
         } catch (UnsupportedEncodingException e) {
+            log.warn("解密【{}】失败", code);
             throw Exceptions.unchecked(e);
         }
     }

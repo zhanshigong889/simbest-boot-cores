@@ -81,6 +81,7 @@ public class Des3Encryptor extends AbstractEncryptor {
             byte[] decryptData = cipher.doFinal(Base64.getDecoder().decode(code));
             result =  new String(decryptData, DEFAULT_URL_ENCODING);
         } catch (Exception e) {
+            log.warn("解密【{}】失败", code);
             throw new RuntimeException(e);
         }
         return result;

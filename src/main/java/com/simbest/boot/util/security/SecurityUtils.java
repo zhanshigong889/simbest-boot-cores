@@ -63,15 +63,15 @@ public final class SecurityUtils {
             }
             else {
                 if(authentication.getPrincipal() != null) {
-                    log.error("SecurityContextHolder包含Authentication信息，但返回认证主体Principal不是IUser，请检查Redis缓存，目前返回的Principal类型为【{}】,toString后为【{}】", authentication.getPrincipal().getClass(), authentication.getPrincipal().toString());
+                    log.warn("SecurityContextHolder包含Authentication信息，但返回认证主体Principal不是IUser，请检查Redis缓存，目前返回的Principal类型为【{}】,toString后为【{}】", authentication.getPrincipal().getClass(), authentication.getPrincipal().toString());
                 }
                 else{
-                    log.error("SecurityContextHolder包含Authentication信息，但返回认证主体Principal为空，请检查Redis缓存，目前返回的Principal为空，authentication是【{}】", authentication.toString());
+                    log.warn("SecurityContextHolder包含Authentication信息，但返回认证主体Principal为空，请检查Redis缓存，目前返回的Principal为空，authentication是【{}】", authentication.toString());
                 }
                 return null;
             }
         }
-        log.error("SecurityContextHolder的Authentication为空，无法获取认证主体Principal，请检查代码Session或API的access_token");
+        log.warn("SecurityContextHolder的Authentication为空，无法获取认证主体Principal，请检查代码Session或API的access_token");
         return null;
     }
 

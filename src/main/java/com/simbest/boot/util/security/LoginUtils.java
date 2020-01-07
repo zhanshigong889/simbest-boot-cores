@@ -44,6 +44,7 @@ import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 @Slf4j
 @Component
 public class LoginUtils {
+
     @Autowired
     private AppConfig appConfig;
 
@@ -64,12 +65,13 @@ public class LoginUtils {
     /**
      * 根据用户名，自动登录
      * @param username 用户名需要3DES、RSA或Mocha算法进行加密
+     * @param appcode
      */
-    public void manualLogin(String username) {
-        log.debug("通过用户名【{}】和应用编码【{}】进行系统自动登录", username, appConfig.getAppcode());
-        String rawUsername = ssoAuthenticationRegister.decodeKeyword(username, IAuthService.KeyType.username, appConfig.getAppcode());
+    public void manualLogin(String username, String appcode) {
+        log.debug("通过用户名【{}】和应用编码【{}】进行系统自动登录", username, appcode);
+        String rawUsername = ssoAuthenticationRegister.decodeKeyword(username, IAuthService.KeyType.username);
         Principal principal = UsernamePrincipal.builder().username(rawUsername).build();
-        SsoUsernameAuthentication authReq = new SsoUsernameAuthentication(principal, appConfig.getAppcode());
+        SsoUsernameAuthentication authReq = new SsoUsernameAuthentication(principal, appcode);
         Authentication auth = authenticationManager.authenticate(authReq);
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
@@ -79,12 +81,13 @@ public class LoginUtils {
      * 根据用户名和密码，自动登录
      * @param username 用户名需要3DES、RSA或Mocha算法进行加密
      * @param password 密码需要由RSA加密
+     * @param appcode
      */
-    public void manualLogin(String username, String password) {
-        log.debug("通过用户名【{}】、密码【{}】和应用编码【{}】进行系统自动登录", username, password, appConfig.getAppcode());
-        String rawUsername = ssoAuthenticationRegister.decodeKeyword(username, IAuthService.KeyType.username, appConfig.getAppcode());
+    public void manualLogin(String username, String password, String appcode) {
+        log.debug("通过用户名【{}】、密码【{}】和应用编码【{}】进行系统自动登录", username, password, appcode);
+        String rawUsername = ssoAuthenticationRegister.decodeKeyword(username, IAuthService.KeyType.username);
         UumsAuthentication uumsAuthentication = new UumsAuthentication(rawUsername, UumsAuthenticationCredentials.builder()
-                .password(password).appcode(appConfig.getAppcode()).build());
+                .password(password).appcode(appcode).build());
         Authentication auth = authenticationManager.authenticate(uumsAuthentication);
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
@@ -95,7 +98,7 @@ public class LoginUtils {
      */
     public void adminLogin() {
         log.debug("通过管理账号【{}】进行系统自动登录", ApplicationConstants.ADMINISTRATOR);
-        IUser iUser = authService.findByKey(ApplicationConstants.ADMINISTRATOR, IAuthService.KeyType.username, appConfig.getAppcode());
+        IUser iUser = authService.findByKey(ApplicationConstants.ADMINISTRATOR, IAuthService.KeyType.username);
         GenericAuthentication auth = new GenericAuthentication(iUser, null, iUser.getAuthorities());
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);

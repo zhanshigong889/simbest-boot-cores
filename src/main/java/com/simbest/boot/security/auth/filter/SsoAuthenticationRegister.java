@@ -4,7 +4,6 @@
 package com.simbest.boot.security.auth.filter;
 
 import com.google.common.collect.Sets;
-import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.provider.sso.service.SsoAuthenticationService;
@@ -45,7 +44,7 @@ public class SsoAuthenticationRegister {
         return sortedSet;
     }
 
-    public String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType, String appcode) {
+    public String decodeKeyword(String encodeKeyword, IAuthService.KeyType keyType) {
         String decodeKeyword = null;
         for(SsoAuthenticationService decryptService : getSsoAuthenticationService()) {
             //防止从前端 加密后的参数通过浏览器后，+之类的字符变成空格
@@ -60,7 +59,7 @@ public class SsoAuthenticationRegister {
             decodeKeyword = decryptService.decryptKeyword(encodeKeyword);
             if(StringUtils.isNotEmpty(decodeKeyword)) {
                 log.debug("通过关键字【{}】解密后为【{}】", encodeKeyword, decodeKeyword);
-                IUser iUser = authService.findByKey(decodeKeyword, keyType, appcode);
+                IUser iUser = authService.findByKey(decodeKeyword, keyType);
                 if (null != iUser) {
                     //成功返回
                     break;

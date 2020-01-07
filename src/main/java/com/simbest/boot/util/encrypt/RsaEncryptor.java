@@ -318,7 +318,7 @@ public class RsaEncryptor extends AbstractEncryptor {
                 byte[] binaryData = decrypt(getPrivateKey(), org.apache.commons.codec.binary.Base64.decodeBase64(code) /*org.apache.commons.codec.binary.Base64.decodeBase64(base46String.getBytes())*/);
                 return new String(binaryData);
             } catch (Exception e1) {
-                log.error("解密【{}】失败第二次", code);
+                log.warn("解密【{}】失败第二次", code);
                 throw new RuntimeException(e1);
             }
         }

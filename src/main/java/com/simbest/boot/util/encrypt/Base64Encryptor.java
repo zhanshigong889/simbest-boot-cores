@@ -56,6 +56,7 @@ public class Base64Encryptor extends AbstractEncryptor {
             String string = new String(binaryData,DEFAULT_URL_ENCODING);
             return string;
         } catch (Exception e) {
+            log.warn("解密【{}】失败", code);
             throw new RuntimeException(e);
         }
     }
