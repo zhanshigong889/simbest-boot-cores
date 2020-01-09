@@ -95,7 +95,7 @@ public class AppConfig {
     @Value("${app.captcha.enable}")
     private boolean isOpenValidateCode = true;
 
-    // 是否开启验证码功能
+    // 是否开启心跳检测功能
     @Value("${app.heart.check.enable:false}")
     private boolean isOpenHeartCheck;
 
