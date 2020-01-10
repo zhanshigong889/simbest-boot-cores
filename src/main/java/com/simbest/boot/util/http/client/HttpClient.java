@@ -6,16 +6,11 @@ package com.simbest.boot.util.http.client;
 import com.simbest.boot.config.AppConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Map;
-
-import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
 /**
  * 用途：Http请求客户端
@@ -23,6 +18,7 @@ import static com.simbest.boot.constants.ApplicationConstants.ZERO;
  * 时间: 2020/1/9  15:39
  */
 @Slf4j
+@DependsOn({"appConfig", "restTemplate"})
 @Component
 public class HttpClient {
 
@@ -49,6 +45,7 @@ public class HttpClient {
         postRequest.setRestTemplate(httpClient.restTemplate);
         return postRequest;
     }
+
 
     /**
      * 构建提交JSON参数的Post请求

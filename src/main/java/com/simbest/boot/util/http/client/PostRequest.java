@@ -86,7 +86,15 @@ public class PostRequest {
      * @throws HttpClientException 如果服务器返回非200则抛出此异常
      */
     public <E> E asBean(Class<E> targetClass) {
-        E response = restTemplate.postForObject(url, toValueMap(formParams), targetClass);
+        E response = null;
+        try {
+            response = restTemplate.postForObject(url, toValueMap(formParams), targetClass);
+        } catch (Exception e){
+            log.error("HTTP请求发生错误，url地址【{}】,参数如下：", url);
+            for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
+                log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
+            }
+        }
         return response;
     }
 

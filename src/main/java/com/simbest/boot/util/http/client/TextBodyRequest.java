@@ -4,6 +4,7 @@
 package com.simbest.boot.util.http.client;
 
 import com.simbest.boot.util.json.JacksonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,6 +17,7 @@ import java.util.Collections;
  * 作者: lishuyi
  * 时间: 2020/1/9  18:20
  */
+@Slf4j
 public class TextBodyRequest extends PostRequest {
 
     private String jsonStr;
@@ -48,10 +50,16 @@ public class TextBodyRequest extends PostRequest {
      */
     @Override
     public <E> E asBean(Class<E> targetClass) {
-        HttpEntity<String> request = new HttpEntity<>(jsonStr, headers);
+        E response = null;
         url = url.replace("%2B", "+");
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class);
-        return JacksonUtils.json2obj(responseEntity.getBody(), targetClass);
+        try {
+            HttpEntity<String> request = new HttpEntity<>(jsonStr, headers);
+            ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class);
+            response = JacksonUtils.json2obj(responseEntity.getBody(), targetClass);
+        } catch (Exception e){
+            log.error("HTTP请求发生错误，url地址【{}】,参数【{}】", url, jsonStr);
+        }
+        return response;
     }
 
 }
