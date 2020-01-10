@@ -4,12 +4,12 @@
 package com.simbest.boot.uums.api.app;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.mzlion.easyokhttp.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.SimpleApp;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;

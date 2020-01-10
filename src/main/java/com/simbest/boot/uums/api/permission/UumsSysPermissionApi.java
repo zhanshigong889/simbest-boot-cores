@@ -4,7 +4,7 @@
 package com.simbest.boot.uums.api.permission;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.mzlion.easyokhttp.HttpClient;
+import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;

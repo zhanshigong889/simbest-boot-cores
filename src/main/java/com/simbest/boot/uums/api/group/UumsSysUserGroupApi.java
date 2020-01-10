@@ -3,7 +3,7 @@
  */
 package com.simbest.boot.uums.api.group;
 
-import com.mzlion.easyokhttp.HttpClient;
+import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
