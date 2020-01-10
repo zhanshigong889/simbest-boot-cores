@@ -12,6 +12,7 @@ import com.simbest.boot.security.SimplePosition;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
+import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,9 @@ public class UumsSysPositionApi {
     //private String uumsAddress="http://localhost:8080/uums";
     @Autowired
     private RsaEncryptor encryptor;
+
+    @Autowired
+    private ApiRequestHandle<List<SimplePosition>> mapPositionApiHandle;
 
     /**
      *根据id查询职位信息
@@ -88,6 +92,24 @@ public class UumsSysPositionApi {
                 .json( json0 )
                 .asBean(JsonResponse.class );
         return response;
+    }
+
+    /**
+     *获取职位信息列表不分页
+     * @param appcode
+     * @param sysPositionMap
+     * @return
+     */
+    public List<SimplePosition> findAllNoPage(String appcode,Map sysPositionMap){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(sysPositionMap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAll"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        return mapPositionApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<SimplePosition>>(){});
     }
 
     /**
