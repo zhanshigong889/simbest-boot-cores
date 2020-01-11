@@ -4,14 +4,15 @@
 package com.simbest.boot.uums.api.app;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
 import com.simbest.boot.security.SimpleAppDecision;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.SecurityUtils;
+import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <strong>Title : SysAppController</strong><br>
@@ -43,6 +45,8 @@ public class UumsSysAppDecisionApi {
     //private String uumsAddress="http://localhost:8080/uums";
     @Autowired
     private RsaEncryptor encryptor;
+    @Autowired
+    private ApiRequestHandle<Set<Map<String,Object>>> mapAppDecisionMapApiHandle;
 
     /**
      * 根据id查找
@@ -161,5 +165,21 @@ public class UumsSysAppDecisionApi {
         String json = JacksonUtils.obj2json(response.getData());
         List<SimpleAppDecision> appDecisionList=JacksonUtils.json2Type(json, new TypeReference<List<SimpleAppDecision>>(){});
         return appDecisionList;
+    }
+
+    /**
+     * 根据appCode查询某应用下流程的信息wfmg，不使用规则
+     * @param appcode
+     * @return
+     */
+    public Set<Map<String,Object>> findDecisionsByAppWfmg(String appcode){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findDecisionsByAppWfmg"+SSO)
+                .param( AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param( AuthoritiesConstants.SSO_API_APP_CODE,appcode )
+                .param("appCode", appcode)
+                .asBean(JsonResponse.class);
+        return mapAppDecisionMapApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<Map<String,Object>>>(){});
     }
 }
