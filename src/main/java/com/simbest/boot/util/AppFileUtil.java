@@ -4,6 +4,7 @@
 package com.simbest.boot.util;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.github.stuxuhai.jpinyin.ChineseHelper;
 import com.google.common.collect.Lists;
 import com.simbest.boot.base.enums.StoreLocation;
@@ -102,6 +103,17 @@ public class AppFileUtil {
     }
 
     /**
+     * 当前配置是非ftp方式时，程序中如果改变上传方式时，该方法用来AppFileSftpUtil赋值
+     */
+    public void setSftpUtil(){
+        try {
+            if ( null == sftpUtil ) {
+                sftpUtil = springContextUtil.getBean( AppFileSftpUtil.class );
+            }
+        } catch (NoSuchBeanDefinitionException e) {}
+    }
+
+    /**
      * 判断是否允许上传
      *
      * @param fileName
@@ -172,6 +184,18 @@ public class AppFileUtil {
     }
 
     /**
+     * 上传单个文件  自定义文件名称
+     * @param directory 相对路径
+     * @param multipartFile
+     * @return SysFile
+     * @throws Exception
+     */
+    public SysFile uploadFileWithFileName(String directory, MultipartFile multipartFile,String fileName) throws Exception {
+        Assert.notNull(multipartFile, "上传文件不能为空");
+        return uploadFiles(directory, Arrays.asList(multipartFile),fileName).get(0);
+    }
+
+    /**
      * 上传单个文件
      * @param directory 相对路径
      * @param multipartFile
@@ -180,7 +204,7 @@ public class AppFileUtil {
      */
     public SysFile uploadFile(String directory, MultipartFile multipartFile) throws Exception {
         Assert.notNull(multipartFile, "上传文件不能为空");
-        return uploadFiles(directory, Arrays.asList(multipartFile)).get(0);
+        return uploadFiles(directory, Arrays.asList(multipartFile),null).get(0);
     }
 
     /**
@@ -190,7 +214,7 @@ public class AppFileUtil {
      * @return List<SysFile>
      * @throws Exception
      */
-    public List<SysFile> uploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
+    public List<SysFile> uploadFiles(String directory, Collection<MultipartFile> multipartFiles,String fileName) throws Exception {
         Assert.notEmpty(multipartFiles, "上传文件不能为空");
         List<SysFile> fileModels = Lists.newArrayList();
         for (MultipartFile multipartFile : multipartFiles) {
@@ -202,7 +226,7 @@ public class AppFileUtil {
                 continue;
             }
             String filePath = null;
-            String filename = getFileName(multipartFile.getOriginalFilename());
+            String filename = StrUtil.isEmpty( fileName )?getFileName(multipartFile.getOriginalFilename()):fileName;
             //特殊字符过滤，防止XSS漏洞
             filename = JacksonUtils.escapeString(filename);
             if(validateUploadFileType(filename)) {
@@ -238,6 +262,17 @@ public class AppFileUtil {
             }
         }
         return fileModels;
+    }
+
+    /**
+     * 上传多个文件   重载上面的方法
+     * @param directory 相对路径
+     * @param multipartFiles
+     * @return List<SysFile>
+     * @throws Exception
+     */
+    public List<SysFile> uploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
+        return uploadFiles(directory,multipartFiles,null);
     }
 
     /**
