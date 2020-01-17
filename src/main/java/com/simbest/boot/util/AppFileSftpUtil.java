@@ -46,7 +46,7 @@ import static com.simbest.boot.constants.ApplicationConstants.SLASH;
 @Component
 //@ConditionalOnPropertyNotEmpty("app.file.sftp.username")
 //@ConditionalOnProperty(name = "app.file.upload.location", havingValue = "sftp")
-@ConditionalOnExpression("'${app.file.upload.location}'=='ftp' || '${app.file.upload.location}'=='sftp'")
+@ConditionalOnExpression("'${app.file.upload.location}'=='ftp' || '${app.file.upload.location}'=='sftp' || '${custom.upload.flag:false}'")
 public class AppFileSftpUtil {
 
     @Autowired

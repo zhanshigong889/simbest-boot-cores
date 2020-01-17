@@ -103,17 +103,6 @@ public class AppFileUtil {
     }
 
     /**
-     * 当前配置是非ftp方式时，程序中如果改变上传方式时，该方法用来AppFileSftpUtil赋值
-     */
-    public void setSftpUtil(){
-        try {
-            if ( null == sftpUtil ) {
-                sftpUtil = springContextUtil.getBean( AppFileSftpUtil.class );
-            }
-        } catch (NoSuchBeanDefinitionException e) {}
-    }
-
-    /**
      * 判断是否允许上传
      *
      * @param fileName
