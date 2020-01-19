@@ -99,14 +99,16 @@ public class PostRequest {
     }
 
     public String asString() {
+        String response = null;
         try {
-            String response = restTemplate.postForObject(url, toValueMap(formParams), String.class);
+            response = restTemplate.postForObject(url, toValueMap(formParams), String.class);
         } catch (Exception e){
             log.error("HTTP请求发生错误，url地址【{}】,参数如下：", url);
             for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
                 log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
             }
         }
+        return response;
     }
 
 
