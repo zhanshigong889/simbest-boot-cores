@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util.http.client;
 
+import com.simbest.boot.base.exception.Exceptions;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -94,6 +95,7 @@ public class PostRequest {
             for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
                 log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
             }
+            Exceptions.printException(e);
         }
         return response;
     }
@@ -107,6 +109,7 @@ public class PostRequest {
             for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
                 log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
             }
+            Exceptions.printException(e);
         }
         return response;
     }

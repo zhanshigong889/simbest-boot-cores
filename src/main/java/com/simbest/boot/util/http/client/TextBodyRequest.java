@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util.http.client;
 
+import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -58,13 +59,14 @@ public class TextBodyRequest extends PostRequest {
             response = JacksonUtils.json2obj(responseEntity.getBody(), targetClass);
         } catch (Exception e){
             log.error("HTTP请求发生错误，url地址【{}】,参数【{}】", url, jsonStr);
+            Exceptions.printException(e);
         }
         return response;
     }
 
     @Override
     public String asString() {
-        return asBean(String.class);
+        return super.asString();
     }
 
 }

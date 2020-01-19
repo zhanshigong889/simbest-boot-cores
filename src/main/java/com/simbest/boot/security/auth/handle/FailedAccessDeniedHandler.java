@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.handle;
 
+import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.constants.AuthoritiesConstants;
@@ -45,12 +46,12 @@ import static com.simbest.boot.base.web.response.JsonResponse.ERROR_CODE;
 public class FailedAccessDeniedHandler implements AccessDeniedHandler, AuthenticationFailureHandler {
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException {
         handleResponse(request, response, exception);
     }
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         //登录发生错误计数，每错误一次，即向后再延时等待5分钟
         String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
         if(StringUtils.isNotEmpty(username)){
@@ -59,7 +60,7 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
         handleResponse(request, response, exception);
     }
 
-    protected void handleResponse(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException, ServletException {
+    protected void handleResponse(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException {
         String ssoPath = getRequestPath(request);
         //单点登录首页，不返回JSON数据，而是调到登录首页
         if(!ApplicationConstants.ROOT_SSO_PAGE.equals(ssoPath)) {
@@ -97,7 +98,11 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
         }
         else{
             response.setStatus(HttpServletResponse.SC_OK);
-            request.getRequestDispatcher(ApplicationConstants.LOGIN_ERROR_PAGE).forward(request, response);
+            try {
+                request.getRequestDispatcher(ApplicationConstants.LOGIN_ERROR_PAGE).forward(request, response);
+            } catch (ServletException e) {
+                Exceptions.printException(e);
+            }
         }
     }
 
