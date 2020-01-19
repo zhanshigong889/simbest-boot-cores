@@ -98,6 +98,10 @@ public class PostRequest {
         return response;
     }
 
+    public String asString() {
+        return asBean(String.class);
+    }
+
 
     private static MultiValueMap toValueMap(Map<String, List<String>> parameters){
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();

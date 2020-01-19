@@ -36,6 +36,15 @@ public class HttpClient {
     }
 
     /**
+     * 构建提交Form表单参数的Get请求
+     * @param url
+     * @return PostRequest
+     */
+    public static PostRequest get(String url) {
+        return post(url);
+    }
+
+    /**
      * 构建提交Form表单参数的Post请求
      * @param url
      * @return PostRequest
