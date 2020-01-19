@@ -99,7 +99,7 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
         else{
             response.setStatus(HttpServletResponse.SC_OK);
             try {
-                request.getRequestDispatcher(ApplicationConstants.LOGIN_ERROR_PAGE).forward(request, response);
+                request.getRequestDispatcher(ApplicationConstants.LOGIN_PAGE).forward(request, response);
             } catch (ServletException e) {
                 Exceptions.printException(e);
             }
