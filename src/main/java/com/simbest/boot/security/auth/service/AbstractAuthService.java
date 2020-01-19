@@ -109,9 +109,11 @@ public abstract class AbstractAuthService implements IAuthService {
         Boolean isPermit = authUserCacheService.loadCacheUserAccess(username, appcode);
         if(null == isPermit) {
             isPermit = userinfoApi.checkUserAccessAppNoSession(username, appcode);
-            authUserCacheService.saveOrUpdateCacheUserAccess(username, appcode, isPermit);
+            if(null != isPermit) {
+                authUserCacheService.saveOrUpdateCacheUserAccess(username, appcode, isPermit);
+            }
         }
-        return isPermit;
+        return null == isPermit ? false : isPermit;
     }
 
     /**
