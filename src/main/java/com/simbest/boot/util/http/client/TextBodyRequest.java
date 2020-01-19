@@ -62,4 +62,8 @@ public class TextBodyRequest extends PostRequest {
         return response;
     }
 
+    public String asString() {
+        return asBean(String.class);
+    }
+    
 }
