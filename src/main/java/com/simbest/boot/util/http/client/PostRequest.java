@@ -78,7 +78,15 @@ public class PostRequest {
         return this;
     }
 
-    /**
+    private void printLog(Exception e){
+        log.error("HTTP请求发生错误，url地址【{}】,参数如下：", url);
+        for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
+            log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
+        }
+        Exceptions.printException(e);
+    }
+
+  /**
      * 将响应结果转为JavaBean对象
      *
      * @param targetClass 目标类型
@@ -91,11 +99,7 @@ public class PostRequest {
         try {
             response = restTemplate.postForObject(url, toValueMap(formParams), targetClass);
         } catch (Exception e){
-            log.error("HTTP请求发生错误，url地址【{}】,参数如下：", url);
-            for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
-                log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
-            }
-            Exceptions.printException(e);
+            printLog(e);
         }
         return response;
     }
@@ -105,11 +109,7 @@ public class PostRequest {
         try {
             response = restTemplate.postForObject(url, toValueMap(formParams), String.class);
         } catch (Exception e){
-            log.error("HTTP请求发生错误，url地址【{}】,参数如下：", url);
-            for(Map.Entry<String, List<String>> entry : formParams.entrySet()){
-                log.error("键【{}】，值【{}】",entry.getKey(), entry.getValue().get(ZERO));
-            }
-            Exceptions.printException(e);
+            printLog(e);
         }
         return response;
     }
