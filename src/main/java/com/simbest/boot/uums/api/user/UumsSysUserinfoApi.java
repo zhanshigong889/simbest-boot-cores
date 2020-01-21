@@ -5,13 +5,18 @@
 package com.simbest.boot.uums.api.user;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
+import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.constants.AuthoritiesConstants;
-import com.simbest.boot.security.*;
+import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.SimplePermission;
+import com.simbest.boot.security.SimpleUser;
+import com.simbest.boot.security.UserOrgTree;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.util.json.JacksonUtils;
+import com.simbest.boot.util.security.LoginUtils;
 import com.simbest.boot.util.security.SecurityUtils;
 import com.simbest.boot.uums.api.ApiRequestHandle;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +72,9 @@ public class UumsSysUserinfoApi {
 
     @Autowired
     private ApiRequestHandle<Map<String,Object>> mapUserApiHandlemapUserApiHandle;
+
+    @Autowired
+    private LoginUtils loginUtils;
 
     /**
      * 插入reserve4
@@ -979,6 +987,9 @@ public class UumsSysUserinfoApi {
      */
     public Set<String> findThLeUser(  String appcode) {
         String username = SecurityUtils.getCurrentUserName();
+        if(StringUtils.isEmpty( username )){
+            username = ApplicationConstants.ADMINISTRATOR;
+        }
         log.debug("Http remote request user by username: {}", username);
         JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findThLeUser"+SSO)
                 .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
