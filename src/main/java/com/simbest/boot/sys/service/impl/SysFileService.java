@@ -71,8 +71,8 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    public SysFile customUploadProcessFile ( MultipartFile multipartFile,String pmInsType, String pmInsId, String pmInsTypePart ) {
-        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile), pmInsType, pmInsId, pmInsTypePart);
+    public SysFile uploadProcessFile ( MultipartFile multipartFile,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
+        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customDirectory,pmInsType, pmInsId, pmInsTypePart);
         return fileList.isEmpty() ? null : fileList.get(0);
     }
 
@@ -125,10 +125,10 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    public List<SysFile> customUploadProcessFiles ( Collection<MultipartFile> multipartFiles,String pmInsType, String pmInsId, String pmInsTypePart ) {
+    public List<SysFile> uploadProcessFiles ( Collection<MultipartFile> multipartFiles,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
         List<SysFile> sysFileList = Lists.newArrayList();
         try {
-            sysFileList = appFileUtil.customUploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
+            sysFileList = appFileUtil.customUploadFiles(customDirectory + pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             for(SysFile sysFile : sysFileList){
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID

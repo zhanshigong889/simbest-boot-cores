@@ -237,7 +237,7 @@ public class AppFileUtil {
                         log.debug("基于ftp，方式同sftp");
                     case sftp:
                         sftpUtil.upload(directory, filename, multipartFile.getBytes());
-                        filePath = config.getShareHostPost() + directory + ApplicationConstants.SLASH + filename;
+                        filePath = directory + ApplicationConstants.SLASH + filename;
                         break;
                 }
                 Assert.notNull(filePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
@@ -295,9 +295,6 @@ public class AppFileUtil {
                         log.debug("基于ftp，方式同sftp");
                     case sftp:
                         String directoryPath = createUploadDirectoryPath(directory);
-                        if ( BooleanUtil.toBoolean(config.getCustomUploadFlag()) ){
-                            directoryPath = directory;
-                        }
                         sftpUtil.upload(directoryPath, filename, multipartFile.getBytes());
                         filePath = config.getUploadPath() + directoryPath + ApplicationConstants.SLASH + filename;
                         break;
@@ -611,7 +608,7 @@ public class AppFileUtil {
      * 设置本地文件上传目录（适用于disk方式）
      */
     public File createCustomUploadDirectory(String directory) throws IOException {
-        String storePath = config.getShareHostPost() + directory;
+        String storePath = directory;
         File targetFileDirectory = new File(storePath);
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);

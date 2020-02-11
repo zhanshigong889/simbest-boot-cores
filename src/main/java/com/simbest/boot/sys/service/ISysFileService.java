@@ -32,9 +32,10 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
+     * @param customDirectory  自定义路径
      * @return SysFile
      */
-    SysFile customUploadProcessFile(MultipartFile multipartFile,String pmInsType, String pmInsId, String pmInsTypePart);
+    SysFile uploadProcessFile(MultipartFile multipartFile,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart);
 
     /**
      * 上传并保存多个文件
@@ -53,9 +54,10 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
+     * @param customDirectory  自定义路径
      * @return List<SysFile>
      */
-    List<SysFile> customUploadProcessFiles(Collection<MultipartFile> multipartFiles,String pmInsType, String pmInsId, String pmInsTypePart);
+    List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart);
 
 
     /**
