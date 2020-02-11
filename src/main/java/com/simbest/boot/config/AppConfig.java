@@ -108,7 +108,7 @@ public class AppConfig {
     @Value("${app.host.port}")
     private String appHostPort;
 
-    @Value("${share.host.port}")
+    @Value("${share.host.port:null}")
     private String shareHostPost;
 
     @Value("${app.file.upload.path}")
