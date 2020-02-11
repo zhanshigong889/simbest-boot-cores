@@ -108,6 +108,12 @@ public class AppConfig {
     @Value("${app.host.port}")
     private String appHostPort;
 
+    @Value("${share.host.port}")
+    private String shareHostPost;
+
+    @Value("${custom.upload.flag:false}")
+    private String customUploadFlag;
+
     @Value("${app.file.upload.path}")
     private String uploadPath;
 
@@ -170,6 +176,8 @@ public class AppConfig {
         uploadTmpFileLocation = System.getProperty("user.dir").concat("/springboottmp").concat(contextPath);
         log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
+        log.info("针对FTP和SFTP方式上传方式，其直接访问文件的地址为【{}】",shareHostPost);
+        log.info("是否开启自定义文件上传方式【{}】",customUploadFlag);
     }
 
 
