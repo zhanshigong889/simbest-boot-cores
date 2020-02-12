@@ -78,7 +78,7 @@ public class MultiHttpSecurityConfig {
      * @throws Exception 异常
      */
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    public void configureGlobal(AuthenticationManagerBuilder auth) {
         Map<String, CustomAbstractAuthenticationProvider> auths = appContext.getBeansOfType(CustomAbstractAuthenticationProvider.class);
         for(CustomAbstractAuthenticationProvider provider : auths.values()){
             log.debug("系统将自动注册自定义认证提供器: {}", provider.getClass());
