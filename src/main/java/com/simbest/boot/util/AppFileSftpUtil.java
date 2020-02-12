@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -171,7 +172,9 @@ public class AppFileSftpUtil {
     }
 
     private void ftpUpload(String directory, String filename, InputStream input) throws Exception {
-        directory = config.getUploadPath()+directory;
+        if ( !BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
+            directory = config.getUploadPath()+directory;
+        }
         directory = StringUtils.replace(directory, "\\", SLASH);
         FTPClient ftp = new FTPClient();
         try {
@@ -232,10 +235,11 @@ public class AppFileSftpUtil {
         try {
             connect();
             try {// 如果cd报异常，说明目录不存在，就创建目录
-                sftp1.cd(config.getUploadPath());
+                if ( !BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
+                    sftp1.cd(config.getUploadPath());
+                }
                 sftp1.cd(directory);
-            }
-            catch (Exception e) {
+            }catch (Exception e) {
                 String[] folders = StringUtils.removeFirst(directory, SLASH ).split( SLASH );
                 for ( String folder : folders ) {
                     if ( folder.length() > 0 ) {
