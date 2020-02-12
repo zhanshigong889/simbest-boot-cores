@@ -1,5 +1,6 @@
 package com.simbest.boot.sys.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
 import com.simbest.boot.base.enums.StoreLocation;
 import com.simbest.boot.base.exception.Exceptions;
@@ -14,6 +15,7 @@ import com.simbest.boot.util.AppFileUtil;
 import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -71,8 +73,8 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    public SysFile uploadProcessFile ( MultipartFile multipartFile,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
-        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customDirectory,pmInsType, pmInsId, pmInsTypePart);
+    public SysFile uploadProcessFile ( MultipartFile multipartFile,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
+        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customFileName,customDirectory,pmInsType, pmInsId, pmInsTypePart);
         return fileList.isEmpty() ? null : fileList.get(0);
     }
 
@@ -125,10 +127,12 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    public List<SysFile> uploadProcessFiles ( Collection<MultipartFile> multipartFiles,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
+    public List<SysFile> uploadProcessFiles ( Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
         List<SysFile> sysFileList = Lists.newArrayList();
         try {
-            sysFileList = appFileUtil.customUploadFiles(customDirectory + pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
+            String pmInsTypePath = StrUtil.isEmpty( pmInsType )?"":pmInsType.concat( ApplicationConstants.SLASH  );
+            pmInsTypePart = StrUtil.isEmpty( pmInsTypePart )?"":pmInsTypePath;
+            sysFileList = appFileUtil.customUploadFiles(customDirectory + ApplicationConstants.SLASH + pmInsTypePath + pmInsTypePart, multipartFiles,customFileName);
             for(SysFile sysFile : sysFileList){
                 sysFile = super.insert(sysFile); //先保存文件获取ID
                 sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
@@ -142,7 +146,8 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 String anonymousFilePath = null;
                 switch (serverUploadLocation) {
                     case disk:
-                        mobileFilePath = config.getShareHostPost() + ApplicationConstants.SLASH + sysFile.getFileName();
+                        //mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
+                        mobileFilePath = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
                         apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
                         anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
                         break;
@@ -153,7 +158,8 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                         break;
                     case ftp:
                     case sftp:
-                        mobileFilePath = config.getShareHostPost() + ApplicationConstants.SLASH + sysFile.getFileName();
+                        //mobileFilePath = config.getShareHostPost() + ApplicationConstants.SLASH + sysFile.getFileName();
+                        mobileFilePath = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
                         apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
                         anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
                         break;

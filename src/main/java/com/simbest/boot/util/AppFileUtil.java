@@ -225,10 +225,13 @@ public class AppFileUtil {
                     case disk:
                         File targetFileDirectory = createCustomUploadDirectory(directory);
                         byte[] bytes = multipartFile.getBytes();
-                        Path path = Paths.get(targetFileDirectory.getPath() + ApplicationConstants.SLASH + filename);
+                        String pathTmp = targetFileDirectory.getPath() + ApplicationConstants.SLASH + filename;
+                        if ( StrUtil.endWithIgnoreCase( directory,ApplicationConstants.SLASH ) ){
+                            pathTmp = targetFileDirectory.getPath() + filename;
+                        }
+                        Path path = Paths.get(pathTmp);
                         Files.write(path, bytes);
                         filePath = path.toString();
-
                         break;
                     case fastdfs:
                         filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(multipartFile.getInputStream()), filename, getFileSuffix(filename));
@@ -238,6 +241,9 @@ public class AppFileUtil {
                     case sftp:
                         sftpUtil.upload(directory, filename, multipartFile.getBytes());
                         filePath = directory + ApplicationConstants.SLASH + filename;
+                        if ( StrUtil.endWithIgnoreCase( directory,ApplicationConstants.SLASH ) ){
+                            filePath = directory + filename;
+                        }
                         break;
                 }
                 Assert.notNull(filePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
@@ -739,6 +745,9 @@ public class AppFileUtil {
 //                        autoindex on;
 //                }
                 String nginxFileUrl = StringUtils.replace(filePath, config.getUploadPath(), config.getAppHostPort().concat("/staticfiles"));
+                if ( BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
+                    nginxFileUrl = StringUtils.replace(filePath, config.getCustomUploadBashPath(), config.getShareHostPost());
+                }
                 nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
                 log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
                 realFile = downloadFromUrl(nginxFileUrl);
@@ -915,5 +924,7 @@ public class AppFileUtil {
         System.out.println(getFileName(fileUrl));
         System.out.println(getFileBaseName(fileUrl));
         System.out.println(getFileSuffix(fileUrl));
+
+        System.out.println(StrUtil.endWithIgnoreCase("/home/oaapp/simbestboot/uploadFiles/uploadFiles/anddoc/doc/","/") );
     }
 }

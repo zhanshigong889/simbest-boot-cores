@@ -114,6 +114,9 @@ public class AppConfig {
     @Value("${custom.upload.flag:false}")
     private String customUploadFlag;
 
+    @Value("${custom.app.file.upload.bash.path:null}")
+    private String customUploadBashPath;
+
     @Value("${app.file.upload.path}")
     private String uploadPath;
 
@@ -176,6 +179,7 @@ public class AppConfig {
         uploadTmpFileLocation = System.getProperty("user.dir").concat("/springboottmp").concat(contextPath);
         log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
+        log.info("自定义基础上传目录为，同时也是Nginx配置的代理目录【{}】",customUploadBashPath);
         log.info("针对FTP和SFTP、DISK方式上传方式，其直接访问文件的地址为【{}】",shareHostPost);
         log.info("是否开启自定义路径上传文件【{}】",customUploadFlag);
     }
