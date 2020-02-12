@@ -133,11 +133,14 @@ public final class GlobalExceptionRegister {
     }
 
     private static void setCorrectErrorMessage(JsonResponse response, Exception e){
-        if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains(" constraint [")){
+        if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains(" constraint [null]")){
+            response.setMessage("必填字段不能为空");
+        }
+        else if(StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().contains(" constraint [")){
             String constraintField = e.getMessage();
             constraintField = StringUtils.substringAfter(constraintField, "constraint [");
             constraintField = StringUtils.substringBefore(constraintField, "]");
-            response.setMessage("数据[".concat(constraintField).concat("]唯一性校验错误"));
+            response.setMessage("数据【".concat(constraintField).concat("】不可重复"));
         }
         else if(StringUtils.isNotEmpty(e.getMessage()) && ChineseHelper.containsChinese(e.getMessage())){
             response.setMessage(e.getMessage());
