@@ -60,7 +60,7 @@ public class LoginUtils {
     @Autowired
     private ISysLogLoginService loginService;
 
-    private final static String loggedUser = "LOGGED_USER";
+    private final static String loginedUser = "com.simbest.boot.util.security.LoginUtils_LOGINED_USER";
 
     /**
      * 根据用户名，自动登录
@@ -142,7 +142,7 @@ public class LoginUtils {
      * @param username
      */
     public void recordLoginUsername(String username){
-        RedisUtil.getRedisTemplate().opsForSet().add(loggedUser, username);
+        RedisUtil.getRedisTemplate().opsForSet().add(loginedUser, username);
     }
 
     /**
@@ -150,7 +150,7 @@ public class LoginUtils {
      * @param username
      */
     public void recordLogoutUsername(String username){
-        RedisUtil.getRedisTemplate().opsForSet().remove(loggedUser, username);
+        RedisUtil.getRedisTemplate().opsForSet().remove(loginedUser, username);
     }
 
     /**
@@ -158,7 +158,7 @@ public class LoginUtils {
      * @return
      */
     public Set<String> loadLoginUsername(){
-        return RedisUtil.getRedisTemplate().opsForSet().members(loggedUser);
+        return RedisUtil.getRedisTemplate().opsForSet().members(loginedUser);
     }
 
 }
