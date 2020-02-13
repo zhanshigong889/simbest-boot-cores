@@ -50,6 +50,12 @@ import static com.simbest.boot.constants.ApplicationConstants.SLASH;
 @ConditionalOnExpression("'${app.file.upload.location}'=='ftp' || '${app.file.upload.location}'=='sftp' || '${custom.upload.flag:false}'")
 public class AppFileSftpUtil {
 
+    /** 本地字符编码 */
+    private static String LOCAL_CHARSET = "GBK";
+
+    // FTP协议里面，规定文件名编码为iso-8859-1
+    private static String SERVER_CHARSET = "ISO-8859-1";
+
     @Autowired
     private AppConfig config;
 
@@ -188,6 +194,11 @@ public class AppFileSftpUtil {
                 log.error("FTP上传失败！文件名：" + filename);
                 throw new RuntimeException("FTP服务器无法连通");
             }
+            // 开启服务器对UTF-8的支持，如果服务器支持就用UTF-8编码，否则就使用本地编码（GBK）.
+            if (FTPReply.isPositiveCompletion(ftp.sendCommand("OPTS UTF8", "ON"))) {
+                LOCAL_CHARSET = "UTF-8";
+            }
+            ftp.setControlEncoding(LOCAL_CHARSET);
             //切换到上传目录
             if (!ftp.changeWorkingDirectory(directory)) {
                 //如果目录不存在创建目录

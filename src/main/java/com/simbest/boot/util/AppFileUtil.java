@@ -4,6 +4,8 @@
 package com.simbest.boot.util;
 
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.stuxuhai.jpinyin.ChineseHelper;
 import com.google.common.collect.Lists;
@@ -72,7 +74,7 @@ import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
 public class AppFileUtil {
 
     private static final String UPLOAD_FILE_PATTERN =
-            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|mp4|ogg|swf|webm|html|htm|mov)$";
+            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|mp4|ogg|swf|webm|html|htm)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
     @Autowired
