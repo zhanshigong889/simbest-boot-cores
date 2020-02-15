@@ -8,10 +8,13 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
 import com.simbest.boot.security.auth.oauth2.CustomWebResponseExceptionTranslator;
 import com.simbest.boot.security.auth.oauth2.OauthExceptionEntryPoint;
+import com.simbest.boot.security.auth.oauth2.RsaPasswordTokenGranter;
 import com.simbest.boot.security.auth.oauth2.UumsTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaBindTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaCodeTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaMiniTokenGranter;
+import com.simbest.boot.util.encrypt.RsaEncryptor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -128,6 +131,9 @@ public class ApiSecurityConfigurer {
         @Autowired
         private CustomWebResponseExceptionTranslator exceptionTranslator;
 
+        @Autowired
+        private RsaEncryptor encryptor;
+
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
             clients.withClientDetails(oauth2ClientDetailsService);
@@ -163,6 +169,9 @@ public class ApiSecurityConfigurer {
          */
         private TokenGranter tokenGranter(final AuthorizationServerEndpointsConfigurer endpoints) {
             List<TokenGranter> granters = new ArrayList<>(Arrays.asList(endpoints.getTokenGranter()));
+            //追加rsapassword方式的认证
+            granters.add(new RsaPasswordTokenGranter(authenticationManager, endpoints.getTokenServices(),
+                    endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory(), encryptor));
             //追加uumspassword方式的认证
             granters.add(new UumsTokenGranter(authenticationManager, endpoints.getTokenServices(),
                     endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
