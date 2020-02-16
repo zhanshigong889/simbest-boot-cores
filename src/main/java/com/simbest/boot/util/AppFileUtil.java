@@ -74,7 +74,7 @@ import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
 public class AppFileUtil {
 
     private static final String UPLOAD_FILE_PATTERN =
-            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|mp4|ogg|swf|webm|html|htm)$";
+            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm|html|htm|mov|flv|mp4)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
     @Autowired
