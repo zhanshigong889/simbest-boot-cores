@@ -8,18 +8,13 @@ import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentia
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
-import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 import java.util.LinkedHashMap;
@@ -32,7 +27,7 @@ import java.util.Map;
  * 时间: 2019/3/27  16:57
  */
 @Slf4j
-public class UumsTokenGranter extends AbstractTokenGranter {
+public class UumsTokenGranter extends Oauth2ExtendTokenGranter {
 
     private static final String GRANT_TYPE = "uumspassword";
 
@@ -47,6 +42,7 @@ public class UumsTokenGranter extends AbstractTokenGranter {
                                                 ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
         super(tokenServices, clientDetailsService, requestFactory, grantType);
         this.authenticationManager = authenticationManager;
+        super.setAuthenticationManager(authenticationManager);
     }
 
     @Override
@@ -64,23 +60,7 @@ public class UumsTokenGranter extends AbstractTokenGranter {
         Authentication userAuth = new UumsAuthentication(username, UumsAuthenticationCredentials.builder()
                 .password(password).appcode(appcode).build());
         ((AbstractAuthenticationToken) userAuth).setDetails(parameters);
-        try {
-            userAuth = authenticationManager.authenticate(userAuth);
-        }
-        catch (AccountStatusException ase) {
-            //covers expired, locked, disabled cases (mentioned in section 5.2, draft 31)
-            throw new InvalidGrantException(ase.getMessage());
-        }
-        catch (BadCredentialsException e) {
-            // If the username/password are wrong the spec says we should send 400/invalid grant
-            throw new InvalidGrantException(e.getMessage());
-        }
-        if (userAuth == null || !userAuth.isAuthenticated()) {
-            throw new InvalidGrantException("Could not authenticate user: " + username);
-        }
-
-        OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
-        return new OAuth2Authentication(storedOAuth2Request, userAuth);
+        return this.genericOAuth2Authentication(userAuth, client, tokenRequest);
     }
 
 }

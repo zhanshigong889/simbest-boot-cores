@@ -5,9 +5,13 @@ import com.simbest.boot.base.repository.Oauth2ClientDetailsRepository;
 import com.simbest.boot.base.service.IOauth2ClientDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.stereotype.Service;
+
+import static com.simbest.boot.constants.AuthoritiesConstants.OAUTH2_UNKNOW_CLIENT;
 
 /**
  * 用途：Oauth2 客户端信息逻辑层
@@ -32,6 +36,7 @@ public class Oauth2ClientDetailsService extends GenericService<Oauth2ClientDetai
         ClientDetails clientDetails = repository.findByClientId(clientId);
         if(null == clientDetails){
             log.error("无法获取到OAuth2的信息，目前接收的clientId为【{}】，请检查数据库oauth2client_details配置和请求参数", clientId);
+            throw new BadCredentialsException(OAUTH2_UNKNOW_CLIENT+clientId);
         }
         return clientDetails;
     }

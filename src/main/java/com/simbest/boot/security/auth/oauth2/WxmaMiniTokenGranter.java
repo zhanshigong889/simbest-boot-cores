@@ -7,18 +7,13 @@ import com.simbest.boot.security.auth.authentication.wxma.WxmaAuthenticationCred
 import com.simbest.boot.security.auth.authentication.wxma.WxmaMiniAuthenticationToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
-import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
 import java.util.LinkedHashMap;
@@ -34,7 +29,7 @@ import java.util.Map;
  *
  */
 @Slf4j
-public class WxmaMiniTokenGranter extends AbstractTokenGranter {
+public class WxmaMiniTokenGranter extends Oauth2ExtendTokenGranter {
 
     private static final String GRANT_TYPE = "wxmamini";
 
@@ -49,6 +44,7 @@ public class WxmaMiniTokenGranter extends AbstractTokenGranter {
                                    ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
         super(tokenServices, clientDetailsService, requestFactory, grantType);
         this.authenticationManager = authenticationManager;
+        super.setAuthenticationManager(authenticationManager);
     }
 
     /**
@@ -66,32 +62,12 @@ public class WxmaMiniTokenGranter extends AbstractTokenGranter {
         String encryptedData = parameters.get("encryptedData");
         String iv = parameters.get("iv");
         Boolean forceCreate = Boolean.valueOf(parameters.get("forceCreate"));
-
+        log.debug("OAUTH2即将通过WxmaMiniTokenGranter进行认证，appcode【{}】appid【{}】wxcode【{}】encryptedData【{}】iv【{}】",
+               appcode, appid, wxcode, encryptedData, iv);
         Authentication userAuth = new WxmaMiniAuthenticationToken(appid, WxmaAuthenticationCredentials.builder()
                 .appcode(appcode).appid(appid).wxcode(wxcode).encryptedData(encryptedData).iv(iv).forceCreate(forceCreate).build());
         ((AbstractAuthenticationToken) userAuth).setDetails(parameters);
-        try {
-            userAuth = authenticationManager.authenticate(userAuth);
-        }
-        catch (AccountStatusException ase) {
-            log.warn("Token认证发生异常【{}】", ase.getMessage());
-            throw new InvalidGrantException(ase.getMessage());
-        }
-        catch (BadCredentialsException be) {
-            log.warn("Token认证发生异常【{}】", be.getMessage());
-            throw new InvalidGrantException(be.getMessage());
-        }
-        catch (Exception e) {
-            log.warn("Token认证发生异常【{}】", e.getMessage());
-            throw new InvalidGrantException(e.getMessage());
-        }
-        if (userAuth == null || !userAuth.isAuthenticated()) {
-            log.warn("认证主体为空或校验失败【{}】", userAuth);
-            throw new InvalidGrantException(String.format("微信小程序认证%s失败", wxcode));
-        }
-
-        OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
-        return new OAuth2Authentication(storedOAuth2Request, userAuth);
+        return this.genericOAuth2Authentication(userAuth, client, tokenRequest);
     }
 
 }

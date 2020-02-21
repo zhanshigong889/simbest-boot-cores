@@ -58,4 +58,6 @@ public class AuthoritiesConstants {
     public static final String AttempMaxLoginFaildException = "错误登录超过"+ATTEMPT_LOGIN_MAX_TIMES+"次，锁定"+ATTEMPT_LOGIN_FAILED_WAIT_SECONDS/60+"分钟";
     public static final String InternalAuthenticationServiceException = "权限认证错误";
 
+    public static final String OAUTH2_UNKNOW_CLIENT = "错误的客户端：";
+
 }
