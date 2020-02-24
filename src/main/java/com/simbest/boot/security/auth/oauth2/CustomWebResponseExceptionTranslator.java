@@ -11,6 +11,8 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.stereotype.Component;
 
+import static com.simbest.boot.constants.ApplicationConstants.ONE;
+import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 import static com.simbest.boot.security.auth.oauth2.CustomOauthException.OAUTH2_FORBIDDEN;
 
 /**
@@ -37,7 +39,8 @@ public class CustomWebResponseExceptionTranslator extends DefaultWebResponseExce
                 if(null != result && result.length == 2){
                     return ResponseEntity
                             .status(oAuth2Exception.getHttpErrorCode())
-                            .body(new CustomOauthException(result[0], result[1]));
+                            //解析WxmaCodeAuthenticationProvider和WxmaMiniAuthenticationProvider抛出在CustomOauthException定义的OAUTH2_LOGIN_ERROR和OAUTH2_MINI_ERROR错误
+                            .body(new CustomOauthException(result[ZERO], result[ONE]));
                 }
             }
             return ResponseEntity

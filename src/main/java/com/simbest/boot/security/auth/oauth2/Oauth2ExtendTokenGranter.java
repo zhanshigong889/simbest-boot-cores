@@ -43,28 +43,33 @@ public abstract class Oauth2ExtendTokenGranter extends AbstractTokenGranter {
         try {
             userAuth = authenticationManager.authenticate(userAuth);
         }
+        catch (OAuth2Exception e){
+            log.error("OAUTH2 通用认证器认证发生错误【{}】", e.getMessage());
+            Exceptions.printException(e);
+            throw new InvalidGrantException(e.getMessage());
+        }
         catch (AccountStatusException e) {
             log.error("OAUTH2 通用认证器认证发生错误【{}】", e.getMessage());
             Exceptions.printException(e);
-            throw new InvalidGrantException(AuthoritiesConstants.BadCredentialsException);
+            throw new InvalidGrantException(e.getMessage());
         }
         catch (BadCredentialsException e) {
             log.error("OAUTH2 通用认证器认证发生错误【{}】", e.getMessage());
             Exceptions.printException(e);
-            throw new InvalidGrantException(AuthoritiesConstants.BadCredentialsException);
+            throw new InvalidGrantException(e.getMessage());
         }
         catch (AuthenticationException e){
             log.error("OAUTH2 通用认证器认证发生错误【{}】", e.getMessage());
             Exceptions.printException(e);
-            throw new BadCredentialsException(AuthoritiesConstants.BadCredentialsException);
+            throw new InvalidGrantException(e.getMessage());
         }
-        catch (OAuth2Exception e){
+        catch (Exception e){
             log.error("OAUTH2 通用认证器认证发生错误【{}】", e.getMessage());
             Exceptions.printException(e);
-            throw new BadCredentialsException(AuthoritiesConstants.BadCredentialsException);
+            throw new InvalidGrantException(AuthoritiesConstants.BadCredentialsException);
         }
         if (userAuth == null || !userAuth.isAuthenticated()) {
-            throw new BadCredentialsException(AuthoritiesConstants.BadCredentialsException);
+            throw new InvalidGrantException(AuthoritiesConstants.BadCredentialsException);
         }
         OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
         return new OAuth2Authentication(storedOAuth2Request, userAuth);
