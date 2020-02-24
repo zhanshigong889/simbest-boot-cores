@@ -4,6 +4,7 @@
 package com.simbest.boot.util;
 
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -16,10 +17,7 @@ import com.simbest.boot.constants.ApplicationConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.ftp.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -34,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import static com.simbest.boot.constants.ApplicationConstants.SLASH;
@@ -195,10 +194,14 @@ public class AppFileSftpUtil {
                 throw new RuntimeException("FTP服务器无法连通");
             }
             // 开启服务器对UTF-8的支持，如果服务器支持就用UTF-8编码，否则就使用本地编码（GBK）.
-            if (FTPReply.isPositiveCompletion(ftp.sendCommand("OPTS UTF8", "ON"))) {
+          /*  if (FTPReply.isPositiveCompletion(ftp.sendCommand("OPTS UTF8", "ON"))) {
                 LOCAL_CHARSET = "UTF-8";
             }
-            ftp.setControlEncoding(LOCAL_CHARSET);
+            //设置中文的文件名称
+            ftp.setControlEncoding(LOCAL_CHARSET);*/
+            /*FTPClientConfig conf = new FTPClientConfig(FTPClientConfig.SYST_UNIX);
+            conf.setServerLanguageCode("zh");
+            ftp.configure(conf);*/
             //切换到上传目录
             if (!ftp.changeWorkingDirectory(directory)) {
                 //如果目录不存在创建目录
@@ -220,7 +223,8 @@ public class AppFileSftpUtil {
                 }
             }
             //设置上传文件的类型为二进制类型
-            ftp.setFileType(FTP.BINARY_FILE_TYPE);
+            ftp.setFileType(ftp.BINARY_FILE_TYPE);
+            //ftp.setFileTransferMode(ftp.STREAM_TRANSFER_MODE);
             //上传文件
             if (!ftp.storeFile(filename, input)) {
                 log.error("FTP上传失败！文件名：" + filename);
@@ -305,6 +309,9 @@ public class AppFileSftpUtil {
      * @throws Exception
      */
     public void upload(String directory, String fileName, byte[] byteArr) throws Exception {
+        String fileContent = StrUtil.str(byteArr,StandardCharsets.UTF_8);
+        //byteArr = StrUtil.bytes( fileContent,StandardCharsets.UTF_8 );
+        log.warn( "转换后>>>>>>ftp文件上传时，输出上传文件byte流【{}】", fileContent);
         upload(directory, fileName, new ByteArrayInputStream(byteArr));
     }
 
