@@ -226,7 +226,7 @@ public class AppFileSftpUtil {
             ftp.setFileType(ftp.BINARY_FILE_TYPE);
             //ftp.setFileTransferMode(ftp.STREAM_TRANSFER_MODE);
             //上传文件
-            if (!ftp.storeFile(filename, input)) {
+            if (!ftp.storeFile(new String(filename.getBytes(LOCAL_CHARSET), StandardCharsets.ISO_8859_1), input)) {
                 log.error("FTP上传失败！文件名：" + filename);
                 throw new RuntimeException("上传文件失败");
             }
