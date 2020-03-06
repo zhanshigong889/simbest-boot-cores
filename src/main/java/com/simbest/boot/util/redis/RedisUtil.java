@@ -53,7 +53,7 @@ public class RedisUtil {
     private static String prefix;
 
     /**
-     * @see RedisConfiguration#redisTemplate
+     *
      */
     @PostConstruct
     public void init() {
@@ -116,7 +116,7 @@ public class RedisUtil {
     /**
      * 模糊删除key
      *
-     * @param key
+     * @param pattern
      */
     public static Long mulDelete(String pattern) {
         Set<String> keys = cacheUtils.redisTemplate.keys(prefix + pattern + ApplicationConstants.STAR);
@@ -126,7 +126,7 @@ public class RedisUtil {
     /**
      * 模糊删除key(全局)
      *
-     * @param key
+     * @param pattern
      */
     public static Long mulDeleteGlobal(String pattern) {
         Set<String> keys = cacheUtils.redisTemplate.keys(pattern + ApplicationConstants.STAR);
@@ -349,11 +349,10 @@ public class RedisUtil {
 
     /**
      * 保存复杂类型数据到缓存（并设置失效时间）
-     *
-     * @param prefix + key
-     * @param Object
+     * @param key
+     * @param obj
      * @param seconds
-     * @return
+     * @param <T>
      */
     public static <T> void setBean(String key, T obj, int seconds) {
         cacheUtils.redisTemplate.opsForValue().set(prefix + key, JacksonUtils.obj2json(obj), seconds, TimeUnit.SECONDS);
@@ -366,11 +365,10 @@ public class RedisUtil {
 
     /**
      * 取得复杂类型数据
-     *
-     * @param prefix + key
-     * @param obj
+     * @param key
      * @param clazz
-     * @return T
+     * @param <T>
+     * @return
      */
     public static <T> T getBean(String key, Class<T> clazz) {
         String value = cacheUtils.redisTemplate.opsForValue().get(prefix + key);
@@ -441,7 +439,7 @@ public class RedisUtil {
 	 * 设置ASCII码, 字符串'a'的ASCII码是97, 转为二进制是'01100001', 此方法是将二进制第offset位值变为value
 	 * 
 	 * @param key
-	 * @param postion
+	 * @param offset
 	 *            位置
 	 * @param value
 	 *            值,true为1, false为0
@@ -540,7 +538,7 @@ public class RedisUtil {
 	 * 增加(自增长)
 	 * 
 	 * @param key
-	 * @param value
+	 * @param increment
 	 * @return Long
 	 */
 	public static Long incrBy(String key, long increment) {
@@ -559,10 +557,9 @@ public class RedisUtil {
 
     /**
      * 减少(自减少)
-     *
      * @param key
-     * @param value
-     * @return Long
+     * @param increment
+     * @return
      */
     public static Long decrBy(String key, long increment) {
         return cacheUtils.redisTemplate.opsForValue().increment(prefix+key, increment*-1);

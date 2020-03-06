@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 用途：
+ * 用途：自定义基于Redis的令牌存储
  * 作者: lishuyi
  * 时间: 2018/8/27  15:29
  */

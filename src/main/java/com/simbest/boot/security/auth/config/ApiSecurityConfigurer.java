@@ -14,15 +14,19 @@ import com.simbest.boot.security.auth.oauth2.WxmaBindTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaCodeTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaMiniTokenGranter;
 import com.simbest.boot.security.auth.provider.GenericAuthenticationChecker;
+import com.simbest.boot.security.auth.oauth2.Oauth2TokenServices;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -34,7 +38,10 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +59,8 @@ import java.util.List;
  * 获取token请求（/oauth/token），请求所需参数：client_id、client_secret、grant_type
  * client模式：http://localhost:8080/uums/oauth/token?grant_type=client_credentials&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e
  * password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=111.com
- * uums扩展后的password模式：http://10.92.80.72:8088/andhall/oauth/token?grant_type=uumspassword&scope=all&client_id=simbest_andhall&client_secret=338d6311c8efad8314b9212860adb12e&appcode=andhall&username=zhengxiaolei&password=pVOMsZTPznKFDU82BNN4BtaALbM4eQ/FphXo77BdSXnn+TTJU2yPqbVKhFoHCG5Kgcm7OuBBlhykzaRgUwGAn7xTXEKdU/uE3bBr4jRDKeOXJ8LxMyelqXFnPVOhF5/GqGCCbafp40BwMUDKdxqdqRVttZmjEST27DmX1U9Hqdc=
+ * rsa加密password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=nvXgA1H+5GLFVP9Fi4vFEZLRU8WzNC2XOAC2lOieB6T9B1rNPzWp1PNs5WptaX3ipQ8znbtn8RdIjDFkVhLx09hvAgWEjQFzYStMk8qAhQWUXa7bZOtC6RQDFJ0WEuDLPyF9CSjN5o3DrEVnNqzTRAHfeP2AYK+N0MsVCI5DkcQ=
+ * uums认证password模式：http://10.92.80.72:8088/andhall/oauth/token?grant_type=uumspassword&scope=all&client_id=simbest_andhall&client_secret=338d6311c8efad8314b9212860adb12e&appcode=andhall&username=zhengxiaolei&password=pVOMsZTPznKFDU82BNN4BtaALbM4eQ/FphXo77BdSXnn+TTJU2yPqbVKhFoHCG5Kgcm7OuBBlhykzaRgUwGAn7xTXEKdU/uE3bBr4jRDKeOXJ8LxMyelqXFnPVOhF5/GqGCCbafp40BwMUDKdxqdqRVttZmjEST27DmX1U9Hqdc=
  * 注意：
  *  1、client的password的有两种方式：1、BCryptPasswordEncoder加密前的MD5值  2、SecurityUtils万能密码的MD5值
  *  2、client_secret对Simbest_2018做MD5加密得：338d6311c8efad8314b9212860adb12e，而数据库中client_secret需要进行BCryptPasswordEncoder加密后存放，即 $2a$12$.s06wfoiyPGWRCH6xwfdlOt8h.eWQXz97ZQQ/RSFjeReArJy8Ymg2
@@ -62,7 +70,7 @@ import java.util.List;
  *
  * 刷新token请求（/oauth/token），请求所需参数：grant_type、refresh_token、client_id、client_secret
  * 注意：client模式没有refresh_token
- * http://localhost:8080/uums/oauth/token?grant_type=refresh_token&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e&refresh_token=fbde81ee-f419-42b1-1234-9191f1f95be9
+ * http://localhost:8080/uums/oauth/token?grant_type=refresh_token&client_id=password_changer&client_secret=e10adc3949ba59abbe56e057f20f883e&appcode=nma&refresh_token=fbde81ee-f419-42b1-1234-9191f1f95be9
  *
  * 检查token请求
  * http://localhost:8080/uums/oauth/check_token?token=d1034046-064d-4b5f-b9a6-c0f66abba28d
@@ -154,11 +162,35 @@ public class ApiSecurityConfigurer {
                     .accessDeniedHandler(accessDeniedHandler());
         }
 
+        private void addUserDetailsService(DefaultTokenServices tokenServices, UserDetailsService userDetailsService) {
+            if (userDetailsService != null) {
+                PreAuthenticatedAuthenticationProvider provider = new PreAuthenticatedAuthenticationProvider();
+                provider.setPreAuthenticatedUserDetailsService(new UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken>(
+                        userDetailsService));
+                tokenServices
+                        .setAuthenticationManager(new ProviderManager(Arrays.<AuthenticationProvider> asList(provider)));
+            }
+        }
+
+        @Bean
+        public Oauth2TokenServices createOauth2TokenServices() {
+            Oauth2TokenServices tokenServices = new Oauth2TokenServices();
+            tokenServices.setTokenStore(redisTokenStore);
+            tokenServices.setSupportRefreshToken(true);
+            tokenServices.setReuseRefreshToken(true);
+            tokenServices.setClientDetailsService(oauth2ClientDetailsService);
+//            tokenServices.setTokenEnhancer(tokenEnhancer());
+            addUserDetailsService(tokenServices, authService);
+            tokenServices.setGenericAuthenticationChecker(genericAuthenticationChecker);
+            return tokenServices;
+        }
+
         @Override
         public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
             // 配置tokenStore，保存到redis缓存中
             endpoints.authenticationManager(authenticationManager)
                     .tokenStore(redisTokenStore)
+                    .tokenServices(createOauth2TokenServices())
                     .tokenGranter(tokenGranter(endpoints))
                     // 不添加userDetailsService，刷新access_token时会报错
                     .userDetailsService(authService)

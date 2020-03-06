@@ -24,6 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -50,9 +51,13 @@ public class GenericAuthenticationChecker {
     public Authentication authChek(Authentication authentication, String appcode) {
         IUser authUser = null;
         try {
-            if (authentication instanceof UsernamePasswordAuthenticationToken || authentication instanceof UumsAuthentication) {
+            if (authentication instanceof UsernamePasswordAuthenticationToken
+                    || authentication instanceof UumsAuthentication
+                    //Oauth2 refresh_token
+                    || authentication instanceof PreAuthenticatedAuthenticationToken) {
                 authUser = authService.findByKey(authentication.getName(), IAuthService.KeyType.username);
-            } else if (authentication instanceof SsoUsernameAuthentication) {
+            }
+            else if (authentication instanceof SsoUsernameAuthentication) {
                 if (authentication.getPrincipal() instanceof UsernamePrincipal) {
                     UsernamePrincipal principal = (UsernamePrincipal) authentication.getPrincipal();
                     authUser = authService.findByKey(principal.getUsername(), IAuthService.KeyType.username);

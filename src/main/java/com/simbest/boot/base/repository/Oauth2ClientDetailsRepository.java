@@ -4,7 +4,6 @@
 package com.simbest.boot.base.repository;
 
 import com.simbest.boot.base.model.Oauth2ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -15,6 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface Oauth2ClientDetailsRepository extends GenericRepository<Oauth2ClientDetails, String> {
 
-    ClientDetails findByClientId(String clientId);
+    Oauth2ClientDetails findByClientId(String clientId);
 }
 
