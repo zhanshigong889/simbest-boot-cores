@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Maps;
 import com.mzlion.core.lang.Assert;
 import com.simbest.boot.base.exception.Exceptions;
@@ -75,7 +76,7 @@ public class MapUtil {
                     Object value = map.get(field.getName());
                     // 如果类型是Boolean 是封装类
                     if ("class java.lang.Boolean".equals(field.getGenericType().toString())){
-                        value = "1".equals(map.get(field.getName()).toString())?true:false;
+                        value = StrUtil.equals( "1",cn.hutool.core.map.MapUtil.getStr( map,field.getName())) ?true:false;
                     }
                     field.set(obj, value);
                 }
@@ -137,7 +138,7 @@ public class MapUtil {
 
     /**
      * 简单 xml 转换为 Map
-     * @param reader
+     * @param xml
      * @return
      */
     public static Map<String,String> xmlToMap(String xml){
