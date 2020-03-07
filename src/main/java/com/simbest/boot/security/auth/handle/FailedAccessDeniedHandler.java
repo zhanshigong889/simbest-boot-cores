@@ -20,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -71,11 +72,13 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
             if(null != exception) {
                 log.warn("登录认证发生【{}】异常，错误信息为【{}】", exception.getClass().getSimpleName(), exception.getMessage());
                 if (exception instanceof UsernameNotFoundException || exception.getCause() instanceof UsernameNotFoundException) {
-                    jsonResponse.setError(AuthoritiesConstants.UsernameNotFoundException);
-                    jsonResponse.setErrcode(ERROR_CODE);
+                    jsonResponse.setError(AuthoritiesConstants.BadCredentialsException);
                 } else if (exception instanceof BadCredentialsException || exception.getCause() instanceof BadCredentialsException) {
                     jsonResponse.setError(AuthoritiesConstants.BadCredentialsException);
-                    jsonResponse.setErrcode(ERROR_CODE);
+                }
+                //DaoAuthenticationProvider的retrieveUser在用户不存在时会抛出此异常
+                else if (exception instanceof InternalAuthenticationServiceException || exception.getCause() instanceof InternalAuthenticationServiceException) {
+                    jsonResponse.setError(AuthoritiesConstants.BadCredentialsException);
                 } else if (exception instanceof AccountExpiredException || exception.getCause() instanceof AccountExpiredException) {
                     jsonResponse.setError(AuthoritiesConstants.AccountExpiredException);
                 } else if (exception instanceof DisabledException || exception.getCause() instanceof DisabledException) {
@@ -91,6 +94,7 @@ public class FailedAccessDeniedHandler implements AccessDeniedHandler, Authentic
                 } else {
                     jsonResponse.setError(AuthoritiesConstants.InternalAuthenticationServiceException);
                 }
+                jsonResponse.setMessage(jsonResponse.getError());
             }
             String responseStr = JacksonUtils.obj2json(jsonResponse);
             log.warn("访问控制校验异常，即将返回【{}】", responseStr);
