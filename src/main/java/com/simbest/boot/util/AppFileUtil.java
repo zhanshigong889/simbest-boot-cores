@@ -4,7 +4,6 @@
 package com.simbest.boot.util;
 
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.stuxuhai.jpinyin.ChineseHelper;
@@ -74,7 +73,7 @@ import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
 public class AppFileUtil {
 
     private static final String UPLOAD_FILE_PATTERN =
-            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm|html|htm|mov|flv|mp4|mp3)$";
+            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm|html|htm|mov|flv|mp4|mp3|amr)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
     @Autowired
@@ -111,10 +110,17 @@ public class AppFileUtil {
      * @return boolean
      */
     public static boolean validateUploadFileType(String fileName) {
-        Matcher matcher = pattern.matcher(getFileSuffix(fileName).toLowerCase());
-        boolean ret = matcher.matches();
-        log.debug("判断文件【{}】是否合法结果为【{}】", fileName, ret);
-        return ret;
+        String fileSuffix = getFileSuffix(fileName).toLowerCase();
+        if(StringUtils.isNotEmpty(fileSuffix)) {
+            Matcher matcher = pattern.matcher(fileSuffix);
+            boolean ret = matcher.matches();
+            log.debug("判断文件【{}】是否合法结果为【{}】", fileName, ret);
+            return ret;
+        }
+        //没有后缀的文件，也允许上传
+        else{
+            return true;
+        }
     }
 
     /**
@@ -315,6 +321,7 @@ public class AppFileUtil {
                 fileModels.add(sysFile);
             } else {
                 log.warn("【{}】文件类型受限，不允许上传！", filename);
+                throw new RuntimeException(filename+"文件类型受限，不允许上传！");
             }
         }
         return fileModels;
