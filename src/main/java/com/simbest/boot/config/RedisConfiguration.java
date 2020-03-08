@@ -4,8 +4,11 @@
 package com.simbest.boot.config;
 
 import com.google.common.collect.Maps;
+import com.simbest.boot.base.enums.StoreLocation;
+import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.component.distributed.lock.DistributedLockFactoryBean;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.util.AppFileSftpUtil;
 import com.simbest.boot.util.redis.RedisUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +43,17 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.simbest.boot.constants.ApplicationConstants.ONE;
+import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
 /**
  * 用途：Redis 和 RedissonClient 配置信息
@@ -58,6 +66,10 @@ import java.util.Map;
 @Slf4j
 public class RedisConfiguration extends CachingConfigurerSupport {
 
+    public enum RedisConfigType {
+        propertiesRedis,  ftpRedis,  sftpRedis
+    }
+
     @Autowired
     private AppConfig config;
 
@@ -69,6 +81,8 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @Getter
     private RedissonClient redissonClient;
+
+    private String redisClusterNodes;
 
     @PostConstruct
     private void afterPropertiesSet() {
@@ -97,8 +111,8 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @Bean
     public RedisClusterConfiguration redisClusterConfiguration(){
         Map<String, Object> source = Maps.newHashMap();
-        source.put("spring.redis.cluster.nodes", config.getRedisClusterNodes());
-        log.debug("Redis 启动节点为【{}】", config.getRedisClusterNodes());
+        source.put("spring.redis.cluster.nodes", redisClusterNodes);
+        log.debug("Redis 启动节点为【{}】", redisClusterNodes);
         source.put("spring.redis.cluster.max-redirects", config.getRedisMaxRedirects());
         log.info("Redis 最大重定向次数为为【{}】", config.getRedisMaxRedirects());
         return new RedisClusterConfiguration(new MapPropertySource("RedisClusterConfiguration", source));
@@ -121,18 +135,47 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        LettuceConnectionFactory factory;
-        if (config.getRedisClusterNodes().split(ApplicationConstants.COMMA).length == 1) {
-            RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
-            standaloneConfig.setHostName(config.getRedisClusterNodes().split(ApplicationConstants.COLON)[0]);
-            standaloneConfig.setPort(Integer.valueOf(config.getRedisClusterNodes().split(ApplicationConstants.COLON)[1]));
-            standaloneConfig.setPassword(RedisPassword.of(config.getRedisPassword()));
-            standaloneConfig.setDatabase(0);
-            factory = new LettuceConnectionFactory(standaloneConfig);
-        } else {
-            RedisClusterConfiguration clusterConfig = redisClusterConfiguration();
-            clusterConfig.setPassword(RedisPassword.of(config.getRedisPassword()));
-            factory = new LettuceConnectionFactory(clusterConfig);
+        LettuceConnectionFactory factory = null;
+        try {
+            RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfigType.class, config.getRedisConfigType());
+            Assert.notNull(redisConfigTypeEnum, "Redis配置类型不能为空");
+            if(RedisConfigType.propertiesRedis.equals(redisConfigTypeEnum)){
+                redisClusterNodes = config.getRedisClusterNodes();
+            }
+            else {
+                AppFileSftpUtil appFileSftpUtil = new AppFileSftpUtil();
+                appFileSftpUtil.setUsername(config.getRedisFtpUsername());
+                appFileSftpUtil.setPassword(config.getRedisPassword());
+                appFileSftpUtil.setHost(config.getRedisFtpHost());
+                appFileSftpUtil.setPort(config.getRedisFtpPort());
+                appFileSftpUtil.setKeyFilePath(config.getRedisFtpKeyFile());
+                appFileSftpUtil.setPassphrase(config.getRedisFtpPassphrase());
+                if(RedisConfigType.ftpRedis.equals(redisConfigTypeEnum)){
+                    appFileSftpUtil.setServerUploadLocation(StoreLocation.ftp);
+                }
+                if(RedisConfigType.sftpRedis.equals(redisConfigTypeEnum)){
+                    appFileSftpUtil.setServerUploadLocation(StoreLocation.sftp);
+                }
+                redisClusterNodes = new String(appFileSftpUtil.download2Byte(config.getRedisFtpNodeConfigDirectory(),
+                        config.getRedisFtpNodeConfigFile()));
+            }
+            redisClusterNodes = StringUtils.trimAllWhitespace(redisClusterNodes);
+            if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
+                RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
+                standaloneConfig.setHostName(redisClusterNodes.split(ApplicationConstants.COLON)[ZERO]);
+                standaloneConfig.setPort(Integer.valueOf(redisClusterNodes.split(ApplicationConstants.COLON)[ONE]));
+                standaloneConfig.setPassword(RedisPassword.of(config.getRedisPassword()));
+                standaloneConfig.setDatabase(0);
+                factory = new LettuceConnectionFactory(standaloneConfig);
+            } else {
+                RedisClusterConfiguration clusterConfig = redisClusterConfiguration();
+                clusterConfig.setPassword(RedisPassword.of(config.getRedisPassword()));
+                factory = new LettuceConnectionFactory(clusterConfig);
+            }
+        }
+        catch (Exception e){
+            log.error("加载Redis配置发生错误，请检查配置文件");
+            Exceptions.printException(e);
         }
         return factory;
     }
@@ -265,11 +308,11 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redissonClient() {
         Config redissonConfig = new Config();
-        if (config.getRedisClusterNodes().split(ApplicationConstants.COMMA).length == 1) {
-            redissonConfig.useSingleServer().setAddress("redis://"+config.getRedisClusterNodes())
+        if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
+            redissonConfig.useSingleServer().setAddress("redis://"+redisClusterNodes)
             .setPassword(config.getRedisPassword());
         } else {
-            String[] nodes = config.getRedisClusterNodes().split(ApplicationConstants.COMMA);
+            String[] nodes = redisClusterNodes.split(ApplicationConstants.COMMA);
             for(int i=0; i<nodes.length; i++){
                 nodes[i] = "redis://"+ nodes[i];
             }

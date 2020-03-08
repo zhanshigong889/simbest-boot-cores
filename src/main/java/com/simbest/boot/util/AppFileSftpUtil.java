@@ -14,6 +14,7 @@ import com.simbest.boot.base.enums.StoreLocation;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,23 +59,30 @@ public class AppFileSftpUtil {
     @Autowired
     private AppConfig config;
 
+    @Setter
     public StoreLocation serverUploadLocation;
 
+    @Setter
     @Value("${app.file.sftp.username}")
     private String username;
 
+    @Setter
     @Value("${app.file.sftp.password}")
     private String password;
 
+    @Setter
     @Value("${app.file.sftp.host}")
     private String host;
 
+    @Setter
     @Value("${app.file.sftp.port}")
     private int port;
 
+    @Setter
     @Value("${app.file.sftp.keyFilePath}")
     private String keyFilePath;
 
+    @Setter
     @Value("${app.file.sftp.passphrase}")
     private String passphrase;
 

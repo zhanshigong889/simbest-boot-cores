@@ -61,6 +61,33 @@ public class AppConfig {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
+    @Value("${spring.redis.config.type:propertiesRedis}")
+    private String redisConfigType;
+
+    @Value("${spring.redis.config.ftp.username:}")
+    private String redisFtpUsername;
+
+    @Value("${spring.redis.config.ftp.password:}")
+    private String redisFtpPassword;
+
+    @Value("${spring.redis.config.ftp.host:}")
+    private String redisFtpHost;
+
+    @Value("${spring.redis.config.ftp.port:22}")
+    private int redisFtpPort;
+
+    @Value("${spring.redis.config.ftp.keyFile:}")
+    private String redisFtpKeyFile;
+
+    @Value("${spring.redis.config.ftp.passphrase:}")
+    private String redisFtpPassphrase;
+
+    @Value("${spring.redis.config.ftp.node.config.directory:}")
+    private String redisFtpNodeConfigDirectory;
+
+    @Value("${spring.redis.config.ftp.node.config.file:}")
+    private String redisFtpNodeConfigFile;
+
     @Value("${spring.redis.cluster.nodes}")
     private String redisClusterNodes;
 
@@ -156,6 +183,15 @@ public class AppConfig {
         log.info("数据库URL【{}】", datasourceUrl);
         log.info("数据库账号【{}】", datasourceUsername);
         log.info("数据库密码【{}】", datasourcePassword);
+        log.info("Redis配置方式【{}】", redisConfigType);
+        log.info("Redis (S)FTP用户名【{}】", redisFtpUsername);
+        log.info("Redis (S)FTP密码【{}】", redisFtpPassword);
+        log.info("Redis (S)FTP主机【{}】", redisFtpHost);
+        log.info("Redis (S)FTP端口【{}】", redisFtpPort);
+        log.info("Redis (S)FTP私钥文件【{}】", redisFtpKeyFile);
+        log.info("Redis (S)FTP私钥密码【{}】", redisFtpPassphrase);
+        log.info("Redis (S)FTP节点配置目录【{}】", redisFtpNodeConfigDirectory);
+        log.info("Redis (S)FTP节点配置文件【{}】", redisFtpNodeConfigFile);
         log.info("Redis节点【{}】", redisClusterNodes);
         log.info("Redis密码【{}】", redisPassword);
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
