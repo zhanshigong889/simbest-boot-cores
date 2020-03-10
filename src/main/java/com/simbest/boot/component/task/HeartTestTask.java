@@ -47,6 +47,10 @@ public class HeartTestTask extends AbstractTaskSchedule {
         super.checkAndExecute(false);
     }
 
+    /**
+     * @see com.simbest.boot.sys.service.ISysHealthService
+     * @return
+     */
     @Override
     public String execute() {
         if(config.isOpenHeartCheck()) {

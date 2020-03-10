@@ -5,6 +5,7 @@ package com.simbest.boot.util;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.ftp.Ftp;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -331,22 +332,22 @@ public class AppFileSftpUtil {
      * @param downloadFile 下载的文件
      * @throws Exception
      */
-    public byte[] download2Byte(String directory, String downloadFile) {
+    public byte[] download2Byte(String directory, String fileName) {
         Assert.notNull(directory, "路径不能为空");
-        Assert.notNull(downloadFile, "文件名不能为空");
+        Assert.notNull(fileName, "文件名不能为空");
         byte[] fileData = null;
         switch (serverUploadLocation) {
             case ftp:
-                fileData = ftpDownload2Byte(directory, downloadFile);
+                fileData = ftpDownload2Byte(directory, fileName);
                 break;
             case sftp:
-                fileData = sftpDownload2Byte(directory, downloadFile);
+                fileData = sftpDownload2Byte(directory, fileName);
                 break;
         }
         return fileData;
     }
 
-    private byte[] ftpDownload2Byte(String directory, String downloadFile) {
+    private byte[] ftpDownload2Byte(String directory, String fileName) {
         byte[] fileData = null;
         FTPClient ftp = new FTPClient();
         try {
@@ -357,18 +358,23 @@ public class AppFileSftpUtil {
             reply = ftp.getReplyCode();
             if (!FTPReply.isPositiveCompletion(reply)) {
                 ftp.disconnect();
-                log.error("FTP上传失败！文件名：" + downloadFile);
+                log.error("FTP上传失败！文件名：" + fileName);
                 throw new RuntimeException("FTP服务器无法连通");
             }
-            ftp.changeWorkingDirectory(directory);// 转移到FTP服务器目录
-            FTPFile[] fs = ftp.listFiles();
-            for (FTPFile ff : fs) {
-                if (ff.getName().equals(downloadFile)) {
-                    ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
-                    ftp.retrieveFile(ff.getName(), outSteam);
-                    fileData = outSteam.toByteArray();
-                }
-            }
+            // 转移到FTP服务器目录
+            ftp.changeWorkingDirectory(directory);
+            log.debug("当前FTP工作路径【{}】", ftp.printWorkingDirectory());
+            ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+            ftp.retrieveFile(fileName, outSteam);
+            fileData = outSteam.toByteArray();
+//            FTPFile[] fs = ftp.listFiles();
+//            for (FTPFile ff : fs) {
+//                if (ff.getName().equals(fileName)) {
+//                    ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+//                    ftp.retrieveFile(ff.getName(), outSteam);
+//                    fileData = outSteam.toByteArray();
+//                }
+//            }
             ftp.logout();
         } catch (IOException e) {
             Exceptions.printException(e);
@@ -381,10 +387,11 @@ public class AppFileSftpUtil {
                 }
             }
         }
+        Assert.notNull(fileData, "下载文件不存在");
         return fileData;
     }
 
-    private byte[] sftpDownload2Byte(String directory, String downloadFile) {
+    private byte[] sftpDownload2Byte(String directory, String fileName) {
         connect();
         byte[] fileData = null;
         ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
@@ -392,42 +399,47 @@ public class AppFileSftpUtil {
         try {
             synchronized (this) {
                 sftp1.cd(directory);
-                sftp1.get(downloadFile, outSteam);
+                sftp1.get(fileName, outSteam);
                 fileData = outSteam.toByteArray();
             }
-            log.debug("SFTP下载文件成功！文件名：" + downloadFile);
-            return fileData;
+            log.debug("SFTP下载文件成功！文件名：" + fileName);
         } catch (Exception e) {
-            log.debug("SFTP下载文件失败！文件名：" + downloadFile);
+            log.debug("SFTP下载文件失败！文件名：" + fileName);
             Exceptions.printException(e);
             return null;
         } finally {
             disconnect();
         }
+        Assert.notNull(fileData, "下载文件不存在");
+        return fileData;
     }
 
     /**
      * 下载文件
      *
      * @param directory    下载目录
-     * @param downloadFile 下载的文件
-     * @param saveFile     存在本地的路径
+     * @param fileName 下载的文件
+     * @param saveTempFile     存在本地的路径
      * @throws Exception
      */
-    public File download2File(String directory, String downloadFile, File saveFile) {
+    public File download2File(String directory, String fileName, File saveTempFile) {
         try {
-            FileUtils.writeByteArrayToFile(saveFile, download2Byte(directory, downloadFile));
+            FileUtils.writeByteArrayToFile(saveTempFile, download2Byte(directory, fileName));
         } catch (IOException e) {
             Exceptions.printException(e);
             return null;
         }
-        return saveFile;
+        return saveTempFile;
     }
 
-    public void deleteFile(String filePath){
-        Assert.notNull(filePath, "文件路径不能为空");
-        String directory = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SEPARATOR);
-        String fileName = StringUtils.substringAfterLast(filePath, ApplicationConstants.SEPARATOR);
+    /**
+     * 删除文件，传递文件绝对路径地址
+     * @param fileFullPath
+     */
+    public void deleteFile(String fileFullPath){
+        Assert.notNull(fileFullPath, "文件路径不能为空");
+        String directory = StringUtils.substringBeforeLast(fileFullPath, ApplicationConstants.SEPARATOR);
+        String fileName = StringUtils.substringAfterLast(fileFullPath, ApplicationConstants.SEPARATOR);
         switch (serverUploadLocation) {
             case ftp:
                 ftpDeleteFile(directory, fileName);

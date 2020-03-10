@@ -756,12 +756,57 @@ public class AppFileUtil {
                 if ( BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
                     nginxFileUrl = StringUtils.replace(filePath, config.getCustomUploadBashPath(), config.getShareHostPost());
                 }
-                nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
-                log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
-                realFile = downloadFromUrl(nginxFileUrl);
+                if(nginxFileUrl.startsWith("http")) {
+                    nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
+                    log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
+                    realFile = downloadFromUrl(nginxFileUrl);
+                } else {
+                    log.warn("FTP磁盘文件未正确配置Nginx网络映射，请检查应用上传路径配置与Nginx配置");
+                }
                 break;
         }
         return realFile;
+    }
+
+    /**
+     * 不通过Nginx, 从FTP服务器下载文件
+     * @param directory
+     * @param filename
+     * @return
+     */
+    public File getFileFromFtpOrSftp(String directory, String filename){
+        Assert.notNull(directory, "文件路径不能为空!");
+        Assert.notNull(filename, "文件名称不能为空!");
+        File realFile = null;
+        switch (serverUploadLocation) {
+            case ftp:
+                log.debug("基于ftp，方式同sftp");
+            case sftp:
+                realFile = createTempFile(getFileSuffix(filename));
+                sftpUtil.download2File(directory, filename, realFile);
+                break;
+        }
+        return realFile;
+    }
+
+    /**
+     * 不通过Nginx, 从FTP服务器下载文件
+     * @param directory
+     * @param filename
+     * @return
+     */
+    public byte[] getByteFromFtpOrSftp(String directory, String filename){
+        Assert.notNull(directory, "文件路径不能为空!");
+        Assert.notNull(filename, "文件名称不能为空!");
+        byte[] realFileByte = null;
+        switch (serverUploadLocation) {
+            case ftp:
+                log.debug("基于ftp，方式同sftp");
+            case sftp:
+                realFileByte = sftpUtil.download2Byte(directory, filename);
+                break;
+        }
+        return realFileByte;
     }
 
     /**
