@@ -52,9 +52,9 @@ public abstract class AbstractTaskSchedule {
                 try {
                     //执行子类特定的定时任务
 //                    log.debug("定时任务开始执行，目前运行第【{}】次", times++);
-                    log.info("------------------------------【{}】上锁成功，即将执行定时任务", this.getClass().getName());
+                    log.debug("------------------------------【{}】上锁成功，即将执行定时任务", this.getClass().getName());
                     content = this.execute();
-                    log.info("------------------------------【{}】定时任务执行完毕", this.getClass().getName());
+                    log.debug("------------------------------【{}】定时任务执行完毕", this.getClass().getName());
                 } catch (Exception e) {
                     executeFlag = false;
                     log.error("------------------------------【{}】上锁成功，但执行任务发生异常", this.getClass().getSimpleName());
@@ -65,7 +65,8 @@ public abstract class AbstractTaskSchedule {
                         lock.getRLock().unlock();
                         log.info("------------------------------【{}】定时任务执行完毕，集群锁已成功释放", this.getClass().getName());
                     } catch (IllegalMonitorStateException emse) {
-                        log.trace(emse.getMessage());
+                        log.error("------------------------------【{}】定时任务执行完毕，集群锁解锁异常", this.getClass().getSimpleName());
+                        Exceptions.printException(emse);
                     }
                 }
                 if(writeLog) {
@@ -79,7 +80,7 @@ public abstract class AbstractTaskSchedule {
                             .executeFlag(executeFlag)
                             .build();
                     repository.save(taskExecutedLog);
-                    log.info("------------------------------【{}】定时任务执行完毕，已写入定时任务记录日志", this.getClass().getName());
+                    log.debug("------------------------------【{}】定时任务执行完毕，已写入定时任务记录日志", this.getClass().getName());
                 }
             }
         } else {

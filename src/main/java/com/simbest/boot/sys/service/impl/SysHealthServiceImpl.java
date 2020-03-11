@@ -68,7 +68,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
 
     @PostConstruct
     public void init(){
-        log.info("系统健康检查器开始初始化…………");
+        log.info("------------系统健康检查器开始初始化--------------");
         StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
         if(!StoreLocation.fastdfs.equals(serverUploadLocation)) {
             File localFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
