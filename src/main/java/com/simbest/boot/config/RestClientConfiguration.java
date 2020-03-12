@@ -38,8 +38,8 @@ public class RestClientConfiguration {
     @Bean
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(6000);// 设置建立连接超时时间  毫秒
-        requestFactory.setReadTimeout(6000);// 设置读取数据超时时间  毫秒
+        requestFactory.setConnectTimeout(1000 * 30);// 设置建立连接超时时间  毫秒
+        requestFactory.setReadTimeout(1000 * 30);// 设置读取数据超时时间  毫秒
         RestTemplate restTemplate = new RestTemplate(requestFactory);
 
         List<HttpMessageConverter<?>> messageConverters = Arrays.asList(

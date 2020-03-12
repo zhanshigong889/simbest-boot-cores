@@ -60,11 +60,11 @@ public class PostRequest {
     public PostRequest param(String name, String value, boolean replace) {
         //Assert.hasLength(name, "Name may not be null or empty.");
         if (StringUtils.isEmpty(name)) {
-            log.debug(" ===> The parameter[name] is null or empty.");
+            log.debug("参数名称name为空，忽略追加参数");
             return this;
         }
         if (!replace && value == null) {
-            log.warn(" ===> The value is null,ignore:name={},value=null", name);
+            log.debug("参数名称【{}】的参数值value为空，且不进行替换", name);
             return this;
         }
         List<String> valueList = this.formParams.get(name);

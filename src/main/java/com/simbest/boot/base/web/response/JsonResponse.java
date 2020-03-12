@@ -23,6 +23,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
+import static com.simbest.boot.constants.AuthoritiesConstants.ACCESS_FORBIDDEN;
+
 /**
  * 用途：Restful 接口通用返回的JSON对象
  * 作者: lishuyi 
@@ -167,6 +169,7 @@ public class JsonResponse {
                 errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error(HttpStatus.UNAUTHORIZED.name())
+                .message(ACCESS_FORBIDDEN)
                 .timestamp(new Date())
                 .build();
         log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));
@@ -177,9 +180,9 @@ public class JsonResponse {
         JsonResponse response = JsonResponse.builder().
                 errcode(HttpStatus.UNAUTHORIZED.value())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.name())
+                .error(exception.getMessage())
                 .timestamp(new Date())
-                .message(exception.getMessage())
+                .message(ACCESS_FORBIDDEN)
                 .path(request.getRequestURI())
                 .build();
         log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));

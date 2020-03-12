@@ -24,6 +24,9 @@ public class HttpClient {
 
     private static HttpClient httpClient;
 
+    /**
+     * @see com.simbest.boot.config.RestClientConfiguration
+     */
     @Autowired
     private RestTemplate restTemplate;
 
