@@ -320,7 +320,7 @@ public class AppFileSftpUtil {
     public void upload(String directory, String fileName, byte[] byteArr) throws Exception {
         String fileContent = StrUtil.str(byteArr,StandardCharsets.UTF_8);
         //byteArr = StrUtil.bytes( fileContent,StandardCharsets.UTF_8 );
-        log.warn( "转换后>>>>>>ftp文件上传时，输出上传文件byte流【{}】", fileContent);
+        //log.warn( "转换后>>>>>>ftp文件上传时，输出上传文件byte流【{}】", fileContent);
         upload(directory, fileName, new ByteArrayInputStream(byteArr));
     }
 
