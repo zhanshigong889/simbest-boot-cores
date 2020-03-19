@@ -4,6 +4,7 @@
 package com.simbest.boot.util;
 
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.stuxuhai.jpinyin.ChineseHelper;
@@ -204,6 +205,18 @@ public class AppFileUtil {
         return uploadFiles(directory, Arrays.asList(multipartFile),null).get(0);
     }
 
+
+    /**
+     * 上传多个文件   重载上面的方法
+     * @param directory 相对路径
+     * @param multipartFiles
+     * @return List<SysFile>
+     * @throws Exception
+     */
+    public List<SysFile> customUploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
+        return customUploadFiles(directory, multipartFiles,null);
+    }
+
     /**
      * 上传多个文件
      * @param directory 相对路径
@@ -265,6 +278,51 @@ public class AppFileUtil {
             }
         }
         return fileModels;
+    }
+
+    public SysFile customUploadNormalFiles(String directory, File uploadFile,String fileName) throws Exception {
+        SysFile sysFile = null;
+        String filePath = null;
+        String filename = StrUtil.isEmpty( fileName )?getFileName(uploadFile.getName()):fileName;
+        //特殊字符过滤，防止XSS漏洞
+        filename = JacksonUtils.escapeString(filename);
+        if(validateUploadFileType(filename)) {
+            log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, filename);
+            switch (serverUploadLocation) {
+                case disk:
+                    File targetFileDirectory = createCustomUploadDirectory(directory);
+                    byte[] bytes = FileUtil.readBytes(uploadFile);
+                    String pathTmp = targetFileDirectory.getPath() + ApplicationConstants.SLASH + filename;
+                    if ( StrUtil.endWithIgnoreCase( directory,ApplicationConstants.SLASH ) ){
+                        pathTmp = targetFileDirectory.getPath() + filename;
+                    }
+                    Path path = Paths.get(pathTmp);
+                    Files.write(path, bytes);
+                    filePath = path.toString();
+                    break;
+                case fastdfs:
+                    filePath = FastDfsClient.uploadFile(FileUtil.readBytes(uploadFile), filename, getFileSuffix(filename));
+                    break;
+                case ftp:
+                    log.debug("基于ftp，方式同sftp");
+                case sftp:
+                    sftpUtil.upload(directory, filename, FileUtil.readBytes(uploadFile));
+                    filePath = directory + ApplicationConstants.SLASH + filename;
+                    if ( StrUtil.endWithIgnoreCase( directory,ApplicationConstants.SLASH ) ){
+                        filePath = directory + filename;
+                    }
+                    break;
+            }
+            Assert.notNull(filePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
+            sysFile = SysFile.builder().fileName(filename).fileType(getFileSuffix(filename)).storeLocation(serverUploadLocation)
+                    .filePath(StringUtils.replace(filePath, ApplicationConstants.SEPARATOR, ApplicationConstants.SLASH))
+                    .fileSize(uploadFile.length()).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
+                    .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
+            log.debug("【{}】上传成功，具体信息如下: 【{}】", filename, sysFile.toString());
+        } else {
+            log.warn("【{}】文件类型受限，不允许上传！", filename);
+        }
+        return sysFile;
     }
 
     /**
@@ -339,17 +397,6 @@ public class AppFileUtil {
     }
 
     /**
-     * 上传多个文件   重载上面的方法
-     * @param directory 相对路径
-     * @param multipartFiles
-     * @return List<SysFile>
-     * @throws Exception
-     */
-    public List<SysFile> customUploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
-        return customUploadFiles(directory,multipartFiles,null);
-    }
-
-    /**
      * 将文件在远程URL读取后，再上传
      * @param fileUrl   远程文件URL
      * @param directory 相对路径
@@ -414,20 +461,41 @@ public class AppFileUtil {
         return sysFile;
     }
 
+    public SysFile uploadFromLocalDirectory(File localFile, String directory) {
+        File dir = null;
+        try {
+            dir = createUploadDirectory(directory);
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        }
+        Assert.notNull(dir, "创建上传路径异常");
+        return uploadFromLocal(localFile, dir);
+    }
+
+    public SysFile uploadFromLocalCustomDirectory(File localFile, String directory) {
+        File dir = null;
+        try {
+            dir = createCustomUploadDirectory(directory);
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        }
+        Assert.notNull(dir, "创建上传路径异常");
+        return uploadFromLocal(localFile, dir);
+    }
+
     /**
      * 将本地文件上传至系统
      * @param localFile  系统临时目录的文件
      * @param directory 相对路径
      * @return SysFile
      */
-    public SysFile uploadFromLocal(File localFile, String directory) {
+    public SysFile uploadFromLocal(File localFile, File dir) {
         String filePath = null;
         String fileName = localFile.getName();
         try {
             switch (serverUploadLocation) {
                 case disk:
-                    File targetFileDirectory = createUploadDirectory(directory);
-                    Path path = Paths.get(targetFileDirectory.getPath() + ApplicationConstants.SLASH + localFile.getName());
+                    Path path = Paths.get(dir.getPath() + ApplicationConstants.SLASH + localFile.getName());
                     Files.write(path, Files.readAllBytes(Paths.get(localFile.getAbsolutePath())));
                     filePath = path.toString();
                     break;
@@ -437,8 +505,8 @@ public class AppFileUtil {
                 case ftp:
                     log.debug("基于ftp，方式同sftp");
                 case sftp:
-                    sftpUtil.upload(createUploadDirectoryPath(directory), fileName, localFile);
-                    filePath = config.getUploadPath() + createUploadDirectoryPath(directory) + ApplicationConstants.SLASH + fileName;
+                    sftpUtil.upload(dir.getPath(), fileName, localFile);
+                    filePath = config.getUploadPath() + dir.getPath() + ApplicationConstants.SLASH + fileName;
                     break;
                 default:
                     break;
@@ -619,10 +687,10 @@ public class AppFileUtil {
     }
 
     /**
-     * 设置本地文件上传目录（适用于disk方式）
+     * 设置本地文件上传目录（适用于disk和共享存储方式）
      */
-    public File createCustomUploadDirectory(String directory) throws IOException {
-        String storePath = directory;
+    public File createUploadDirectory(String directory) throws IOException {
+        String storePath = config.getUploadPath() + createUploadDirectoryPath(directory);
         File targetFileDirectory = new File(storePath);
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);
@@ -632,10 +700,10 @@ public class AppFileUtil {
     }
 
     /**
-     * 设置本地文件上传目录（适用于disk方式）
+     * 设置本地文件上传目录（适用于disk和共享存储方式）
      */
-    public File createUploadDirectory(String directory) throws IOException {
-        String storePath = config.getUploadPath() + createUploadDirectoryPath(directory);
+    public File createCustomUploadDirectory(String directory) throws IOException {
+        String storePath = directory;
         File targetFileDirectory = new File(storePath);
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);
@@ -971,13 +1039,15 @@ public class AppFileUtil {
 //        String fileUrl = "http://mmbiz.qpic.cn/mmbiz_jpg/MyDnHITZqkiaoqpMdyFh84RP6pDZ4dMIHa2d4JFJWO5R6nGPVN1EA9GyVnfqiaxZ9EY5L3L0CBpAvRheQlxgvJ5Q/0";
 //        String fileUrl = "http://10.92.81.163:8088/group1/M00/00/00/ClxQR1uWKAyAM4c4AAAyAsyPzjY83.docx";
 //        String fileUrl = "http://shmhzs.free.idcfengye.com/anon/file/anonymous/sys/file/download?id=V569213798079004672";
-        String fileUrl = "http://10.87.42.136:8088/maipdocument/夏季防洪防汛.doc";
-        AppFileUtil util = new AppFileUtil();
-        File files = util.downloadFromUrl(fileUrl);
-        System.out.println(getFileName(fileUrl));
-        System.out.println(getFileBaseName(fileUrl));
-        System.out.println(getFileSuffix(fileUrl));
-
-        System.out.println(StrUtil.endWithIgnoreCase("/home/oaapp/simbestboot/uploadFiles/uploadFiles/anddoc/doc/","/") );
+//        String fileUrl = "http://10.87.42.136:8088/maipdocument/夏季防洪防汛.doc";
+//        AppFileUtil util = new AppFileUtil();
+//        File files = util.downloadFromUrl(fileUrl);
+//        System.out.println(getFileName(fileUrl));
+//        System.out.println(getFileBaseName(fileUrl));
+//        System.out.println(getFileSuffix(fileUrl));
+        File file1 = new File("C:\\Users\\kynel\\Desktop\\会议管理.doc");
+        System.out.println(getFileType(file1));
+        File file2 = new File("C:\\Users\\kynel\\Desktop\\附件四、河南移动业务支撑中心远程外包服务支撑申请表-OA专项.docx");
+        System.out.println(getFileType(file2));
     }
 }
