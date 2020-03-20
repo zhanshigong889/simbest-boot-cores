@@ -45,7 +45,6 @@ public class SysFile extends LogicModel {
     @EntityIdPrefix(prefix = "F") //主键前缀，此为可选项注解
     private String id;
 
-
     @ApiModelProperty(value = "文件名称")
     @Column(nullable = false, length = 200)
     @NonNull
@@ -109,5 +108,10 @@ public class SysFile extends LogicModel {
     @Column(length = 10)
     @Enumerated(EnumType.STRING)
     private StoreLocation storeLocation;
+
+    public static SysFile createSysFile(String fileName, String fileType, String filePath, Long fileSize, String downLoadUrl){
+        return SysFile.builder().fileName(fileName).fileType(fileType).filePath(filePath)
+                .fileSize(fileSize).downLoadUrl(fileType).build();
+    }
 
 }

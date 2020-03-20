@@ -13,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +54,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static com.simbest.boot.constants.ApplicationConstants.ONE;
+import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
 /**
  * 用途：定义逻辑删除Repository
@@ -108,7 +112,10 @@ public class LogicDeleteRepositoryImpl <T, ID extends Serializable> extends Simp
     @Override
     public T findOneActive(Specification<T> conditions) {
         List<T> list = super.findAll(conditions.and(notDeleted()));
-        return list.size()==0 ? null : list.get(0);
+        if(list.size() > ONE){
+            throw new IncorrectResultSizeDataAccessException(ONE);
+        }
+        return list.size()==ZERO ? null : list.get(ZERO);
     }
 
     @Override

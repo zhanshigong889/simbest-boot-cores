@@ -222,18 +222,18 @@ public class AppFileUtil {
 
     /**
      * 上传MultipartFile文件，自定义目录
-     * @param directory
+     * @param customDirectory
      * @param multipartFiles
      * @return
      * @throws Exception
      */
-    public List<SysFile> customUploadFiles(String directory, Collection<MultipartFile> multipartFiles) throws Exception {
-        return customUploadFiles(directory, multipartFiles,null);
+    public List<SysFile> customUploadFiles(String customDirectory, Collection<MultipartFile> multipartFiles) throws Exception {
+        return customUploadFiles(customDirectory, multipartFiles,null);
     }
 
     /**
      * 上传MultipartFile文件，自定义目录，自定义文件名
-     * @param directory
+     * @param customDirectory
      * @param multipartFiles
      * @param fileName
      * @return
@@ -285,7 +285,7 @@ public class AppFileUtil {
 
     /**
      * 上传普通File文件
-     * @param directory
+     * @param customDirectory
      * @param uploadFile
      * @param fileName
      * @return
@@ -325,9 +325,10 @@ public class AppFileUtil {
 
     /**
      * 上传单个文件  自定义文件名称
-     * @param directory 相对路径
+     * @param directory
      * @param multipartFile
-     * @return SysFile
+     * @param fileName
+     * @return
      * @throws Exception
      */
     public SysFile uploadFileWithFileName(String directory, MultipartFile multipartFile,String fileName) throws Exception {
@@ -758,6 +759,32 @@ public class AppFileUtil {
         return tempDirectory;
     }
 
+
+    /**
+     * 创建临时后缀临时文件
+     * @return File
+     */
+    public File createTempFile(){
+        return createTempFile(CodeGenerator.randomChar(4));
+    }
+
+    /**
+     * 创建固定名称的临时文件
+     * @param filename
+     * @return
+     */
+    public File createTempFileWithName(String filename){
+        File tempFile = null;
+        try {
+            tempFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat(filename));
+            FileUtils.touch(tempFile);
+        } catch (IOException e) {
+            Exceptions.printException(e);
+        }
+        log.debug("创建的临时文件路径为【{}】", tempFile.getAbsolutePath());
+        return tempFile;
+    }
+
     /**
      * 创建指定文件名称的临时文件
      * @param dir
@@ -779,13 +806,6 @@ public class AppFileUtil {
         return tempFile;
     }
 
-    /**
-     * 创建临时后缀临时文件
-     * @return File
-     */
-    public File createTempFile(){
-        return createTempFile(CodeGenerator.randomChar(4));
-    }
 
     /**
      * 创建带后缀临时文件
@@ -850,6 +870,7 @@ public class AppFileUtil {
 //                }
                 String nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
                 if ( BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
+                    //自定义了上传目录
                     nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
                 }
                 if(nginxFileUrl.startsWith("http")) {
