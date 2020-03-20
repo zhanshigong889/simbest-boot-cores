@@ -42,7 +42,7 @@ public class SysFile extends LogicModel {
     @Column(name = "id", length = 40)
     @GeneratedValue(generator = "snowFlakeId")
     @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.boot.util.distribution.id.SnowflakeId")
-    @EntityIdPrefix(prefix = "V") //主键前缀，此为可选项注解
+    @EntityIdPrefix(prefix = "F") //主键前缀，此为可选项注解
     private String id;
 
 

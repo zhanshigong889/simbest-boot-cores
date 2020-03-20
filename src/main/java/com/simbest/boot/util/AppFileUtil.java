@@ -77,6 +77,8 @@ public class AppFileUtil {
             "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm|html|htm|mov|flv|mp4|mp3|amr|csv)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
+    public static final String NGINX_STATIC_FILE_LOCATION = "/staticfiles";
+
     @Autowired
     private AppConfig config;
 
@@ -784,28 +786,28 @@ public class AppFileUtil {
     public File getFileFromSystem(SysFile sysFile){
         if(null == sysFile.getStoreLocation()){
             log.debug("文件记录的存储位置为空，将通过【{}】方式下载文件【{}】", serverUploadLocation, sysFile.getFilePath());
-            return getFileFromSystem(serverUploadLocation, sysFile.getFilePath());
+            return getFileFromSystem(serverUploadLocation, sysFile);
         }
         else{
             log.debug("将通过【{}】方式下载文件【{}】", sysFile.getStoreLocation(), sysFile.getFilePath());
-            return getFileFromSystem(sysFile.getStoreLocation(), sysFile.getFilePath());
+            return getFileFromSystem(sysFile.getStoreLocation(), sysFile);
         }
     }
 
-    public File getFileFromSystem(StoreLocation serverUploadLocation, String filePath){
+    public File getFileFromSystem(StoreLocation serverUploadLocation, SysFile sysFile){
         Assert.notNull(serverUploadLocation, "文件保存位置不能为空!");
         Assert.notNull(serverUploadLocation, "文件路径不能为空!");
         File realFile = null;
-        log.debug("即将以【{}】方式读取文件【{}】",serverUploadLocation, filePath);
+        log.debug("即将以【{}】方式读取文件【{}】",serverUploadLocation, sysFile.getFilePath());
         switch (serverUploadLocation) {
             case disk:
-                realFile = new File(filePath);
+                realFile = new File(sysFile.getFilePath());
                 if(!realFile.exists()){
                     realFile = null;
                 }
                 break;
             case fastdfs:
-                realFile = downloadFromUrl(getFileUrlFromFastDfs(filePath));
+                realFile = downloadFromUrl(config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath());
                 break;
             case ftp:
                 log.debug("基于ftp，方式同sftp");
@@ -820,9 +822,9 @@ public class AppFileUtil {
 //                        alias ${app.file.upload.path};
 //                        autoindex on;
 //                }
-                String nginxFileUrl = StringUtils.replace(filePath, config.getUploadPath(), config.getAppHostPort().concat("/staticfiles"));
+                String nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
                 if ( BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
-                    nginxFileUrl = StringUtils.replace(filePath, config.getCustomUploadBashPath(), config.getShareHostPost());
+                    nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
                 }
                 if(nginxFileUrl.startsWith("http")) {
                     nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
@@ -877,14 +879,14 @@ public class AppFileUtil {
         return realFileByte;
     }
 
-    /**
-     * 获取保存在FastDfs中的文件访问路径(免登陆)
-     * @param filePath
-     * @return String
-     */
-    public String getFileUrlFromFastDfs(String filePath){
-        return config.getAppHostPort() + ApplicationConstants.SLASH + filePath;
-    }
+//    /**
+//     * 获取保存在FastDfs中的文件访问路径(免登陆)
+//     * @param filePath
+//     * @return String
+//     */
+//    public String getFileUrlFromFastDfs(String filePath){
+//        return config.getAppHostPort() + ApplicationConstants.SLASH + filePath;
+//    }
 
     /**
      * 根据远程文件的url下载文件
