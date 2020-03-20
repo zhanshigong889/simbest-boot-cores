@@ -44,6 +44,4 @@ public class SpringContextUtil {
     public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) {
         return context.getBeansOfType(type);
     }
-
-
 }
