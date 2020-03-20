@@ -3,6 +3,7 @@ package com.simbest.boot.util;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * <strong>Title : ApplicationContextProvider</strong><br>
@@ -17,6 +18,7 @@ import org.springframework.context.ApplicationContextAware;
  * 修改人 修改日期 修改描述<br>
  * -------------------------------------------<br>
  */
+@Component
 public class ApplicationContextProvider implements ApplicationContextAware {
     /**
      * 上下文对象实例
