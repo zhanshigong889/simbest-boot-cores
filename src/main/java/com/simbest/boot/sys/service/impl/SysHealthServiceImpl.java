@@ -79,7 +79,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
             File file = appFileUtil.getFileFromSystem(testFile);
             if (null == file) {
                 FileUtil.writeString(ApplicationConstants.TEST, localFile, UTF_8);
-                testFile = appFileUtil.uploadFromLocalCustomDirectory(localFile, "hearttemps");
+                testFile = appFileUtil.uploadFromLocalAutoServerDirectory(localFile, "hearttemps");
                 log.info("测试文件已上传：【{}】", testFile);
             }
         }
