@@ -4,6 +4,7 @@
 package com.simbest.boot.config;
 
 import com.simbest.boot.component.GracefulShutdown;
+import com.simbest.boot.util.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Connector;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,9 @@ public class EmbeddedServletConfiguration {
     private AppConfig appConfig;
 
     @Autowired
+    private SpringContextUtil springContextUtil;
+
+    @Autowired
     private Environment env;
 
     @Value("${spring.servlet.multipart.max-file-size}")
@@ -38,7 +42,7 @@ public class EmbeddedServletConfiguration {
 
     @Bean
     public GracefulShutdown gracefulShutdown() {
-        return new GracefulShutdown(appConfig);
+        return new GracefulShutdown(appConfig, springContextUtil);
     }
 
     @Bean

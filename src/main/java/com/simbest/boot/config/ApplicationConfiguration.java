@@ -3,8 +3,10 @@
  */
 package com.simbest.boot.config;
 
+import com.simbest.boot.sys.service.IAppShutdownService;
 import com.simbest.boot.sys.service.ISimpleSmsService;
 import com.simbest.boot.sys.service.impl.CloopenSmsService;
+import com.simbest.boot.sys.service.impl.GenericAppShutdownService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,6 +33,16 @@ public class ApplicationConfiguration {
     @ConditionalOnMissingBean(value = ISimpleSmsService.class)
     public ISimpleSmsService cloopenSmsService() {
         return new CloopenSmsService(config.getSmsAccount(), config.getSmsToken(), config.getSmsAppId(), config.getSmsTemplateId());
+    }
+
+    /**
+     * 配置缺省的简单应用关闭钩子
+     * @return
+     */
+    @Bean
+    @ConditionalOnMissingBean(value = IAppShutdownService.class)
+    public IAppShutdownService genericAppShutdownService() {
+        return new GenericAppShutdownService();
     }
 
 }
