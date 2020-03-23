@@ -43,8 +43,6 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
 
     private volatile Connector connector;
 
-
-
     public GracefulShutdown(AppConfig appConfig, SpringContextUtil springContextUtil){
         this.appConfig = appConfig;
         this.springContextUtil = springContextUtil;
@@ -58,11 +56,11 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         log.debug("应用即将被关闭，销毁前清理工作".concat(SHUTDOWN_FLAG).concat("START"));
-        //程序销毁的时候， 删除应用临时上传的文件
         try {
             IAppShutdownService appShutdownService = springContextUtil.getBean(IAppShutdownService.class);
             appShutdownService.gracefulShutdown();
 
+            //程序销毁的时候， 删除应用临时上传的文件
             log.debug("正在删除应用临时目录【{}】的文件".concat(SHUTDOWN_FLAG), appConfig.getUploadTmpFileLocation());
             FileUtils.cleanDirectory(new File(appConfig.getUploadTmpFileLocation()));
             //程序销毁的时候， 删除reids缓存中放的tmp开头的临时变量

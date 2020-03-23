@@ -190,6 +190,7 @@ public class AppFileUtil {
             log.debug("目录不存在，即将强制创建路径【{}】", targetFileDirectory.getPath());
         }
         String pathTmp = targetFileDirectory.getPath() + ApplicationConstants.SLASH + fileName;
+        pathTmp = StringUtils.replace(pathTmp, "\\", SLASH);
         Path path = Paths.get(pathTmp);
         Files.write(path, uploadFileBytes);
         String filePath = path.toString();
@@ -204,6 +205,7 @@ public class AppFileUtil {
     }
 
     private String ftpSftpUpload(byte[] uploadFileBytes, String directory, String fileName) throws Exception {
+        directory = StringUtils.replace(directory, "\\", SLASH);
         sftpUtil.upload(directory, fileName, uploadFileBytes);
         String filePath = directory + ApplicationConstants.SLASH + fileName;
         if ( StrUtil.endWithIgnoreCase(directory, ApplicationConstants.SLASH ) ){
@@ -709,7 +711,8 @@ public class AppFileUtil {
      * 设置文件上传路径
      */
     public String createAutoUploadDirPath(String directory) {
-        return ApplicationConstants.SEPARATOR + DateUtil.getDateStr("yyyy")
+        return config.getUploadPath() + ApplicationConstants.SEPARATOR
+                + DateUtil.getDateStr("yyyy")
                 + ApplicationConstants.SEPARATOR + DateUtil.getDateStr("MM")
                 + ApplicationConstants.SEPARATOR + config.getAppcode()
                 + ApplicationConstants.SEPARATOR + directory;
@@ -719,7 +722,7 @@ public class AppFileUtil {
      * 设置本地文件上传目录（适用于disk和共享存储方式）
      */
     public File createAutoUploadDirFile(String directory) throws IOException {
-        String storePath = config.getUploadPath() + createAutoUploadDirPath(directory);
+        String storePath = createAutoUploadDirPath(directory);
         File targetFileDirectory = new File(storePath);
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);

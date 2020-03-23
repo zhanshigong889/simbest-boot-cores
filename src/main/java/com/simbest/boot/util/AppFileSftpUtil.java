@@ -6,6 +6,8 @@ package com.simbest.boot.util;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ftp.Ftp;
+import cn.hutool.extra.ssh.JschUtil;
+import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -38,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import static com.simbest.boot.constants.ApplicationConstants.SLASH;
+import static org.apache.commons.io.Charsets.UTF_8;
 
 /**
  * 用途：
@@ -104,6 +107,67 @@ public class AppFileSftpUtil {
     }
 
     /**
+     * 将输入流的数据上传到sftp作为文件
+     *
+     * @param directory    上传到该目录
+     * @param fileName     sftp端文件名
+     * @param uploadFile   文件
+     * @throws Exception
+     */
+    public void upload(String directory, String fileName, File uploadFile) throws Exception {
+        upload(directory, fileName, new FileInputStream(uploadFile));
+    }
+
+    /**
+     * 将byte[]上传到sftp，作为文件。注意:从String生成byte[]是，要指定字符集。
+     *
+     * @param directory    上传到sftp目录
+     * @param fileName 文件在sftp端的命名
+     * @param byteArr      要上传的字节数组
+     * @throws Exception
+     */
+    public void upload(String directory, String fileName, byte[] byteArr) throws Exception {
+        upload(directory, fileName, new ByteArrayInputStream(byteArr));
+    }
+
+    /**
+     * 将输入流的数据上传到sftp作为文件
+     *
+     * @param directory    上传到该目录
+     * @param fileName  sftp端文件名
+     * @param input        输入流
+     * @throws Exception
+     */
+    public void upload(String directory, String fileName, InputStream inputStream) throws Exception {
+        Assert.notNull(directory, "路径不能为空");
+        Assert.notNull(fileName, "文件名不能为空");
+        Assert.notNull(inputStream, "文件流不能为空");
+        switch (serverUploadLocation) {
+            case ftp:
+                ftpUpload(directory, fileName, inputStream);
+                break;
+            case sftp:
+                sftpUpload(directory, fileName, inputStream);
+                break;
+        }
+
+    }
+
+    private void ftpUpload(String directory, String filename, InputStream inputStream) throws Exception {
+        if ( !BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
+            directory = config.getUploadPath()+directory;
+        }
+        try {
+            Ftp ftp = new Ftp(host, port, username, password, UTF_8 );
+            ftp.upload(directory, filename, inputStream);
+            inputStream.close();
+            ftp.close();
+        } catch (Exception e){
+            Exceptions.printException(e);
+        }
+    }
+
+    /**
      * 连接sftp服务器
      * 如果connect过程出现：Kerberos username [xxx]   Kerberos password
      * 解决办法：移步https://blog.csdn.net/a718515028/article/details/80356337
@@ -163,99 +227,8 @@ public class AppFileSftpUtil {
         }
     }
 
-    /**
-     * 将输入流的数据上传到sftp作为文件
-     *
-     * @param directory    上传到该目录
-     * @param fileName  sftp端文件名
-     * @param input        输入流
-     * @throws Exception
-     */
-    public void upload(String directory, String fileName, InputStream input) throws Exception {
-        Assert.notNull(directory, "路径不能为空");
-        Assert.notNull(fileName, "文件名不能为空");
-        Assert.notNull(input, "文件流不能为空");
-        switch (serverUploadLocation) {
-            case ftp:
-                ftpUpload(directory, fileName, input);
-                break;
-            case sftp:
-                sftpUpload(directory, fileName, input);
-                break;
-        }
-    }
-
-    private void ftpUpload(String directory, String filename, InputStream input) throws Exception {
-        if ( !BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
-            directory = config.getUploadPath()+directory;
-        }
-        directory = StringUtils.replace(directory, "\\", SLASH);
-        FTPClient ftp = new FTPClient();
-        try {
-            int reply;
-            ftp.connect(host, port);// 连接FTP服务器
-            // 如果采用默认端口，可以使用ftp.connect(host)的方式直接连接FTP服务器
-            ftp.login(username, password);// 登录
-            reply = ftp.getReplyCode();
-            if (!FTPReply.isPositiveCompletion(reply)) {
-                ftp.disconnect();
-                log.error("FTP上传失败！文件名：" + filename);
-                throw new RuntimeException("FTP服务器无法连通");
-            }
-            // 开启服务器对UTF-8的支持，如果服务器支持就用UTF-8编码，否则就使用本地编码（GBK）.
-          /*  if (FTPReply.isPositiveCompletion(ftp.sendCommand("OPTS UTF8", "ON"))) {
-                LOCAL_CHARSET = "UTF-8";
-            }
-            //设置中文的文件名称
-            ftp.setControlEncoding(LOCAL_CHARSET);*/
-            /*FTPClientConfig conf = new FTPClientConfig(FTPClientConfig.SYST_UNIX);
-            conf.setServerLanguageCode("zh");
-            ftp.configure(conf);*/
-            //切换到上传目录
-            if (!ftp.changeWorkingDirectory(directory)) {
-                //如果目录不存在创建目录
-                String[] dirs = directory.split("/");
-                String tempPath = "";
-                for (String dir : dirs) {
-                    if (null == dir || "".equals(dir)) continue;
-                    tempPath += "/" + dir;
-                    if (!ftp.changeWorkingDirectory(tempPath)) {  //进不去目录，说明该目录不存在
-                        if (!ftp.makeDirectory(tempPath)) { //创建目录
-                            //如果创建文件目录失败，则返回
-                            log.error("FTP上传失败！文件名：" + filename);
-                            throw new RuntimeException("创建文件目录" + tempPath + "失败");
-                        } else {
-                            //目录存在，则直接进入该目录
-                            ftp.changeWorkingDirectory(tempPath);
-                        }
-                    }
-                }
-            }
-            //设置上传文件的类型为二进制类型
-            ftp.setFileType(ftp.BINARY_FILE_TYPE);
-            //ftp.setFileTransferMode(ftp.STREAM_TRANSFER_MODE);
-            //上传文件
-            if (!ftp.storeFile(new String(filename.getBytes(LOCAL_CHARSET), StandardCharsets.ISO_8859_1), input)) {
-                log.error("FTP上传失败！文件名：" + filename);
-                throw new RuntimeException("上传文件失败");
-            }
-            input.close();
-            ftp.logout();
-        } catch (IOException e) {
-            Exceptions.printException(e);
-        } finally {
-            if (ftp.isConnected()) {
-                try {
-                    ftp.disconnect();
-                } catch (IOException ioe) {
-                    Exceptions.printException(ioe);
-                }
-            }
-        }
-    }
 
     private void sftpUpload(String directory, String sftpFileName, InputStream input) throws Exception {
-        directory = StringUtils.replace(directory, "\\", SLASH);
         try {
             connect();
             try {// 如果cd报异常，说明目录不存在，就创建目录
@@ -287,41 +260,6 @@ public class AppFileSftpUtil {
         finally {
             disconnect();
         }
-    }
-
-    /**
-     * 将输入流的数据上传到sftp作为文件
-     *
-     * @param directory    上传到该目录
-     * @param fileName     sftp端文件名
-     * @param uploadFile   文件
-     * @throws Exception
-     */
-    public void upload(String directory, String fileName, File uploadFile) throws Exception {
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(uploadFile);
-            upload(directory, fileName, in);
-        } catch (Exception ex) {
-            if (in != null) {
-                in.close();
-            }
-        }
-    }
-
-    /**
-     * 将byte[]上传到sftp，作为文件。注意:从String生成byte[]是，要指定字符集。
-     *
-     * @param directory    上传到sftp目录
-     * @param fileName 文件在sftp端的命名
-     * @param byteArr      要上传的字节数组
-     * @throws Exception
-     */
-    public void upload(String directory, String fileName, byte[] byteArr) throws Exception {
-        String fileContent = StrUtil.str(byteArr,StandardCharsets.UTF_8);
-        //byteArr = StrUtil.bytes( fileContent,StandardCharsets.UTF_8 );
-        //log.warn( "转换后>>>>>>ftp文件上传时，输出上传文件byte流【{}】", fileContent);
-        upload(directory, fileName, new ByteArrayInputStream(byteArr));
     }
 
 
