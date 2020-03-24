@@ -57,7 +57,7 @@ import static com.simbest.boot.util.AppFileUtil.NGINX_STATIC_FILE_LOCATION;
  */
 @Api(description = "SysFileController", tags = {"系统管理-文件管理"})
 @Slf4j
-@RestController
+@Controller
 @RequestMapping("/sys/file")
 public class SysFileController extends LogicController<SysFile, String> {
 
@@ -278,6 +278,13 @@ public class SysFileController extends LogicController<SysFile, String> {
     public JsonResponse deleteById(@RequestParam("id") String id){
         fileService.deleteById(id);
         return JsonResponse.defaultSuccessResponse();
+    }
+
+    @PostMapping(value = {"/update" , "/update/api", "/update/sso"})
+    @ResponseBody
+    public JsonResponse updateSysFile(@RequestBody SysFile sysFile) {
+        JsonResponse jsonResponse = super.update( sysFile );
+        return jsonResponse;
     }
 
 //    /**
