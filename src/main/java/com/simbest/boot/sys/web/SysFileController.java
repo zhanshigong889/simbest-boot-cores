@@ -280,9 +280,10 @@ public class SysFileController extends LogicController<SysFile, String> {
         return JsonResponse.defaultSuccessResponse();
     }
 
-    @PostMapping(value = {"/update" , "/update/api", "/update/sso"})
+    @Override
     @ResponseBody
-    public JsonResponse updateSysFile(@RequestBody SysFile sysFile) {
+    @PostMapping(value = {"/update" , "/update/api", "/update/sso"})
+    public JsonResponse update(@RequestBody SysFile sysFile) {
         JsonResponse jsonResponse = super.update( sysFile );
         return jsonResponse;
     }
