@@ -31,12 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -62,7 +57,7 @@ import static com.simbest.boot.util.AppFileUtil.NGINX_STATIC_FILE_LOCATION;
  */
 @Api(description = "SysFileController", tags = {"系统管理-文件管理"})
 @Slf4j
-@Controller
+@RestController
 @RequestMapping("/sys/file")
 public class SysFileController extends LogicController<SysFile, String> {
 
