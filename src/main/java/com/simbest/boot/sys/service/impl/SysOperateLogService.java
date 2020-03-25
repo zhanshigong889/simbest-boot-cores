@@ -5,6 +5,7 @@ import com.simbest.boot.base.service.impl.LogicService;
 import com.simbest.boot.sys.model.SysOperateLog;
 import com.simbest.boot.sys.repository.SysOperateLogRepository;
 import com.simbest.boot.sys.service.ISysOperateLogService;
+import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.security.LoginUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +59,7 @@ public class SysOperateLogService extends LogicService<SysOperateLog,String> imp
 
     @Override
     public SysOperateLog saveLog ( Map<String, Object> sysOperateLogParam ) {
+        log.warn( "操作日志，参数为：{}", JacksonUtils.obj2json( sysOperateLogParam ) );
         SysOperateLog sysOperateLog = new SysOperateLog();
         // 接收到请求，记录请求内容
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
