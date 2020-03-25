@@ -7,6 +7,7 @@ import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.base.service.impl.LogicService;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.exceptions.AppRuntimeException;
 import com.simbest.boot.sys.model.SysFile;
 import com.simbest.boot.sys.model.UploadFileResponse;
 import com.simbest.boot.sys.repository.SysFileRepository;
@@ -39,6 +40,8 @@ import java.util.Map;
 @Service
 @DependsOn(value = {"appFileUtil"})
 public class SysFileService extends LogicService<SysFile, String> implements ISysFileService {
+
+    public static final String FILE_ERROR = "文件操作异常【%s】";
 
     @Autowired
     private SysFileRepository repository;
@@ -80,101 +83,32 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     @Override
     @Transactional
     public List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart) {
-        List<SysFile> sysFileList = Lists.newArrayList();
+        List<SysFile> sysFileList;
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, sysFileList);
-//            for(SysFile sysFile : sysFileList){
-//                sysFile = super.insert(sysFile); //先保存文件获取ID
-//                sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
-//                sysFile.setApiFilePath(sysFile.getApiFilePath().concat("?id="+sysFile.getId()));
-//                sysFile.setAnonymousFilePath(sysFile.getAnonymousFilePath().concat("?id="+sysFile.getId()));
-//                sysFile.setPmInsType(pmInsType);
-//                sysFile.setPmInsId(pmInsId);
-//                sysFile.setPmInsTypePart(pmInsTypePart);
-//                String mobileFilePath = null;
-//                String apiFilePath = null;
-//                String anonymousFilePath = null;
-//                switch (serverUploadLocation) {
-//                    case disk:
-//                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
-//                        apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
-//                        anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
-//                        break;
-//                    case fastdfs:
-//                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
-//                        apiFilePath = mobileFilePath;
-//                        anonymousFilePath = mobileFilePath;
-//                        break;
-//                    case ftp:
-//                    case sftp:
-//                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
-//                        apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
-//                        anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
-//                        break;
-//                }
-//                sysFile.setMobileFilePath( mobileFilePath );
-//                sysFile.setApiFilePath(apiFilePath);
-//                sysFile.setAnonymousFilePath(anonymousFilePath);
-//                super.update(sysFile); //再保存一下更新的值
-//            }
         } catch (IOException e) {
-            Exceptions.printException(e);
+            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         } catch (Exception e) {
-            Exceptions.printException(e);
+            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         }
         return sysFileList;
     }
 
     @Override
     public List<SysFile> uploadProcessFiles ( Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
-        List<SysFile> sysFileList = Lists.newArrayList();
+        List<SysFile> sysFileList;
         try {
             String pmInsTypePath = StrUtil.isEmpty( pmInsType )?"":pmInsType.concat( ApplicationConstants.SLASH  );
             String pmInsTypePartPath = StrUtil.isEmpty( pmInsTypePart )?"":pmInsTypePart.concat( ApplicationConstants.SLASH  );
             sysFileList = appFileUtil.customUploadFiles(customDirectory + ApplicationConstants.SLASH + pmInsTypePath + pmInsTypePartPath, multipartFiles,customFileName);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, sysFileList);
-//            for(SysFile sysFile : sysFileList){
-//                sysFile = super.insert(sysFile); //先保存文件获取ID
-//                sysFile.setDownLoadUrl(sysFile.getDownLoadUrl().concat("?id="+sysFile.getId())); //修改下载URL，追加ID
-//                sysFile.setApiFilePath(sysFile.getApiFilePath().concat("?id="+sysFile.getId()));
-//                sysFile.setAnonymousFilePath(sysFile.getAnonymousFilePath().concat("?id="+sysFile.getId()));
-//                sysFile.setPmInsType(pmInsType);
-//                sysFile.setPmInsId(pmInsId);
-//                sysFile.setPmInsTypePart(pmInsTypePart);
-//                String mobileFilePath = null;
-//                String apiFilePath = null;
-//                String anonymousFilePath = null;
-//                switch (serverUploadLocation) {
-//                    case disk:
-//                        mobileFilePath = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
-////                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
-//                        apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
-//                        anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
-//                        break;
-//                    case fastdfs:
-//                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath();
-//                        apiFilePath = mobileFilePath;
-//                        anonymousFilePath = mobileFilePath;
-//                        break;
-//                    case ftp:
-//                    case sftp:
-//                        mobileFilePath = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
-////                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
-//                        mobileFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getDownLoadUrl();
-//                        apiFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getApiFilePath();
-//                        anonymousFilePath = config.getAppHostPort() + ApplicationConstants.SLASH + config.getAppcode() + sysFile.getAnonymousFilePath();
-//                        break;
-//                }
-//                sysFile.setMobileFilePath( mobileFilePath );
-//                sysFile.setApiFilePath(apiFilePath);
-//                sysFile.setAnonymousFilePath(anonymousFilePath);
-//                super.update(sysFile); //再保存一下更新的值
-//            }
         } catch (IOException e) {
             Exceptions.printException(e);
+            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         } catch (Exception e) {
             Exceptions.printException(e);
+            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         }
         return sysFileList;
     }
@@ -227,6 +161,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 return uploadFileResponse;
             } catch (IOException e) {
                 Exceptions.printException(e);
+                throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
             }
         }
         return null;
@@ -247,6 +182,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 return uploadFileResponse;
             } catch (IOException e) {
                 Exceptions.printException(e);
+                throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
             }
         }
         return null;
@@ -267,6 +203,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                 return uploadFileResponse;
             } catch (IOException e) {
                 Exceptions.printException(e);
+                throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
             }
         }
         return null;
@@ -287,4 +224,5 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         boolean result = appFileUtil.deleteFile(sysFile);
         log.warn("物理删除文件结果为【{}】", result);
     }
+
 }
