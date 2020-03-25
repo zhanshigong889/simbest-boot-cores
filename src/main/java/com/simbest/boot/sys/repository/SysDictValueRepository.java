@@ -40,9 +40,9 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
     /**
      *根据字典类型以及值的父类型来查询数据字典中的相应值name以及value的值
      */
-    String sql4 = " SELECT dv.name as name,dv.value as name,dv.isDefault as isDefault from sys_dict d,sys_dict_value dv where d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 " +
+    String sql4 = " SELECT dv.name as name,dv.value as value,dv.isDefault as isDefault from sys_dict d,sys_dict_value dv where d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 " +
             " and d.dict_type=:dictType and dv.parent_id=:parentId"+
-            " order by dv.display_order asc ";
+            " order by dv.display_order asc";
     @Query (value = sql4,nativeQuery = true)
     List<Map<String,String>> findDictValue2(@Param ("dictType") String dictType,@Param ("parentId")String parentId);
 
@@ -53,6 +53,14 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
             " order by d.display_order asc, dv.display_order asc ";
     @Query (value = sql3,nativeQuery = true)
     List<Map<String,String>> findAllDictValue();
+
+    /**
+     * 查看数据字典的所有值
+     */
+    String sql6 = " SELECT dv.id, dv.name, dv.value, dv.display_order, dv.dict_type, dv.value_type, dv.is_default from sys_dict d,sys_dict_value dv where d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 "+
+            " order by d.display_order asc, dv.display_order asc ";
+    @Query (value = sql6,nativeQuery = true)
+    List<Map<String,String>> findAllDictValueMapList();
 
     /**
      * 根据dictType还有父id来查看字典的信息,单表查询

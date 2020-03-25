@@ -259,4 +259,14 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
         return JsonResponse.success(sysDictValueService.findAllDictValue());
     }
 
+    /**
+     *
+     * @return JsonResponse
+     */
+    @ApiOperation(value = "查看数据字典的所有值, Map结构，key为dictType，value为字典值list", notes = "查看数据字典的所有值, Map结构，key为dictType，value为字典值list")
+    @PostMapping(value = {"/findAllDictValueMapList", "/findAllDictValueMapList/sso", "/findAllDictValueMapList/api"})
+    public JsonResponse findAllDictValueMapList(){
+        return JsonResponse.success(sysDictValueService.findAllDictValueMapList());
+    }
+
 }

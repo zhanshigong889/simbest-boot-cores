@@ -2,6 +2,7 @@ package com.simbest.boot.sys.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.simbest.boot.base.service.impl.LogicService;
 import com.simbest.boot.exceptions.BusinessForbiddenException;
 import com.simbest.boot.sys.model.SysDict;
@@ -208,7 +209,24 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
         return dictValueRepository.findAllDictValue();
     }
 
+    @Override
+    public Map<String,List<Map<String,String>>> findAllDictValueMapList() {
+        Map<String,List<Map<String,String>>> resultMap = Maps.newHashMap();
+        List<Map<String, String>> dictValueMapList = dictValueRepository.findAllDictValueMapList();
+        for(Map<String, String> rowMap : dictValueMapList){
+            String dictType = rowMap.get("DICT_TYPE");
+            if(null == resultMap.get(dictType)){
+                List<Map<String,String>> dictTypeList = Lists.newArrayList();
+                dictTypeList.add(rowMap);
+                resultMap.put(dictType, dictTypeList);
+            }
+            else{
+                resultMap.get(dictType).add(rowMap);
+            }
 
+        }
+        return resultMap;
+    }
 
 
     @Override
