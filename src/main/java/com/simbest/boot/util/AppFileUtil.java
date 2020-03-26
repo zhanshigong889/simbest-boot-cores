@@ -184,13 +184,19 @@ public class AppFileUtil {
         return ret;
     }
 
+    public static String replaceSlash(String directory) {
+        directory = StringUtils.replace(directory, "\\", SLASH);
+        directory = StringUtils.replace(directory, "//", SLASH);
+        return directory;
+    }
+
     private String diskUpload(byte[] uploadFileBytes, File targetFileDirectory, String fileName) throws IOException {
         if (!targetFileDirectory.exists()) {
             FileUtils.forceMkdir(targetFileDirectory);
             log.debug("目录不存在，即将强制创建路径【{}】", targetFileDirectory.getPath());
         }
         String pathTmp = targetFileDirectory.getPath() + ApplicationConstants.SLASH + fileName;
-        pathTmp = StringUtils.replace(pathTmp, "\\", SLASH);
+        pathTmp = replaceSlash(pathTmp);
         Path path = Paths.get(pathTmp);
         Files.write(path, uploadFileBytes);
         String filePath = path.toString();
@@ -205,7 +211,7 @@ public class AppFileUtil {
     }
 
     private String ftpSftpUpload(byte[] uploadFileBytes, String directory, String fileName) throws Exception {
-        directory = StringUtils.replace(directory, "\\", SLASH);
+        directory = replaceSlash(directory);
         sftpUtil.upload(directory, fileName, uploadFileBytes);
         String filePath = directory + ApplicationConstants.SLASH + fileName;
         if ( StrUtil.endWithIgnoreCase(directory, ApplicationConstants.SLASH ) ){
@@ -703,7 +709,7 @@ public class AppFileUtil {
      * @return SysFile
      */
     public SysFile uploadCompressImageFromUrl(String imageUrl, float quality, String directory) {
-        File imageFile = downloadFromUrl(imageUrl);
+        File imageFile = downloadFileFromUrl(imageUrl);
         return uploadCompressImage(imageFile, quality, directory);
     }
 
@@ -711,11 +717,12 @@ public class AppFileUtil {
      * 设置文件上传路径
      */
     public String createAutoUploadDirPath(String directory) {
-        return config.getUploadPath() + ApplicationConstants.SEPARATOR
+        String dir = config.getUploadPath() + SLASH
                 + DateUtil.getDateStr("yyyy")
-                + ApplicationConstants.SEPARATOR + DateUtil.getDateStr("MM")
-                + ApplicationConstants.SEPARATOR + config.getAppcode()
-                + ApplicationConstants.SEPARATOR + directory;
+                + SLASH + DateUtil.getDateStr("MM")
+                + SLASH + config.getAppcode()
+                + SLASH + directory;
+        return replaceSlash(dir);
     }
 
     /**
@@ -856,7 +863,7 @@ public class AppFileUtil {
                 }
                 break;
             case fastdfs:
-                realFile = downloadFromUrl(config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath());
+                realFile = downloadFileFromUrl(config.getAppHostPort() + ApplicationConstants.SLASH + sysFile.getFilePath());
                 break;
             case ftp:
                 log.debug("基于ftp，方式同sftp");
@@ -877,9 +884,9 @@ public class AppFileUtil {
                     nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
                 }
                 if(nginxFileUrl.startsWith("http")) {
-                    nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
+                    nginxFileUrl = replaceSlash(nginxFileUrl);
                     log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
-                    realFile = downloadFromUrl(nginxFileUrl);
+                    realFile = downloadFileFromUrl(nginxFileUrl);
                 } else {
                     log.warn("FTP磁盘文件未正确配置Nginx网络映射，请检查应用上传路径配置与Nginx配置");
                 }
@@ -894,16 +901,16 @@ public class AppFileUtil {
      * @param filename
      * @return
      */
-    public File getFileFromFtpOrSftp(String directory, String filename){
+    public File downloadFileFromDir(String directory, String fileName){
         Assert.notNull(directory, "文件路径不能为空!");
-        Assert.notNull(filename, "文件名称不能为空!");
+        Assert.notNull(fileName, "文件名称不能为空!");
         File realFile = null;
         switch (serverUploadLocation) {
             case ftp:
                 log.debug("基于ftp，方式同sftp");
             case sftp:
-                realFile = createTempFile(getFileSuffix(filename));
-                sftpUtil.download2File(directory, filename, realFile);
+                realFile = createTempFile(getFileSuffix(fileName));
+                sftpUtil.download2File(directory, fileName, realFile);
                 break;
         }
         return realFile;
@@ -915,35 +922,26 @@ public class AppFileUtil {
      * @param filename
      * @return
      */
-    public byte[] getByteFromFtpOrSftp(String directory, String filename){
+    public byte[] downloadByteFromDir(String directory, String fileName){
         Assert.notNull(directory, "文件路径不能为空!");
-        Assert.notNull(filename, "文件名称不能为空!");
+        Assert.notNull(fileName, "文件名称不能为空!");
         byte[] realFileByte = null;
         switch (serverUploadLocation) {
             case ftp:
                 log.debug("基于ftp，方式同sftp");
             case sftp:
-                realFileByte = sftpUtil.download2Byte(directory, filename);
+                realFileByte = sftpUtil.download2Byte(directory, fileName);
                 break;
         }
         return realFileByte;
     }
-
-//    /**
-//     * 获取保存在FastDfs中的文件访问路径(免登陆)
-//     * @param filePath
-//     * @return String
-//     */
-//    public String getFileUrlFromFastDfs(String filePath){
-//        return config.getAppHostPort() + ApplicationConstants.SLASH + filePath;
-//    }
 
     /**
      * 根据远程文件的url下载文件
      * @param fileUrl
      * @return File
      */
-    public File downloadFromUrl(String fileUrl) {
+    public File downloadFileFromUrl(String fileUrl) {
         Assert.notNull(fileUrl, "下载链接地址不可为空");
         File targetFile = null;
         HttpURLConnection urlConnection = null;
@@ -1102,4 +1100,6 @@ public class AppFileUtil {
         File file2 = new File("C:\\Users\\kynel\\Desktop\\附件四、河南移动业务支撑中心远程外包服务支撑申请表-OA专项.docx");
         System.out.println(getFileType(file2));
     }
+
+
 }
