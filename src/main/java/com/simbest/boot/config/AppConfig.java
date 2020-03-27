@@ -192,7 +192,6 @@ public class AppConfig {
         log.info("Redis (S)FTP私钥密码【{}】", redisFtpPassphrase);
         log.info("Redis (S)FTP节点配置目录【{}】", redisFtpNodeConfigDirectory);
         log.info("Redis (S)FTP节点配置文件【{}】", redisFtpNodeConfigFile);
-        log.info("Redis节点【{}】", redisClusterNodes);
         log.info("Redis密码【{}】", redisPassword);
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
         log.info("Redis缓存空间前缀【{}】", redisNamespace);

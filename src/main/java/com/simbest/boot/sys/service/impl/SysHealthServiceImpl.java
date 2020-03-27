@@ -63,7 +63,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
     @Autowired
     private ISimpleSmsService smsService;
 
-    private SysFile testFile;
+    private SysFile testSysFile;
 
 
     @PostConstruct
@@ -71,16 +71,21 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
         log.info("------------系统健康检查器开始初始化--------------");
         StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
         if(!StoreLocation.fastdfs.equals(serverUploadLocation)) {
-            File localFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
-            if(null == testFile) {
-                testFile = SysFile.builder().fileName(localFile.getName()).fileType("txt").filePath(localFile.getAbsolutePath())
-                        .fileSize(localFile.length()).downLoadUrl(localFile.getAbsolutePath()).build();
+            File notExistLocalFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
+            if(null == testSysFile) {
+                testSysFile = SysFile.builder().fileName(notExistLocalFile.getName()).fileType("txt").filePath(notExistLocalFile.getAbsolutePath())
+                        .fileSize(notExistLocalFile.length()).downLoadUrl(notExistLocalFile.getAbsolutePath()).build();
             }
-            File file = appFileUtil.getFileFromSystem(testFile);
-            if (null == file) {
-                FileUtil.writeString(ApplicationConstants.TEST, localFile, UTF_8);
-                testFile = appFileUtil.uploadFromLocalAutoServerDirectory(localFile, "hearttemps");
-                log.info("测试文件已上传：【{}】", testFile);
+            File downloadTestFile = null;
+            try {
+                downloadTestFile = appFileUtil.getFileFromSystem(testSysFile);
+            }
+            catch (Exception e){
+                if (null == downloadTestFile) {
+                    FileUtil.writeString(ApplicationConstants.MSG_FILE_CHECK, notExistLocalFile, UTF_8);
+                    testSysFile = appFileUtil.uploadFromLocalAutoServerDirectory(notExistLocalFile, "hearttemps");
+                    log.info("测试文件已上传：【{}】", testSysFile);
+                }
             }
         }
     }
@@ -154,7 +159,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
         StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
         switch (serverUploadLocation) {
             case disk:
-                File diskFile = appFileUtil.getFileFromSystem(testFile);
+                File diskFile = appFileUtil.getFileFromSystem(testSysFile);
                 if(null == diskFile){
                     log.error("文件基于【{}】读取文件Fail", serverUploadLocation);
                     sysHealth.setResult(false);
@@ -162,7 +167,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                 }
                 else{
                     String content = FileUtil.readString(diskFile, UTF_8);
-                    if(ApplicationConstants.TEST.equals(content)) {
+                    if(ApplicationConstants.MSG_FILE_CHECK.equals(content)) {
                         log.info("文件系统基于disk方式，读取文件【{}】测试OK", diskFile);
                     }
                     else{
@@ -208,7 +213,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
             case ftp:
                 log.info("基于ftp，方式同sftp");
             case sftp:
-                File sftpFile = appFileUtil.getFileFromSystem(testFile);
+                File sftpFile = appFileUtil.getFileFromSystem(testSysFile);
                 if(null == sftpFile){
                     log.error("文件基于"+serverUploadLocation+"读取取文件失败");
                     sysHealth.setResult(false);

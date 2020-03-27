@@ -212,8 +212,7 @@ public class AppFileUtil {
 
     private String ftpSftpUpload(byte[] uploadFileBytes, String directory, String fileName) throws Exception {
         directory = replaceSlash(directory);
-        sftpUtil.upload(directory, fileName, uploadFileBytes);
-        String filePath = directory + ApplicationConstants.SLASH + fileName;
+        String filePath = sftpUtil.upload(directory, fileName, uploadFileBytes);
         if ( StrUtil.endWithIgnoreCase(directory, ApplicationConstants.SLASH ) ){
             filePath = directory + fileName;
         }
@@ -884,11 +883,12 @@ public class AppFileUtil {
                     nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
                 }
                 if(nginxFileUrl.startsWith("http")) {
-                    nginxFileUrl = replaceSlash(nginxFileUrl);
-                    log.debug("SFTP上传的文件即将通过URL：【{}】进行下载", nginxFileUrl);
+                    nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
+                    log.debug("即将以【{}】方式通过URL【{}】下载文件【{}】", serverUploadLocation, nginxFileUrl, sysFile.getFileName());
                     realFile = downloadFileFromUrl(nginxFileUrl);
                 } else {
-                    log.warn("FTP磁盘文件未正确配置Nginx网络映射，请检查应用上传路径配置与Nginx配置");
+                    log.warn("即将以【{}】方式通过路径【{}】下载文件【{}】", serverUploadLocation, sysFile.getFilePath(), sysFile.getFileName());
+                    realFile = sftpUtil.download2File(sysFile.getFilePath(), sysFile.getFileName(), createTempFileWithName(sysFile.getFileName()));
                 }
                 break;
         }

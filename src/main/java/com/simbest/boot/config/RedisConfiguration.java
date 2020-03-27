@@ -145,7 +145,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             else {
                 AppFileSftpUtil appFileSftpUtil = new AppFileSftpUtil();
                 appFileSftpUtil.setUsername(config.getRedisFtpUsername());
-                appFileSftpUtil.setPassword(config.getRedisPassword());
+                appFileSftpUtil.setPassword(config.getRedisFtpPassword());
                 appFileSftpUtil.setHost(config.getRedisFtpHost());
                 appFileSftpUtil.setPort(config.getRedisFtpPort());
                 appFileSftpUtil.setKeyFilePath(config.getRedisFtpKeyFile());
@@ -160,6 +160,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                         config.getRedisFtpNodeConfigFile()));
             }
             redisClusterNodes = StringUtils.trimAllWhitespace(redisClusterNodes);
+            log.info("==========================Redis节点为【{}】==========================", redisClusterNodes);
             if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
                 RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
                 standaloneConfig.setHostName(redisClusterNodes.split(ApplicationConstants.COLON)[ZERO]);

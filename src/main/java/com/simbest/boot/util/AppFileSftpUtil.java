@@ -97,8 +97,8 @@ public class AppFileSftpUtil {
      * @param uploadFile   文件
      * @throws Exception
      */
-    public void upload(String directory, String fileName, File uploadFile) throws Exception {
-        upload(directory, fileName, new FileInputStream(uploadFile));
+    public String upload(String directory, String fileName, File uploadFile) throws Exception {
+        return upload(directory, fileName, new FileInputStream(uploadFile));
     }
 
     /**
@@ -108,8 +108,8 @@ public class AppFileSftpUtil {
      * @param fileName     文件在sftp端的命名
      * @param byteArr      要上传的字节数组
      */
-    public void upload(String directory, String fileName, byte[] byteArr) {
-        upload(directory, fileName, new ByteArrayInputStream(byteArr));
+    public String upload(String directory, String fileName, byte[] byteArr) {
+        return upload(directory, fileName, new ByteArrayInputStream(byteArr));
     }
 
     /**
@@ -120,22 +120,24 @@ public class AppFileSftpUtil {
      * @param input        输入流
      * @throws Exception
      */
-    public void upload(String directory, String fileName, InputStream inputStream){
+    public String upload(String directory, String fileName, InputStream inputStream){
+        String fullFilePath = null;
         Assert.notNull(directory, "路径不能为空");
         Assert.notNull(fileName, "文件名不能为空");
         Assert.notNull(inputStream, "文件流不能为空");
         directory = AppFileUtil.replaceSlash(directory);
         switch (serverUploadLocation) {
             case ftp:
-                ftpUpload(directory, fileName, inputStream);
+                fullFilePath = ftpUpload(directory, fileName, inputStream);
                 break;
             case sftp:
-                sftpUpload(directory, fileName, inputStream);
+                fullFilePath = sftpUpload(directory, fileName, inputStream);
                 break;
         }
+        return fullFilePath;
     }
 
-    private void ftpUpload(String directory, String fileName, InputStream inputStream) {
+    private String ftpUpload(String directory, String fileName, InputStream inputStream) {
         try {
             log.debug("FTP即将在目录【{}】上传文件【{}】", directory, fileName);
             Ftp ftp = new Ftp(host, port, username, password, UTF_8 );
@@ -146,13 +148,15 @@ public class AppFileSftpUtil {
             inputStream.close();
             ftp.close();
             log.debug("FTP在路径【{}】上传文件【{}】成功", directory, fileName);
+            String fullFilePath = directory+SLASH+fileName;
+            return fullFilePath;
         } catch (Exception e){
             Exceptions.printException(e);
             throw new AppRuntimeException(String.format("FTP在路径【%s】上传文件【%s】发生异常【%s】", directory, fileName, e.getMessage()));
         }
     }
 
-    private void sftpUpload(String directory, String fileName, InputStream input) {
+    private String sftpUpload(String directory, String fileName, InputStream input) {
         try{
             try {
                 sftpConnect();
@@ -176,8 +180,10 @@ public class AppFileSftpUtil {
             //上传文件
             sftpChannel.put(input, fileName);
             //检查文件是否上传成功
-            sftpChannel.ls(directory+SLASH+fileName);
+            String fullFilePath = directory+SLASH+fileName;
+            sftpChannel.ls(fullFilePath);
             log.debug("SFTP在路径【{}】上传文件【{}】成功", directory, fileName);
+            return fullFilePath;
         } catch (Exception e){
             Exceptions.printException(e);
             throw new AppRuntimeException(String.format("SFTP在路径【%s】上传文件【%s】发生异常【%s】", directory, fileName, e.getMessage()));
@@ -235,7 +241,7 @@ public class AppFileSftpUtil {
             if(null == fileData || fileData.length == ZERO){
                 throw new AppRuntimeException(String.format("FTP在路径【%s】下载文件【%s】失败", directory, fileName));
             }
-            log.debug("SFTP在路径【{}】下载文件【{}】成功", directory, fileName);
+            log.debug("FTP在路径【{}】下载文件【{}】成功", directory, fileName);
             return fileData;
         } catch (Exception e){
             Exceptions.printException(e);
