@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
+import static com.simbest.boot.constants.ApplicationConstants.SLASH;
+
 /**
  * 用途：应用配置
  * 参考: https://segmentfault.com/a/1190000016941757
@@ -162,6 +164,7 @@ public class AppConfig {
     @Value("${thread.keep.alive.seconds:60}")
     private int threadKeepAliveSeconds;
 
+    public static final String uploadTmpFileDir = "springboottmp";
     private String uploadTmpFileLocation;
 
     //简单实时短信接口配置
@@ -176,7 +179,6 @@ public class AppConfig {
 
     @PostConstruct
     public void init() {
-        log.info("Congratulations------------------------------------------------应用核心配置加载完成");
         log.info("应用注册代码【{}】", appcode);
         log.info("应用访问上下文【{}】", contextPath);
         log.info("应用获准访问白名单【{}】", whiteHostList);
@@ -211,12 +213,13 @@ public class AppConfig {
         log.info("多线程最大线程数【{}】", threadMaxPoolSize);
         log.info("多线程缓冲队列【{}】", threadQueueCapacity);
         log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
-        uploadTmpFileLocation = System.getProperty("user.dir").concat("/springboottmp").concat(contextPath);
+        uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
         log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
         log.info("自定义基础上传目录为，同时也是Nginx配置的代理目录【{}】",customUploadBashPath);
         log.info("针对FTP和SFTP、DISK方式上传方式，其直接访问文件的地址为【{}】",shareHostPost);
         log.info("是否开启自定义路径上传文件【{}】",customUploadFlag);
+        log.info("Congratulations------------------------------------------------基础核心配置加载完成，即将以【{}】方式读取Redis配置信息，请注意！！！------------------------------------------------", redisConfigType);
     }
 
 

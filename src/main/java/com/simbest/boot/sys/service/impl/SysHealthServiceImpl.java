@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
 
+import static com.simbest.boot.config.AppConfig.uploadTmpFileDir;
 import static com.simbest.boot.constants.ApplicationConstants.UTF_8;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
@@ -65,27 +66,17 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
 
     private SysFile testSysFile;
 
-
+    /**
+     * @see com.simbest.boot.component.task.HeartTestTask
+     */
     @PostConstruct
-    public void init(){
-        log.info("------------系统健康检查器开始初始化--------------");
-        StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
-        if(!StoreLocation.fastdfs.equals(serverUploadLocation)) {
-            File notExistLocalFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
-            if(null == testSysFile) {
-                testSysFile = SysFile.builder().fileName(notExistLocalFile.getName()).fileType("txt").filePath(notExistLocalFile.getAbsolutePath())
-                        .fileSize(notExistLocalFile.length()).downLoadUrl(notExistLocalFile.getAbsolutePath()).build();
-            }
-            File downloadTestFile = null;
-            try {
-                downloadTestFile = appFileUtil.getFileFromSystem(testSysFile);
-            }
-            catch (Exception e){
-                if (null == downloadTestFile) {
-                    FileUtil.writeString(ApplicationConstants.MSG_FILE_CHECK, notExistLocalFile, UTF_8);
-                    testSysFile = appFileUtil.uploadFromLocalAutoServerDirectory(notExistLocalFile, "hearttemps");
-                    log.info("测试文件已上传：【{}】", testSysFile);
-                }
+    public void init() {
+        if (config.isOpenHeartCheck()){
+            StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
+            if (!StoreLocation.fastdfs.equals(serverUploadLocation)) {
+                File notExistLocalFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
+                FileUtil.writeString(ApplicationConstants.MSG_FILE_CHECK, notExistLocalFile, UTF_8);
+                testSysFile = appFileUtil.uploadFromLocalAutoServerDirectory(notExistLocalFile, uploadTmpFileDir);
             }
         }
     }
@@ -221,7 +212,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                 }
                 else{
                     String content = FileUtil.readString(sftpFile, UTF_8);
-                    if(ApplicationConstants.TEST.equals(content)) {
+                    if(ApplicationConstants.MSG_FILE_CHECK.equals(content)) {
                         log.info("文件系统基于【{}】方式，读取文件【{}】测试OK", serverUploadLocation, sftpFile);
                     }
                     else{
