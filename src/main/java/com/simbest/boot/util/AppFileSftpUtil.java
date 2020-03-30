@@ -162,7 +162,10 @@ public class AppFileSftpUtil {
                 sftpConnect();
                 sftpChannel.cd(directory);
             }catch (Exception e){
-                String[] folders = StringUtils.removeFirst(directory, SLASH).split( SLASH );
+                if(StringUtils.startsWith(directory, SLASH)){
+                    directory = StringUtils.removeFirst(directory, SLASH);
+                }
+                String[] folders = directory.split( SLASH );
                 for ( String folder : folders ) {
                     if ( folder.length() > 0 ) {
                         try {

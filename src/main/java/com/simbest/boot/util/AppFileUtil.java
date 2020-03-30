@@ -210,12 +210,10 @@ public class AppFileUtil {
         return filePath;
     }
 
-    private String ftpSftpUpload(byte[] uploadFileBytes, String directory, String fileName) throws Exception {
+    private String ftpSftpUpload(byte[] uploadFileBytes, String directory, String fileName) {
         directory = replaceSlash(directory);
         String filePath = sftpUtil.upload(directory, fileName, uploadFileBytes);
-        if ( StrUtil.endWithIgnoreCase(directory, ApplicationConstants.SLASH ) ){
-            filePath = directory + fileName;
-        }
+        log.debug("通过ftpSftp方式上传文件，返回路径为：【{}】", filePath);
         return filePath;
     }
 
@@ -226,127 +224,69 @@ public class AppFileUtil {
         return sysFile;
     }
 
-
     /**
-     * 上传MultipartFile文件，自定义目录
-     * @param customDirectory
-     * @param multipartFiles
-     * @return
-     * @throws Exception
+     * 将文件在远程URL读取后，再上传
+     * @param fileUrl   远程文件URL
+     * @param directory 相对路径
+     * @return SysFile
      */
-    public List<SysFile> customUploadFiles(String customDirectory, Collection<MultipartFile> multipartFiles) throws Exception {
-        return customUploadFiles(customDirectory, multipartFiles,null);
-    }
-
-    /**
-     * 上传MultipartFile文件，自定义目录，自定义文件名
-     * @param customDirectory
-     * @param multipartFiles
-     * @param fileName
-     * @return
-     * @throws Exception
-     */
-    public List<SysFile> customUploadFiles(String customDirectory, Collection<MultipartFile> multipartFiles, String fileName) throws Exception {
-        Assert.notEmpty(multipartFiles, "上传文件不能为空");
-        List<SysFile> fileModels = Lists.newArrayList();
-        for (MultipartFile multipartFile : multipartFiles) {
-            if (multipartFile.isEmpty()) {
-                log.warn("上传文件流为空，继续循环处理上传文件");
-                continue;
-            } else if (multipartFile.getSize() == 0L){
-                log.warn("上传文件流大小为空，继续循环处理上传文件");
-                continue;
+    public SysFile uploadFromUrl(String fileUrl, String directory) throws Exception {
+        String filePath = null;
+        String fileName = null;
+        Long fileSize = null;
+        HttpURLConnection urlConnection = null;
+        UrlFile urlFile = null;
+        try {
+            urlFile = openAndConnectUrl(fileUrl);
+            urlConnection = urlFile.getConn();
+            if(StringUtils.isEmpty(urlFile.getFileName())){
+                //URL连接上面没有文件名
+                fileName = CodeGenerator.systemUUID();
             }
-            String uploadFilePath = null;
-            String uploadFileName = StrUtil.isEmpty(fileName) ? getFileName(multipartFile.getOriginalFilename()) : fileName;
-            //特殊字符过滤，防止XSS漏洞
-            uploadFileName = JacksonUtils.escapeString(uploadFileName);
-            if(validateUploadFileType(uploadFileName)) {
-                log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, uploadFileName);
-                switch (serverUploadLocation) {
-                    case disk:
-                        uploadFilePath = diskUpload(multipartFile.getBytes(), forceCreateCustomUploadDirectory(customDirectory), uploadFileName);
-                        break;
-                    case fastdfs:
-//                        String filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(multipartFile.getInputStream()), fileName, getFileSuffix(fileName));
-//                    filePath = FastDfsClient.uploadFile(FileUtil.readBytes(uploadFile), filename, getFileSuffix(filename));
-                        uploadFilePath = fastDfsUpload(multipartFile.getBytes(), uploadFileName);
-                        break;
-                    case ftp:
-                        log.debug("基于ftp，方式同sftp");
-                    case sftp:
-                        uploadFilePath = ftpSftpUpload(multipartFile.getBytes(), customDirectory, uploadFileName);
-                        break;
-                }
-                Assert.notNull(uploadFilePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
-                SysFile sysFile = buildSysFile(uploadFilePath, uploadFileName, multipartFile.getSize());
-                log.debug("【{}】上传成功，具体信息如下: 【{}】", uploadFileName, sysFile.toString());
-                fileModels.add(sysFile);
-            } else {
-                log.warn("【{}】文件类型受限，不允许上传！", uploadFileName);
-                throw new RuntimeException(uploadFileName+"文件类型受限，不允许上传！");
-            }
-        }
-        return fileModels;
-    }
-
-    /**
-     * 上传普通File文件
-     * @param customDirectory
-     * @param uploadFile
-     * @param fileName
-     * @return
-     * @throws Exception
-     */
-    public SysFile customUploadNormalFiles(String customDirectory, File uploadFile, String fileName) throws Exception {
-        SysFile sysFile = null;
-        String uploadFilePath = null;
-        String uploadFileName = StrUtil.isEmpty(fileName) ? getFileName(uploadFile.getName()) : fileName;
-        //特殊字符过滤，防止XSS漏洞
-        uploadFileName = JacksonUtils.escapeString(uploadFileName);
-        if(validateUploadFileType(uploadFileName)) {
-            log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, uploadFileName);
+            fileName = fileName + ApplicationConstants.DOT + urlFile.getFileSuffix();
             switch (serverUploadLocation) {
                 case disk:
-                    uploadFilePath = diskUpload(FileUtil.readBytes(uploadFile), forceCreateCustomUploadDirectory(customDirectory), uploadFileName);
+                    File targetFileDirectory = createAutoUploadDirFile(directory);
+                    File storeFile = new File(targetFileDirectory.getAbsolutePath() + ApplicationConstants.SLASH + fileName);
+                    FileUtils.touch(storeFile); //覆盖文件
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), storeFile);
+                    filePath = storeFile.getAbsolutePath();
+                    fileSize = storeFile.length();
                     break;
                 case fastdfs:
-                    uploadFilePath = fastDfsUpload(FileUtil.readBytes(uploadFile), uploadFileName);
+                    File tmpFile = createTempFile();
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile);
+                    filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(new FileInputStream(tmpFile)),
+                            fileName, getFileSuffix(fileName));
+                    fileSize = tmpFile.length();
                     break;
                 case ftp:
                     log.debug("基于ftp，方式同sftp");
                 case sftp:
-                    uploadFilePath = ftpSftpUpload(FileUtil.readBytes(uploadFile), customDirectory, uploadFileName);
+                    File tmpFile1 = createTempFile();
+                    FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile1);
+                    sftpUtil.upload(createAutoUploadDirPath(directory), fileName, tmpFile1);
+                    filePath = config.getUploadPath() + createAutoUploadDirPath(directory) + ApplicationConstants.SLASH + fileName;
                     break;
             }
-            Assert.notNull(uploadFilePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
-            sysFile = buildSysFile(uploadFilePath, uploadFileName, uploadFile.length());
-            log.debug("【{}】上传成功，具体信息如下: 【{}】", uploadFileName, sysFile.toString());
-
-        } else {
-            log.warn("【{}】文件类型受限，不允许上传！", uploadFileName);
-            throw new RuntimeException(uploadFileName+"文件类型受限，不允许上传！");
+            urlConnection.disconnect();
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+                urlConnection = null;
+            }
+            Exceptions.printException(e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+                urlConnection = null;
+            }
         }
+        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(urlFile.getFileSuffix()).storeLocation(serverUploadLocation)
+                .filePath(filePath).fileSize(fileSize).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
+                .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
+        log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
         return sysFile;
-    }
-
-    /**
-     * 上传单个文件  自定义文件名称
-     * @param directory
-     * @param multipartFile
-     * @param fileName
-     * @return
-     * @throws Exception
-     */
-    public SysFile uploadFileWithFileName(String directory, MultipartFile multipartFile,String fileName) throws Exception {
-        Assert.notNull(multipartFile, "上传文件不能为空");
-        List<SysFile> sysFileList = uploadFiles(directory, Arrays.asList(multipartFile),fileName);
-        if(sysFileList.size() > ZERO){
-            return sysFileList.get(ZERO);
-        }
-        else{
-            return null;
-        }
     }
 
     /**
@@ -357,8 +297,20 @@ public class AppFileUtil {
      * @throws Exception
      */
     public SysFile uploadFile(String directory, MultipartFile multipartFile) throws Exception {
+        return uploadFile(directory, multipartFile, null);
+    }
+
+    /**
+     * 上传单个文件  自定义文件名称
+     * @param directory
+     * @param multipartFile
+     * @param fileName
+     * @return
+     * @throws Exception
+     */
+    public SysFile uploadFile(String directory, MultipartFile multipartFile, String fileName) throws Exception {
         Assert.notNull(multipartFile, "上传文件不能为空");
-        List<SysFile> sysFileList = uploadFiles(directory, Arrays.asList(multipartFile), null);
+        List<SysFile> sysFileList = uploadFiles(directory, Arrays.asList(multipartFile), fileName);
         if(sysFileList.size() > ZERO){
             return sysFileList.get(ZERO);
         }
@@ -428,70 +380,67 @@ public class AppFileUtil {
         return fileModels;
     }
 
+    /**
+     * 上传MultipartFile文件，自定义目录
+     * @param customDirectory
+     * @param multipartFiles
+     * @return
+     * @throws Exception
+     */
+    public List<SysFile> customUploadFiles(String customDirectory, Collection<MultipartFile> multipartFiles) throws Exception {
+        return customUploadFiles(customDirectory, multipartFiles,null);
+    }
 
     /**
-     * 将文件在远程URL读取后，再上传
-     * @param fileUrl   远程文件URL
-     * @param directory 相对路径
-     * @return SysFile
+     * 上传MultipartFile文件，自定义目录，自定义文件名
+     * @param customDirectory
+     * @param multipartFiles
+     * @param fileName
+     * @return
+     * @throws Exception
      */
-    public SysFile uploadFromUrl(String fileUrl, String directory) throws Exception {
-        String filePath = null;
-        String fileName = null;
-        Long fileSize = null;
-        HttpURLConnection urlConnection = null;
-        UrlFile urlFile = null;
-        try {
-            urlFile = openAndConnectUrl(fileUrl);
-            urlConnection = urlFile.getConn();
-            if(StringUtils.isEmpty(urlFile.getFileName())){
-                //URL连接上面没有文件名
-                fileName = CodeGenerator.systemUUID();
+    public List<SysFile> customUploadFiles(String customDirectory, Collection<MultipartFile> multipartFiles, String fileName) throws Exception {
+        Assert.notEmpty(multipartFiles, "上传文件不能为空");
+        List<SysFile> fileModels = Lists.newArrayList();
+        for (MultipartFile multipartFile : multipartFiles) {
+            if (multipartFile.isEmpty()) {
+                log.warn("上传文件流为空，继续循环处理上传文件");
+                continue;
+            } else if (multipartFile.getSize() == 0L){
+                log.warn("上传文件流大小为空，继续循环处理上传文件");
+                continue;
             }
-            fileName = fileName + ApplicationConstants.DOT + urlFile.getFileSuffix();
-            switch (serverUploadLocation) {
-                case disk:
-                    File targetFileDirectory = createAutoUploadDirFile(directory);
-                    File storeFile = new File(targetFileDirectory.getAbsolutePath() + ApplicationConstants.SLASH + fileName);
-                    FileUtils.touch(storeFile); //覆盖文件
-                    FileUtils.copyURLToFile(urlFile.getConnUrl(), storeFile);
-                    filePath = storeFile.getAbsolutePath();
-                    fileSize = storeFile.length();
-                    break;
-                case fastdfs:
-                    File tmpFile = createTempFile();
-                    FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile);
-                    filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(new FileInputStream(tmpFile)),
-                            fileName, getFileSuffix(fileName));
-                    fileSize = tmpFile.length();
-                    break;
-                case ftp:
-                    log.debug("基于ftp，方式同sftp");
-                case sftp:
-                    File tmpFile1 = createTempFile();
-                    FileUtils.copyURLToFile(urlFile.getConnUrl(), tmpFile1);
-                    sftpUtil.upload(createAutoUploadDirPath(directory), fileName, tmpFile1);
-                    filePath = config.getUploadPath() + createAutoUploadDirPath(directory) + ApplicationConstants.SLASH + fileName;
-                    break;
-            }
-            urlConnection.disconnect();
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-                urlConnection = null;
-            }
-            Exceptions.printException(e);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-                urlConnection = null;
+            String uploadFilePath = null;
+            String uploadFileName = StrUtil.isEmpty(fileName) ? getFileName(multipartFile.getOriginalFilename()) : fileName;
+            //特殊字符过滤，防止XSS漏洞
+            uploadFileName = JacksonUtils.escapeString(uploadFileName);
+            if(validateUploadFileType(uploadFileName)) {
+                log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, uploadFileName);
+                switch (serverUploadLocation) {
+                    case disk:
+                        uploadFilePath = diskUpload(multipartFile.getBytes(), forceCreateCustomUploadDirectory(customDirectory), uploadFileName);
+                        break;
+                    case fastdfs:
+//                        String filePath = FastDfsClient.uploadFile(IOUtils.toByteArray(multipartFile.getInputStream()), fileName, getFileSuffix(fileName));
+//                    filePath = FastDfsClient.uploadFile(FileUtil.readBytes(uploadFile), filename, getFileSuffix(filename));
+                        uploadFilePath = fastDfsUpload(multipartFile.getBytes(), uploadFileName);
+                        break;
+                    case ftp:
+                        log.debug("基于ftp，方式同sftp");
+                    case sftp:
+                        uploadFilePath = ftpSftpUpload(multipartFile.getBytes(), customDirectory, uploadFileName);
+                        break;
+                }
+                Assert.notNull(uploadFilePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
+                SysFile sysFile = buildSysFile(uploadFilePath, uploadFileName, multipartFile.getSize());
+                log.debug("【{}】上传成功，具体信息如下: 【{}】", uploadFileName, sysFile.toString());
+                fileModels.add(sysFile);
+            } else {
+                log.warn("【{}】文件类型受限，不允许上传！", uploadFileName);
+                throw new RuntimeException(uploadFileName+"文件类型受限，不允许上传！");
             }
         }
-        SysFile sysFile = SysFile.builder().fileName(fileName).fileType(urlFile.getFileSuffix()).storeLocation(serverUploadLocation)
-                .filePath(filePath).fileSize(fileSize).downLoadUrl(DOWNLOAD_FULL_URL).apiFilePath(DOWNLOAD_FULL_URL_API)
-                .anonymousFilePath(DOWNLOAD_FULL_URL_ANONYMOUS).build();
-        log.debug("上传文件成功，具体信息如下： {}", sysFile.toString());
-        return sysFile;
+        return fileModels;
     }
 
     /**
@@ -500,15 +449,8 @@ public class AppFileUtil {
      * @param directory
      * @return
      */
-    public SysFile uploadFromLocalAutoServerDirectory(File localFile, String directory) {
-        File dir = null;
-        try {
-            dir = createAutoUploadDirFile(directory);
-        } catch (IOException e) {
-            Exceptions.printException(e);
-        }
-        Assert.notNull(dir, "创建上传路径异常");
-        return uploadFromLocalFile(localFile, dir);
+    public SysFile uploadFromLocalAutoDirectory(String directory, File localFile, String fileName) throws Exception {
+        return uploadFromLocal(createAutoUploadDirPath(directory), localFile, fileName);
     }
 
     /**
@@ -517,45 +459,50 @@ public class AppFileUtil {
      * @param targetDir
      * @return
      */
-    public SysFile uploadFromLocalCustomServerDirectory(File localFile, String targetDir) {
-        return uploadFromLocalFile(localFile, new File(targetDir));
+    public SysFile uploadFromLocalCustomDirectory(String customDirectory, File localFile, String fileName) throws Exception {
+        return uploadFromLocal(customDirectory, localFile, fileName);
     }
 
     /**
-     * 将本地文件上传至系统
-     * @param localFile  系统临时目录的文件
-     * @param directory 相对路径
-     * @return SysFile
+     * 上传普通File文件
+     * @param directory
+     * @param uploadFile
+     * @param fileName
+     * @return
+     * @throws Exception
      */
-    private SysFile uploadFromLocalFile(File localFile, File targetDir) {
+    private SysFile uploadFromLocal(String directory, File uploadFile, String fileName) throws Exception {
+        SysFile sysFile = null;
         String uploadFilePath = null;
-        String uploadFileName = localFile.getName();
-        try {
+        String uploadFileName = StrUtil.isEmpty(fileName) ? getFileName(uploadFile.getName()) : fileName;
+        //特殊字符过滤，防止XSS漏洞
+        uploadFileName = JacksonUtils.escapeString(uploadFileName);
+        if(validateUploadFileType(uploadFileName)) {
+            log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, uploadFileName);
             switch (serverUploadLocation) {
                 case disk:
-                    Path path = Paths.get(targetDir.getPath() + ApplicationConstants.SLASH + uploadFileName);
-                    Files.write(path, Files.readAllBytes(Paths.get(localFile.getAbsolutePath())));
-                    uploadFilePath = path.toString();
+                    uploadFilePath = diskUpload(FileUtil.readBytes(uploadFile), forceCreateCustomUploadDirectory(directory), uploadFileName);
                     break;
                 case fastdfs:
-                    uploadFilePath = FastDfsClient.uploadLocalFile(localFile.getAbsolutePath());
+                    uploadFilePath = fastDfsUpload(FileUtil.readBytes(uploadFile), uploadFileName);
                     break;
                 case ftp:
                     log.debug("基于ftp，方式同sftp");
                 case sftp:
-                    sftpUtil.upload(targetDir.getPath(), uploadFileName, localFile);
-                    uploadFilePath = targetDir.getPath() + ApplicationConstants.SLASH + uploadFileName;
-                    break;
-                default:
+                    uploadFilePath = ftpSftpUpload(FileUtil.readBytes(uploadFile), directory, uploadFileName);
                     break;
             }
-        } catch (Exception e) {
-            Exceptions.printException(e);
+            Assert.notNull(uploadFilePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
+            sysFile = buildSysFile(uploadFilePath, uploadFileName, uploadFile.length());
+            log.debug("【{}】上传成功，具体信息如下: 【{}】", uploadFileName, sysFile.toString());
+
+        } else {
+            log.warn("【{}】文件类型受限，不允许上传！", uploadFileName);
+            throw new RuntimeException(uploadFileName+"文件类型受限，不允许上传！");
         }
-        SysFile sysFile = buildSysFile(uploadFilePath, uploadFileName, localFile.length());
-        log.debug("【{}】上传成功，具体信息如下: 【{}】", uploadFileName, sysFile.toString());
         return sysFile;
     }
+
 
     private BufferedImage toBufferedImage(Image image) {
         if (image instanceof BufferedImage) {

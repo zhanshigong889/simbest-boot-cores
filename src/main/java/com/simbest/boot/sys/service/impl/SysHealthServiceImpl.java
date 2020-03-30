@@ -70,15 +70,15 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
      * @see com.simbest.boot.component.task.HeartTestTask
      */
     @PostConstruct
-    public void init() {
-        if (config.isOpenHeartCheck()){
+    public void init() throws Exception {
+//        if (config.isOpenHeartCheck()){
             StoreLocation serverUploadLocation = appFileUtil.getServerUploadLocation();
             if (!StoreLocation.fastdfs.equals(serverUploadLocation)) {
                 File notExistLocalFile = new File(config.getUploadTmpFileLocation().concat(ApplicationConstants.SEPARATOR).concat("heartCheckFile.txt"));
                 FileUtil.writeString(ApplicationConstants.MSG_FILE_CHECK, notExistLocalFile, UTF_8);
-                testSysFile = appFileUtil.uploadFromLocalAutoServerDirectory(notExistLocalFile, uploadTmpFileDir);
+                testSysFile = appFileUtil.uploadFromLocalAutoDirectory(uploadTmpFileDir, notExistLocalFile,  null);
             }
-        }
+//        }
     }
 
     @Override

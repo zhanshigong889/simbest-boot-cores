@@ -219,7 +219,7 @@ public class AppConfig {
         log.info("自定义基础上传目录为，同时也是Nginx配置的代理目录【{}】",customUploadBashPath);
         log.info("针对FTP和SFTP、DISK方式上传方式，其直接访问文件的地址为【{}】",shareHostPost);
         log.info("是否开启自定义路径上传文件【{}】",customUploadFlag);
-        log.info("Congratulations------------------------------------------------基础核心配置加载完成，即将以【{}】方式读取Redis配置信息，请注意！！！------------------------------------------------", redisConfigType);
+        log.info("==========================基础核心配置加载完成，即将以【{}】方式读取Redis配置信息，请注意！！！==========================", redisConfigType);
     }
 
 

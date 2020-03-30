@@ -16,6 +16,7 @@ import com.simbest.boot.util.AppFileUtil;
 import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -75,20 +76,12 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    public SysFile uploadProcessFile ( MultipartFile multipartFile,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
-        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customFileName,customDirectory,pmInsType, pmInsId, pmInsTypePart);
-        return fileList.isEmpty() ? null : fileList.get(0);
-    }
-
-    @Override
     @Transactional
     public List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart) {
         List<SysFile> sysFileList;
         try {
             sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, sysFileList);
-        } catch (IOException e) {
-            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         } catch (Exception e) {
             throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         }
@@ -96,21 +89,81 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     }
 
     @Override
-    public List<SysFile> uploadProcessFiles ( Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
+    public SysFile uploadProcessFile (MultipartFile multipartFile,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
+        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customFileName,customDirectory,pmInsType, pmInsId, pmInsTypePart);
+        return fileList.isEmpty() ? null : fileList.get(0);
+    }
+
+    @Override
+    public List<SysFile> uploadProcessFiles (Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
         List<SysFile> sysFileList;
         try {
-            String pmInsTypePath = StrUtil.isEmpty( pmInsType )?"":pmInsType.concat( ApplicationConstants.SLASH  );
-            String pmInsTypePartPath = StrUtil.isEmpty( pmInsTypePart )?"":pmInsTypePart.concat( ApplicationConstants.SLASH  );
-            sysFileList = appFileUtil.customUploadFiles(customDirectory + ApplicationConstants.SLASH + pmInsTypePath + pmInsTypePartPath, multipartFiles,customFileName);
+            sysFileList = appFileUtil.customUploadFiles(prepareCustomDirectory(customDirectory, pmInsType, pmInsTypePart), multipartFiles, customFileName);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, sysFileList);
-        } catch (IOException e) {
-            Exceptions.printException(e);
-            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
-        } catch (Exception e) {
+        }catch (Exception e) {
             Exceptions.printException(e);
             throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
         }
         return sysFileList;
+    }
+
+    @Override
+    public SysFile uploadLocalProcessFile(File localFile, String pmInsType, String pmInsId, String pmInsTypePart) {
+        SysFile sysFile = null;
+        try {
+            sysFile = appFileUtil.uploadFromLocalAutoDirectory(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, localFile, null);
+            saveSysFileList(pmInsType, pmInsId, pmInsTypePart, Arrays.asList(sysFile));
+        } catch (Exception e) {
+            Exceptions.printException(e);
+            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
+        }
+        return sysFile;
+    }
+
+    @Override
+    public List<SysFile> uploadLocalProcessFiles(Collection<File> localFiles, String pmInsType, String pmInsId, String pmInsTypePart) {
+        List<SysFile> sysFileList = Lists.newArrayList();
+        for(File localFile : localFiles){
+            SysFile sysFile = uploadLocalProcessFile(localFile, pmInsType, pmInsId, pmInsTypePart);
+            if(null != sysFile){
+                sysFileList.add(sysFile);
+            }
+        }
+        return sysFileList;
+    }
+
+    @Override
+    public SysFile uploadLocalProcessFile(File localFile, String customFileName, String customDirectory, String pmInsType, String pmInsId, String pmInsTypePart) {
+        SysFile sysFile = null;
+        try {
+            sysFile = appFileUtil.uploadFromLocalCustomDirectory(prepareCustomDirectory(customDirectory, pmInsType, pmInsTypePart), localFile, customFileName);
+            saveSysFileList(pmInsType, pmInsId, pmInsTypePart, Arrays.asList(sysFile));
+        } catch (Exception e) {
+            Exceptions.printException(e);
+            throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
+        }
+        return sysFile;
+    }
+
+    @Override
+    public List<SysFile> uploadLocalProcessFiles(Collection<File> localFiles, String customFileName, String customDirectory, String pmInsType, String pmInsId, String pmInsTypePart) {
+        List<SysFile> sysFileList = Lists.newArrayList();
+        for(File localFile : localFiles){
+            SysFile sysFile = uploadLocalProcessFile(localFile, customFileName, customDirectory, pmInsType, pmInsId, pmInsTypePart);
+            if(null != sysFile){
+                sysFileList.add(sysFile);
+            }
+        }
+        return sysFileList;
+    }
+
+    private String prepareCustomDirectory(String customDirectory, String pmInsType, String pmInsTypePart){
+        String pmInsTypePath = StrUtil.isEmpty(pmInsType) ? "" : pmInsType.concat(ApplicationConstants.SLASH);
+        String pmInsTypePartPath = StrUtil.isEmpty(pmInsTypePart) ? "" : pmInsTypePart.concat(ApplicationConstants.SLASH);
+        customDirectory = customDirectory + ApplicationConstants.SLASH + pmInsTypePath + pmInsTypePartPath;
+        customDirectory = StringUtils.removeEnd(customDirectory, ApplicationConstants.SLASH);
+        log.debug("自定义上传路径地址为【{}】", customDirectory);
+        return customDirectory;
     }
 
     private void saveSysFileList(String pmInsType, String pmInsId, String pmInsTypePart, List<SysFile> sysFileList){

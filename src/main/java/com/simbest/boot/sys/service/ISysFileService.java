@@ -27,6 +27,16 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
     SysFile uploadProcessFile(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart);
 
     /**
+     * 上传并保存多个文件
+     * @param multipartFiles 上传文件
+     * @param pmInsType 流程类型
+     * @param pmInsId 流程ID
+     * @param pmInsTypePart 流程区块
+     * @return List<SysFile>
+     */
+    List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart);
+
+    /**
      * 上传并保存单个文件
      * @param multipartFile 上传文件
      * @param pmInsType 流程类型
@@ -44,14 +54,38 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
+     * @param customFileName  自定义文件名称
+     * @param customDirectory  自定义路径
      * @return List<SysFile>
      */
-    List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart);
+    List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart);
 
 
     /**
      * 上传并保存多个文件
-     * @param multipartFiles 上传文件
+     * @param localFile 上传文件
+     * @param pmInsType 流程类型
+     * @param pmInsId 流程ID
+     * @param pmInsTypePart 流程区块
+     * @return List<SysFile>
+     */
+    SysFile uploadLocalProcessFile(File localFile,String pmInsType, String pmInsId, String pmInsTypePart);
+
+
+    /**
+     * 上传并保存多个文件
+     * @param localFiles 上传文件
+     * @param pmInsType 流程类型
+     * @param pmInsId 流程ID
+     * @param pmInsTypePart 流程区块
+     * @return List<SysFile>
+     */
+    List<SysFile> uploadLocalProcessFiles(Collection<File> localFiles,String pmInsType, String pmInsId, String pmInsTypePart);
+
+
+    /**
+     * 上传并保存多个文件
+     * @param localFile 上传文件
      * @param pmInsType 流程类型
      * @param pmInsId 流程ID
      * @param pmInsTypePart 流程区块
@@ -59,7 +93,20 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param customDirectory  自定义路径
      * @return List<SysFile>
      */
-    List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart);
+    SysFile uploadLocalProcessFile(File localFile,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart);
+
+
+    /**
+     * 上传并保存多个文件
+     * @param localFiles 上传文件
+     * @param pmInsType 流程类型
+     * @param pmInsId 流程ID
+     * @param pmInsTypePart 流程区块
+     * @param customFileName  自定义文件名称
+     * @param customDirectory  自定义路径
+     * @return List<SysFile>
+     */
+    List<SysFile> uploadLocalProcessFiles(Collection<File> localFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart);
 
 
     /**
