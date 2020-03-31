@@ -4,12 +4,19 @@
 package com.simbest.boot.config;
 
 import com.google.common.collect.Maps;
+import com.mzlion.easyokhttp.HttpClient;
 import com.simbest.boot.base.enums.StoreLocation;
 import com.simbest.boot.base.exception.Exceptions;
+import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.component.distributed.lock.DistributedLockFactoryBean;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.sys.model.SysDictValue;
 import com.simbest.boot.util.AppFileSftpUtil;
+import com.simbest.boot.util.encrypt.Des3Encryptor;
+import com.simbest.boot.util.encrypt.RsaEncryptor;
 import com.simbest.boot.util.redis.RedisUtil;
+import com.simbest.boot.uums.api.ApiRequestHandle;
+import com.simbest.boot.uums.api.sys.UumsSysDictValueApi;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
@@ -52,7 +59,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.simbest.boot.constants.ApplicationConstants.ADMINISTRATOR;
 import static com.simbest.boot.constants.ApplicationConstants.ONE;
+import static com.simbest.boot.constants.ApplicationConstants.UUMS_APPCODE;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 
 /**
@@ -60,14 +69,16 @@ import static com.simbest.boot.constants.ApplicationConstants.ZERO;
  * 作者: lishuyi
  * 时间: 2018/5/1  18:56
  */
+@Slf4j
 @Configuration
 @EnableCaching
 @EnableRedisHttpSession
-@Slf4j
 public class RedisConfiguration extends CachingConfigurerSupport {
 
+    public final static String DICT_VALUE_REDIS = "redis";
+
     public enum RedisConfigType {
-        propertiesRedis,  ftpRedis,  sftpRedis
+        propertiesRedis,  ftpRedis, sftpRedis, dictValueRedis
     }
 
     @Autowired
@@ -78,6 +89,10 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @Autowired
     private RedisIndexedSessionRepository sessionRepository;
+
+    private Des3Encryptor encryptor = new Des3Encryptor();
+
+    private ApiRequestHandle<SysDictValue> sysDictValueApiHandle = new ApiRequestHandle();
 
     @Getter
     private RedissonClient redissonClient;
@@ -142,6 +157,16 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             if(RedisConfigType.propertiesRedis.equals(redisConfigTypeEnum)){
                 redisClusterNodes = config.getRedisClusterNodes();
             }
+            else if(RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum)){
+                String loginuser = StringUtils.replace(encryptor.encrypt(ADMINISTRATOR), "+", "%2B");
+                JsonResponse jsonResponse = HttpClient.post(config.getUumsAddress() + "/sys/dictValue/findByDictTypeAndName/sso?loginuser="+loginuser+"&appcode="+UUMS_APPCODE)
+                        .param("dictType", DICT_VALUE_REDIS)
+                        .param("name", DICT_VALUE_REDIS)
+                        .asBean(JsonResponse.class);
+                SysDictValue redisDv = sysDictValueApiHandle.handRemoteResponse(jsonResponse, SysDictValue.class);
+                Assert.notNull(redisDv, "REDIS节点配置不能为空！");
+                redisClusterNodes = redisDv.getValue();
+            }
             else {
                 AppFileSftpUtil appFileSftpUtil = new AppFileSftpUtil();
                 appFileSftpUtil.setUsername(config.getRedisFtpUsername());
@@ -160,6 +185,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                         config.getRedisFtpNodeConfigFile()));
             }
             redisClusterNodes = StringUtils.trimAllWhitespace(redisClusterNodes);
+            Assert.notNull(redisClusterNodes, "REDIS节点配置不能为空！");
             log.info("==========================Redis节点为【{}】==========================", redisClusterNodes);
             if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
                 RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();

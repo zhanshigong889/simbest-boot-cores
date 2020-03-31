@@ -186,14 +186,18 @@ public class AppConfig {
         log.info("数据库账号【{}】", datasourceUsername);
         log.info("数据库密码【{}】", datasourcePassword);
         log.info("Redis配置方式【{}】", redisConfigType);
-        log.info("Redis (S)FTP用户名【{}】", redisFtpUsername);
-        log.info("Redis (S)FTP密码【{}】", redisFtpPassword);
-        log.info("Redis (S)FTP主机【{}】", redisFtpHost);
-        log.info("Redis (S)FTP端口【{}】", redisFtpPort);
-        log.info("Redis (S)FTP私钥文件【{}】", redisFtpKeyFile);
-        log.info("Redis (S)FTP私钥密码【{}】", redisFtpPassphrase);
-        log.info("Redis (S)FTP节点配置目录【{}】", redisFtpNodeConfigDirectory);
-        log.info("Redis (S)FTP节点配置文件【{}】", redisFtpNodeConfigFile);
+        RedisConfiguration.RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfiguration.RedisConfigType.class, redisConfigType);
+        if(RedisConfiguration.RedisConfigType.ftpRedis.equals(redisConfigTypeEnum) ||
+                RedisConfiguration.RedisConfigType.sftpRedis.equals(redisConfigTypeEnum) ) {
+            log.info("Redis (S)FTP用户名【{}】", redisFtpUsername);
+            log.info("Redis (S)FTP密码【{}】", redisFtpPassword);
+            log.info("Redis (S)FTP主机【{}】", redisFtpHost);
+            log.info("Redis (S)FTP端口【{}】", redisFtpPort);
+            log.info("Redis (S)FTP私钥文件【{}】", redisFtpKeyFile);
+            log.info("Redis (S)FTP私钥密码【{}】", redisFtpPassphrase);
+            log.info("Redis (S)FTP节点配置目录【{}】", redisFtpNodeConfigDirectory);
+            log.info("Redis (S)FTP节点配置文件【{}】", redisFtpNodeConfigFile);
+        }
         log.info("Redis密码【{}】", redisPassword);
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
         log.info("Redis缓存空间前缀【{}】", redisNamespace);

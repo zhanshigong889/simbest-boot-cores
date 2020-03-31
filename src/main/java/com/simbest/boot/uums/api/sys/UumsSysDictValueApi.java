@@ -38,7 +38,24 @@ public class UumsSysDictValueApi {
     private RsaEncryptor encryptor;
 
     @Autowired
-    private ApiRequestHandle<List<SysDictValue>> sysDictValueApiHandle;
+    private ApiRequestHandle<List<SysDictValue>> sysDictValueApiListHandle;
+
+    @Autowired
+    private ApiRequestHandle<SysDictValue> sysDictValueApiHandle;
+
+    /**
+     * pc查找数据字典值
+     * @param sysDictValue
+     * @return
+     */
+    public SysDictValue findByDictTypeAndName(String dictType, String name){
+        String username = SecurityUtils.getCurrentUserName();
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + DICT_VALUE_MAPPING + "findByDictTypeAndName"+SSO+"?loginuser="+encryptor.encrypt(username)+"&appcode="+UUMS_APPCODE)
+                .param("dictType", dictType)
+                .param("name", name)
+                .asBean(JsonResponse.class);
+        return sysDictValueApiHandle.handRemoteResponse(response, SysDictValue.class);
+    }
 
     /**
      * pc查找数据字典值
@@ -62,7 +79,7 @@ public class UumsSysDictValueApi {
         JsonResponse response= HttpClient.textBody(config.getUumsAddress() + DICT_VALUE_MAPPING + "findDictValue"+SSO+"?loginuser="+encryptor.encrypt(username)+"&appcode="+appcode)
                 .json(JacksonUtils.obj2json(sysDictValue))
                 .asBean(JsonResponse.class);
-        return sysDictValueApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<SysDictValue>>(){});
+        return sysDictValueApiListHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<SysDictValue>>(){});
     }
 
 
