@@ -141,8 +141,8 @@ public class JacksonUtils {
             escapeValue=escapeValue.replaceAll("&amp;", "&");
             escapeValue=escapeValue.replaceAll("&ldquo;", "“");
             escapeValue=escapeValue.replaceAll("&rdquo;", "”");
-//            escapeValue=escapeValue.replaceAll("&mdash;", "—");
-//            escapeValue=escapeValue.replaceAll("&times;", "×");
+            escapeValue=escapeValue.replaceAll("&mdash;", "—");
+            escapeValue=escapeValue.replaceAll("&times;", "×");
 //            escapeValue=escapeValue.replaceAll("&lt;", "<");
 //            escapeValue=escapeValue.replaceAll("&gt;", ">");
 //            escapeValue=escapeValue.replaceAll("&le;", "<=");

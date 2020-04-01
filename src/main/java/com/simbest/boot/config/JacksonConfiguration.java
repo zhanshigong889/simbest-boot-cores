@@ -1,6 +1,7 @@
 package com.simbest.boot.config;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.simbest.boot.util.json.JacksonCustomDeserializer;
+import com.simbest.boot.util.json.JacksonCustomSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -39,7 +41,7 @@ public class JacksonConfiguration {
                 Jdk8Module()).registerModule(new JavaTimeModule()).registerModule(simbestModule);
 
         //不允许出现特殊字符和转义符
-        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, false) ;
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), false) ;
         //mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false); 不增加，避免key值为null，而避免节点消失
         //没有匹配的属性名称时不作失败处理  
         mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, true);
