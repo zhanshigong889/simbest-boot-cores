@@ -48,7 +48,7 @@ public class SysDictValue extends LogicModel {
     private String name;
 
     @ApiModelProperty(value = "字典值")
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 200)
     private String value;
 
     @ApiModelProperty(value = "字典值描述")

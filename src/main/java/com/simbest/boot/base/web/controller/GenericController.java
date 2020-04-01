@@ -42,6 +42,19 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         return JsonResponse.success(service.findById(id));
     }
 
+    @PostMapping(value = {"/findOne", "/sso/findOne", "/api/findOne"})
+    public JsonResponse findOne(@RequestBody T o) {
+        // 获取查询条件
+        Condition condition = new Condition();
+        Map<String, Object> params = ObjectUtil.getEntityPersistentFieldValueExceptId(o);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            condition.eq(entry.getKey(), entry.getValue());
+        }
+        Specification<T> specification = service.getSpecification(condition);
+        T data = service.findOne(specification);
+        return JsonResponse.success(data);
+    }
+
     @PostMapping(value = {"/findAll", "/sso/findAll", "/api/findAll"})
     public JsonResponse findAll(@RequestParam(required = false, defaultValue = "1") int page, //
                                 @RequestParam(required = false, defaultValue = "10") int size, //

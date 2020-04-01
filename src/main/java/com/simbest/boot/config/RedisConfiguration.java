@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import com.mzlion.easyokhttp.HttpClient;
 import com.simbest.boot.base.enums.StoreLocation;
@@ -14,6 +15,7 @@ import com.simbest.boot.sys.model.SysDictValue;
 import com.simbest.boot.util.AppFileSftpUtil;
 import com.simbest.boot.util.encrypt.Des3Encryptor;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.json.JacksonUtils;
 import com.simbest.boot.util.redis.RedisUtil;
 import com.simbest.boot.uums.api.ApiRequestHandle;
 import com.simbest.boot.uums.api.sys.UumsSysDictValueApi;
@@ -57,6 +59,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.simbest.boot.constants.ApplicationConstants.ADMINISTRATOR;
@@ -93,6 +96,8 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     private Des3Encryptor encryptor = new Des3Encryptor();
 
     private ApiRequestHandle<SysDictValue> sysDictValueApiHandle = new ApiRequestHandle();
+
+    private ApiRequestHandle<List<SysDictValue>> sysDictValueApiListHandle = new ApiRequestHandle();
 
     @Getter
     private RedissonClient redissonClient;
@@ -158,12 +163,14 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                 redisClusterNodes = config.getRedisClusterNodes();
             }
             else if(RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum)){
+                SysDictValue sysDictValue = SysDictValue.builder().dictType(DICT_VALUE_REDIS).name(DICT_VALUE_REDIS).build();
                 String loginuser = StringUtils.replace(encryptor.encrypt(ADMINISTRATOR), "+", "%2B");
-                JsonResponse jsonResponse = HttpClient.post(config.getUumsAddress() + "/sys/dictValue/findByDictTypeAndName/sso?loginuser="+loginuser+"&appcode="+UUMS_APPCODE)
-                        .param("dictType", DICT_VALUE_REDIS)
-                        .param("name", DICT_VALUE_REDIS)
+                JsonResponse jsonResponse = HttpClient.textBody(config.getUumsAddress() + "/sys/dictValue/sso/findAllNoPage?loginuser="+loginuser+"&appcode="+UUMS_APPCODE)
+                        .json(JacksonUtils.obj2json(sysDictValue))
                         .asBean(JsonResponse.class);
-                SysDictValue redisDv = sysDictValueApiHandle.handRemoteResponse(jsonResponse, SysDictValue.class);
+//                SysDictValue redisDv = sysDictValueApiHandle.handRemoteResponse(jsonResponse, SysDictValue.class);
+                List<SysDictValue> sysDictValueList = sysDictValueApiListHandle.handRemoteTypeReferenceResponse(jsonResponse, new TypeReference<List<SysDictValue>>(){});
+                SysDictValue redisDv = sysDictValueList.get(ZERO);
                 Assert.notNull(redisDv, "REDIS节点配置不能为空！");
                 redisClusterNodes = redisDv.getValue();
             }
