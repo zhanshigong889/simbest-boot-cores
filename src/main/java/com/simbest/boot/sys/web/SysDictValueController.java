@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -263,10 +264,21 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      *
      * @return JsonResponse
      */
-    @ApiOperation(value = "查看数据字典的所有值, Map结构，key为dictType，value为字典值list", notes = "查看数据字典的所有值, Map结构，key为dictType，value为字典值list")
+    @ApiOperation(value = "查看数据字典的所有值, Map结构，key为dictType，value为字典值list")
     @PostMapping(value = {"/findAllDictValueMapList", "/findAllDictValueMapList/sso", "/findAllDictValueMapList/api"})
     public JsonResponse findAllDictValueMapList(){
         return JsonResponse.success(sysDictValueService.findAllDictValueMapList());
     }
+
+    /**
+     *
+     * @return JsonResponse
+     */
+    @ApiOperation(value = "查看指定数据字典类型的字典值, Map结构，key为dictType，value为字典值list")
+    @PostMapping(value = {"/findDictValueMapList", "/findDictValueMapList/sso", "/findDictValueMapList/api"})
+    public JsonResponse findDictValueMapList(@ApiParam(name = "typeList", value = "字典类型") @RequestBody String[] typeList){
+        return JsonResponse.success(sysDictValueService.findDictValueMapList(typeList));
+    }
+
 
 }

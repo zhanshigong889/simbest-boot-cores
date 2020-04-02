@@ -52,4 +52,8 @@ public interface ISysDictValueService extends ILogicService<SysDictValue,String>
      */
     Map<String,List<Map<String,String>>> findAllDictValueMapList();
 
+    /**
+     * 查看数据字典的所有值, Map结构，key为dictType，value为字典值list
+     */
+    Map<String,List<Map<String,String>>> findDictValueMapList(String[] typeList);
 }

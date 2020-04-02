@@ -1,6 +1,7 @@
 package com.simbest.boot.sys.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.github.wenhao.jpa.Specifications;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.simbest.boot.base.service.impl.LogicService;
@@ -14,7 +15,9 @@ import com.simbest.boot.util.ObjectUtil;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -224,6 +227,24 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
                 resultMap.get(dictType).add(rowMap);
             }
 
+        }
+        return resultMap;
+    }
+
+    @Override
+    public Map<String, List<Map<String, String>>> findDictValueMapList(String[] typeList) {
+        Map<String,List<Map<String,String>>> resultMap = Maps.newHashMap();
+        List<Map<String, String>> dictValueMapList = dictValueRepository.findDictValueMapList(typeList);
+        for(Map<String, String> rowMap : dictValueMapList){
+            String dictType = rowMap.get("DICT_TYPE");
+            if(null == resultMap.get(dictType)){
+                List<Map<String,String>> dictTypeList = Lists.newArrayList();
+                dictTypeList.add(rowMap);
+                resultMap.put(dictType, dictTypeList);
+            }
+            else{
+                resultMap.get(dictType).add(rowMap);
+            }
         }
         return resultMap;
     }

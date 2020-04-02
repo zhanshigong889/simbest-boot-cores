@@ -47,6 +47,14 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
     List<Map<String,String>> findDictValue2(@Param ("dictType") String dictType,@Param ("parentId")String parentId);
 
     /**
+     * 根据dictType还有父id来查看字典的信息,单表查询
+     */
+    String sql5 = " SELECT dv.* from sys_dict_value dv where dv.enabled=1 and dv.dict_type=:dictType and dv.parent_id=:parentId "+
+            " order by case dv.display_order when null then 10000000 end,dv.display_order asc ";
+    @Query (value = sql5,nativeQuery = true)
+    List<SysDictValue> findDictVlueByTypeAndParent(@Param( "dictType" ) String dictType,@Param( "parentId" ) String parentId);
+
+    /**
      * 查看数据字典的所有值
      */
     String sql3 = " SELECT dv.*,d.name as dict_type_name from sys_dict d,sys_dict_value dv where d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 "+
@@ -59,14 +67,17 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
      */
     String sql6 = " SELECT dv.id, dv.name, dv.value, dv.display_order, dv.dict_type, dv.value_type, dv.is_default from sys_dict d,sys_dict_value dv where d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 "+
             " order by d.display_order asc, dv.display_order asc ";
-    @Query (value = sql6,nativeQuery = true)
+    @Query (value = sql6, nativeQuery = true)
     List<Map<String,String>> findAllDictValueMapList();
 
     /**
-     * 根据dictType还有父id来查看字典的信息,单表查询
+     * 查看指定数据字典的所有值
      */
-    String sql5 = " SELECT dv.* from sys_dict_value dv where dv.enabled=1 and dv.dict_type=:dictType and dv.parent_id=:parentId "+
-            " order by case dv.display_order when null then 10000000 end,dv.display_order asc ";
-    @Query (value = sql5,nativeQuery = true)
-    List<SysDictValue> findDictVlueByTypeAndParent(@Param( "dictType" ) String dictType,@Param( "parentId" ) String parentId);
+    String sql7 = " SELECT dv.id, dv.name, dv.value, dv.display_order, dv.dict_type, dv.value_type, dv.is_default from sys_dict d,sys_dict_value dv where d.dict_type=dv.dict_type and d.enabled=1 and dv.enabled=1 " +
+            " and dv.dict_type in (:typeList) "+
+            " order by d.display_order asc, dv.display_order asc ";
+    @Query (value = sql7, nativeQuery = true)
+    List<Map<String,String>> findDictValueMapList(@Param("typeList") String[] typeList);
+
+
 }
