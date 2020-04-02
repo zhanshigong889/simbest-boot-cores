@@ -66,6 +66,8 @@ import static com.simbest.boot.constants.ApplicationConstants.ADMINISTRATOR;
 import static com.simbest.boot.constants.ApplicationConstants.ONE;
 import static com.simbest.boot.constants.ApplicationConstants.UUMS_APPCODE;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
+import static com.simbest.boot.sys.model.SysDictValue.SYS_CONFIG;
+import static com.simbest.boot.sys.model.SysDictValue.SYS_CONFIG_REDIS;
 
 /**
  * 用途：Redis 和 RedissonClient 配置信息
@@ -78,7 +80,6 @@ import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 @EnableRedisHttpSession
 public class RedisConfiguration extends CachingConfigurerSupport {
 
-    public final static String DICT_VALUE_REDIS = "redis";
 
     public enum RedisConfigType {
         propertiesRedis,  ftpRedis, sftpRedis, dictValueRedis
@@ -163,13 +164,13 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                 redisClusterNodes = config.getRedisClusterNodes();
             }
             else if(RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum)){
-                SysDictValue sysDictValue = SysDictValue.builder().dictType(DICT_VALUE_REDIS).name(DICT_VALUE_REDIS).build();
+                SysDictValue sysDictValue = SysDictValue.builder().dictType(SYS_CONFIG).name(SYS_CONFIG_REDIS).build();
                 String loginuser = StringUtils.replace(encryptor.encrypt(ADMINISTRATOR), "+", "%2B");
                 JsonResponse jsonResponse = HttpClient.textBody(config.getUumsAddress() + "/sys/dictValue/sso/findAllNoPage?loginuser="+loginuser+"&appcode="+UUMS_APPCODE)
                         .json(JacksonUtils.obj2json(sysDictValue))
                         .asBean(JsonResponse.class);
-//                SysDictValue redisDv = sysDictValueApiHandle.handRemoteResponse(jsonResponse, SysDictValue.class);
                 List<SysDictValue> sysDictValueList = sysDictValueApiListHandle.handRemoteTypeReferenceResponse(jsonResponse, new TypeReference<List<SysDictValue>>(){});
+                Assert.notEmpty(sysDictValueList, String.format("通过字典类型%s和字典值名称%s无法读取REDIS配置",SYS_CONFIG, SYS_CONFIG_REDIS));
                 SysDictValue redisDv = sysDictValueList.get(ZERO);
                 Assert.notNull(redisDv, "REDIS节点配置不能为空！");
                 redisClusterNodes = redisDv.getValue();

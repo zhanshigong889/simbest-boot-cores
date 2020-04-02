@@ -36,6 +36,9 @@ public class SysDictValue extends LogicModel {
     public final static String VALUE_TYPE_DATE = "date";
     public final static String VALUE_TYPE_DATETIME = "datetime";
 
+    public final static String SYS_CONFIG = "sysconfig";
+    public final static String SYS_CONFIG_REDIS = "redis";
+
     @Id
     @Column(name = "id", length = 40)
     @GeneratedValue(generator = "snowFlakeId")
