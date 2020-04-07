@@ -137,20 +137,17 @@ public class AppConfig {
     @Value("${app.host.port}")
     private String appHostPort;
 
-    @Value("${share.host.port:null}")
-    private String shareHostPost;
-
-    @Value("${custom.upload.flag:false}")
-    private String customUploadFlag;
-
-    @Value("${custom.app.file.upload.bash.path:null}")
-    private String customUploadBashPath;
-
     @Value("${app.file.upload.path}")
     private String uploadPath;
 
     @Value("${app.file.upload.location}")
     private String uploadLocation;
+
+    @Value("${app.nginx.custom.upload.flag:false}")
+    private String ngCustomUploadFlag;
+
+    @Value("${app.nginx.custom.upload.path:null}")
+    private String ngCustomUploadPath;
 
     @Value("${app.security.white.hosts}")
     private String whiteHostList;
@@ -220,9 +217,8 @@ public class AppConfig {
         uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
         log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
-        log.info("自定义基础上传目录为，同时也是Nginx配置的代理目录【{}】",customUploadBashPath);
-        log.info("针对FTP和SFTP、DISK方式上传方式，其直接访问文件的地址为【{}】",shareHostPost);
-        log.info("是否开启自定义路径上传文件【{}】",customUploadFlag);
+        log.info("Nginx代理暴露文件自定义上传位置启动状态【{}】", ngCustomUploadFlag);
+        log.info("Nginx代理暴露文件自定义上传位置路径地址【{}】", ngCustomUploadPath);
         log.info("==========================基础核心配置加载完成，即将以【{}】方式读取Redis配置信息，请注意！！！==========================", redisConfigType);
     }
 

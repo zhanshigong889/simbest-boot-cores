@@ -43,7 +43,7 @@ import static org.apache.commons.io.Charsets.UTF_8;
 @Component
 //@ConditionalOnPropertyNotEmpty("app.file.sftp.username")
 //@ConditionalOnProperty(name = "app.file.upload.location", havingValue = "sftp")
-@ConditionalOnExpression("'${app.file.upload.location}'=='ftp' || '${app.file.upload.location}'=='sftp' || '${custom.upload.flag:false}'")
+@ConditionalOnExpression("'${app.file.upload.location}'=='ftp' || '${app.file.upload.location}'=='sftp'")
 public class AppFileSftpUtil {
 
     @Setter

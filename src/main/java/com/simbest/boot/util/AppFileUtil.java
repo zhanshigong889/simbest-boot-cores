@@ -78,7 +78,7 @@ public class AppFileUtil {
             "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm|html|htm|mov|flv|mp4|mp3|amr|csv)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
-    public static final String NGINX_STATIC_FILE_LOCATION = "/staticfiles";
+    public static final String NGINX_STATIC_FILE_LOCATION = "/uploadFiles";
 
     @Autowired
     private AppConfig config;
@@ -815,19 +815,18 @@ public class AppFileUtil {
                 log.debug("基于ftp，方式同sftp");
             case sftp:
                 //下载文件时每次打开-关闭FTP太费资源。因此，隐藏下面代码，改为配置Nginx的虚拟目录，直接提供URL进行下载
-//                String directory = StringUtils.substringBeforeLast(filePath, ApplicationConstants.SLASH);
-//                String downloadFile = StringUtils.substringAfterLast(filePath, ApplicationConstants.SLASH);
-//                realFile = sftpUtil.download2File(directory, downloadFile, createTempFile(getFileSuffix(filePath)));
-
                 //Nginx的虚拟目录参考
-//                location  /staticfiles/ {
+//                location  /uploadFiles/ {
 //                        alias ${app.file.upload.path};
 //                        autoindex on;
 //                }
-                String nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
-                if ( BooleanUtil.toBoolean( config.getCustomUploadFlag()) ){
-                    //自定义了上传目录
-                    nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getCustomUploadBashPath(), config.getShareHostPost());
+                String nginxFileUrl;
+                if (BooleanUtil.toBoolean( config.getNgCustomUploadFlag()) ){
+                    //自定义了Nginx映射目录
+                    nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getNgCustomUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
+                }
+                else{
+                    nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
                 }
                 if(nginxFileUrl.startsWith("http")) {
                     nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);

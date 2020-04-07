@@ -24,13 +24,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * 用途：统一异常处理 参考：https://blog.csdn.net/king_is_everyone/article/details/53080851
@@ -144,25 +145,29 @@ public class GlobalErrorController extends AbstractErrorController {
     public void logErrorInformation(HttpServletRequest request){
         HttpStatus status = getStatus(request);
         log.error("Access Error Attention, httpstatus name {} code {}, AEA请注意,请求响应发生异常!!!", status.name(), status.value());
-        Map<String, Object> body = getErrorAttributes(request,
-                isIncludeStackTrace(request, MediaType.ALL));
-        for (Map.Entry<String, Object> entry : body.entrySet()) {
-            log.error("Error body key {} value {}", entry.getKey(), entry.getValue());
+        Map<String, Object> body = getErrorAttributes(request, isIncludeStackTrace(request, MediaType.ALL));
+        if(NOT_FOUND.equals(status)){
+            log.warn("请注意所访问URL【{}】发生404错误，资源地址不存在！", body.get("path"));
         }
-        if(null != request.getCookies() && request.getCookies().length > 0 ) {
-            for (int i = 0; i < request.getCookies().length; i++) {
-                log.error("Cookie {} {}", i, request.getCookies()[i]);
+        else {
+            for (Map.Entry<String, Object> entry : body.entrySet()) {
+                log.error("Error body key 【{}】 value 【{}】", entry.getKey(), entry.getValue());
             }
-        }
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while(headerNames.hasMoreElements()){
-            String header = headerNames.nextElement();
-            log.error("Header {} value is {}", header, request.getHeader(header));
-        }
-        Enumeration<String> parameterNames = request.getHeaderNames();
-        while(parameterNames.hasMoreElements()){
-            String parameter = parameterNames.nextElement();
-            log.error("Parameter {} value is {}", parameter, request.getParameter(parameter));
+            if (null != request.getCookies() && request.getCookies().length > 0) {
+                for (int i = 0; i < request.getCookies().length; i++) {
+                    log.error("Cookie 名称【{}】 值【{}】", i, request.getCookies()[i]);
+                }
+            }
+            Enumeration<String> headerNames = request.getHeaderNames();
+            while (headerNames.hasMoreElements()) {
+                String header = headerNames.nextElement();
+                log.error("Header 【{}】 值【{}】", header, request.getHeader(header));
+            }
+            Enumeration<String> parameterNames = request.getHeaderNames();
+            while (parameterNames.hasMoreElements()) {
+                String parameter = parameterNames.nextElement();
+                log.error("Parameter 【{}】 值 【{}】", parameter, request.getParameter(parameter));
+            }
         }
     }
 }
