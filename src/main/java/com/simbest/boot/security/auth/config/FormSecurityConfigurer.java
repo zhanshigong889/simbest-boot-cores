@@ -55,6 +55,7 @@ import static com.simbest.boot.constants.ApplicationConstants.LOGIN_ERROR_PAGE;
 import static com.simbest.boot.constants.ApplicationConstants.LOGIN_PAGE;
 import static com.simbest.boot.constants.ApplicationConstants.LOGOUT_PAGE;
 import static com.simbest.boot.constants.ApplicationConstants.REST_LOGIN_PAGE;
+import static com.simbest.boot.constants.ApplicationConstants.REST_LOGOUT_PAGE;
 import static com.simbest.boot.constants.ApplicationConstants.REST_UUMS_LOGIN_PAGE;
 import static com.simbest.boot.constants.ApplicationConstants.REST_UUMS_LOGOUT_PAGE;
 import static com.simbest.boot.constants.ApplicationConstants.ROOT_PAGE;
@@ -93,7 +94,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     private RestSuccessLoginHandler restSuccessLoginHandler;
 
     @Autowired
-    private  RestSuccessLogoutHandler restSuccessLogoutHandler;
+    private RestSuccessLogoutHandler restSuccessLogoutHandler;
 
     @Autowired
     private DefaultLogoutHandler defaultLogoutHandler;
@@ -309,7 +310,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Bean
     public LogoutFilter restUumsLogoutFilter() {
         LogoutFilter filter = new LogoutFilter(restSuccessLogoutHandler, defaultLogoutHandler);
-        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
+//        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
+        filter.setLogoutRequestMatcher( new OrRequestMatcher(
+                new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()),
+                new AntPathRequestMatcher(REST_LOGOUT_PAGE, RequestMethod.POST.name())
+        ));
         return filter;
     }
 
