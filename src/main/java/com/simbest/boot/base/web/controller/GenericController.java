@@ -13,6 +13,7 @@ import com.simbest.boot.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -85,6 +86,22 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
         }
         Specification<T> specification = service.getSpecification(condition);
         Iterable<T> datas = service.findAllNoPage(specification);
+        return JsonResponse.success(datas);
+    }
+
+    @PostMapping(value = {"/findAllSortNoPage", "/sso/findAllSortNoPage", "/api/findAllSortNoPage"})
+    public JsonResponse findAllSortNoPage(@RequestParam(required = false) String direction,
+                                          @RequestParam(required = false) String properties,
+                                          @RequestBody T o) {
+        // 获取查询条件
+        Condition condition = new Condition();
+        Map<String, Object> params = ObjectUtil.getEntityPersistentFieldValueExceptId(o);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            condition.eq(entry.getKey(), entry.getValue());
+        }
+        Specification<T> specification = service.getSpecification(condition);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), properties);
+        Iterable<T> datas = service.findAllNoPage(specification, sort);
         return JsonResponse.success(datas);
     }
 
