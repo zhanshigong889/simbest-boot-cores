@@ -63,7 +63,7 @@ public class AppConfig {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
-    @Value("${spring.redis.config.type:propertiesRedis}")
+    @Value("${spring.redis.config.type:dictValueRedis}")
     private String redisConfigType;
 
     @Value("${spring.redis.config.ftp.username:}")
