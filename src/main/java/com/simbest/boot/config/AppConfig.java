@@ -63,8 +63,11 @@ public class AppConfig {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
-    @Value("${spring.redis.config.type:dictValueRedis}")
+    @Value("${spring.redis.config.type:propertiesRedis}")
     private String redisConfigType;
+
+    @Value("${spring.redis.config.type.redis:}")
+    private String redisConfigTypeRedis;
 
     @Value("${spring.redis.config.ftp.username:}")
     private String redisFtpUsername;
@@ -184,7 +187,10 @@ public class AppConfig {
         log.info("数据库密码【{}】", datasourcePassword);
         log.info("Redis配置方式【{}】", redisConfigType);
         RedisConfiguration.RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfiguration.RedisConfigType.class, redisConfigType);
-        if(RedisConfiguration.RedisConfigType.ftpRedis.equals(redisConfigTypeEnum) ||
+        if(RedisConfiguration.RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum) ) {
+            log.info("Redis主数据中配置项为【{}】", redisConfigTypeRedis);
+        }
+        else if(RedisConfiguration.RedisConfigType.ftpRedis.equals(redisConfigTypeEnum) ||
                 RedisConfiguration.RedisConfigType.sftpRedis.equals(redisConfigTypeEnum) ) {
             log.info("Redis (S)FTP用户名【{}】", redisFtpUsername);
             log.info("Redis (S)FTP密码【{}】", redisFtpPassword);

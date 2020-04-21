@@ -67,7 +67,6 @@ import static com.simbest.boot.constants.ApplicationConstants.ONE;
 import static com.simbest.boot.constants.ApplicationConstants.UUMS_APPCODE;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
 import static com.simbest.boot.sys.model.SysDictValue.SYS_CONFIG;
-import static com.simbest.boot.sys.model.SysDictValue.SYS_CONFIG_REDIS;
 
 /**
  * 用途：Redis 和 RedissonClient 配置信息
@@ -164,13 +163,14 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                 redisClusterNodes = config.getRedisClusterNodes();
             }
             else if(RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum)){
-                SysDictValue sysDictValue = SysDictValue.builder().dictType(SYS_CONFIG).name(SYS_CONFIG_REDIS).build();
+                log.debug("即将通过UUMS主数据【{}】读取Redis配置项【{}】的Redis节点信息", config.getUumsAddress(), config.getRedisConfigTypeRedis());
+                SysDictValue sysDictValue = SysDictValue.builder().dictType(SYS_CONFIG).name(config.getRedisConfigTypeRedis()).build();
                 String loginuser = StringUtils.replace(encryptor.encrypt(ADMINISTRATOR), "+", "%2B");
                 JsonResponse jsonResponse = HttpClient.textBody(config.getUumsAddress() + "/sys/dictValue/sso/findAllNoPage?loginuser="+loginuser+"&appcode="+UUMS_APPCODE)
                         .json(JacksonUtils.obj2json(sysDictValue))
                         .asBean(JsonResponse.class);
                 List<SysDictValue> sysDictValueList = sysDictValueApiListHandle.handRemoteTypeReferenceResponse(jsonResponse, new TypeReference<List<SysDictValue>>(){});
-                Assert.notEmpty(sysDictValueList, String.format("通过字典类型%s和字典值名称%s无法读取REDIS配置",SYS_CONFIG, SYS_CONFIG_REDIS));
+                Assert.notEmpty(sysDictValueList, String.format("通过字典类型%s和字典值名称%s，无法读取REDIS配置",SYS_CONFIG, config.getRedisConfigTypeRedis()));
                 SysDictValue redisDv = sysDictValueList.get(ZERO);
                 Assert.notNull(redisDv, "REDIS节点配置不能为空！");
                 redisClusterNodes = redisDv.getValue();
