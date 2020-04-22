@@ -23,6 +23,7 @@ import com.simbest.boot.util.server.HostUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -43,6 +44,7 @@ import static com.simbest.boot.constants.ApplicationConstants.ZERO;
  */
 @Slf4j
 @Component
+@DependsOn(value = {"redisUtil"})
 public class LoginUtils {
 
     @Autowired

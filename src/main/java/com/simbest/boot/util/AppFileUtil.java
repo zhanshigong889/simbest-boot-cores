@@ -94,7 +94,6 @@ public class AppFileUtil {
     @PostConstruct
     public void init() {
         serverUploadLocation = Enum.valueOf(StoreLocation.class, config.getUploadLocation());
-        log.info("应用上传文件将基于【{}】方式保存", serverUploadLocation.name());
         try {
             sftpUtil = springContextUtil.getBean(AppFileSftpUtil.class);
         }
@@ -820,21 +819,23 @@ public class AppFileUtil {
 //                        alias ${app.file.upload.path};
 //                        autoindex on;
 //                }
-                String nginxFileUrl;
-                if (BooleanUtil.toBoolean( config.getNgCustomUploadFlag()) ){
-                    //自定义了Nginx映射目录
-                    nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getNgCustomUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
-                }
-                else{
-                    nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
-                }
-                if(nginxFileUrl.startsWith("http")) {
+                if(config.isNgEnable()){
+                    String nginxFileUrl;
+                    if (BooleanUtil.toBoolean( config.getNgCustomUploadFlag()) ){
+                        //自定义了Nginx映射目录
+                        nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getNgCustomUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
+                    }
+                    else{
+                        nginxFileUrl = StringUtils.replace(sysFile.getFilePath(), config.getUploadPath(), config.getAppHostPort().concat(NGINX_STATIC_FILE_LOCATION));
+                    }
                     nginxFileUrl = StringUtils.replace(nginxFileUrl, "\\", SLASH);
-                    log.debug("即将以【{}】方式通过URL【{}】下载文件【{}】", serverUploadLocation, nginxFileUrl, sysFile.getFileName());
+                    log.debug("即将通过Nginx以【{}】方式通过URL【{}】下载文件【{}】", serverUploadLocation, nginxFileUrl, sysFile.getFileName());
                     realFile = downloadFileFromUrl(nginxFileUrl);
-                } else {
+                }
+                else {
                     log.warn("即将以【{}】方式通过路径【{}】下载文件【{}】", serverUploadLocation, sysFile.getFilePath(), sysFile.getFileName());
-                    realFile = sftpUtil.download2File(sysFile.getFilePath(), sysFile.getFileName(), createTempFileWithName(sysFile.getFileName()));
+                    String directory = StringUtils.removeEnd(sysFile.getFilePath(), sysFile.getFileName());
+                    realFile = sftpUtil.download2File(directory, sysFile.getFileName(), createTempFileWithName(sysFile.getFileName()));
                 }
                 break;
         }

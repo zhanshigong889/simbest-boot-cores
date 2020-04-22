@@ -106,12 +106,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @PostConstruct
     private void afterPropertiesSet() {
-        log.info("应用超时时间设置为【{}】秒", config.getRedisMaxInactiveIntervalInSeconds());
         sessionRepository.setDefaultMaxInactiveInterval(config.getRedisMaxInactiveIntervalInSeconds());
-        // 注释以下代码，配合RedisSessionConfiguration的CookiePath=/可以实现同域名应用间Cookie共享Session
-        // 而目前设计必须设置，否则导致不同应用相同Cookie在检查Session到期时间时报错
-        // Failed to deserialize object type; nested exception is java.lang.ClassNotFoundException: com.simbest.boot.uums.role.model.SysRole
-        log.info("应用Redis缓存命名空间前缀为【{}】 ", config.getRedisNamespace());
         sessionRepository.setRedisKeyNamespace(config.getRedisNamespace());
     }
 
@@ -132,9 +127,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     public RedisClusterConfiguration redisClusterConfiguration(){
         Map<String, Object> source = Maps.newHashMap();
         source.put("spring.redis.cluster.nodes", redisClusterNodes);
-        log.debug("Redis 启动节点为【{}】", redisClusterNodes);
         source.put("spring.redis.cluster.max-redirects", config.getRedisMaxRedirects());
-        log.info("Redis 最大重定向次数为为【{}】", config.getRedisMaxRedirects());
         return new RedisClusterConfiguration(new MapPropertySource("RedisClusterConfiguration", source));
     }
 
@@ -194,7 +187,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             }
             redisClusterNodes = StringUtils.trimAllWhitespace(redisClusterNodes);
             Assert.notNull(redisClusterNodes, "REDIS节点配置不能为空！");
-            log.info("==========================Redis节点为【{}】==========================", redisClusterNodes);
+            log.info("------------------------------------Redis加载配置节点END--------------------------------------------------");
+            log.info("Redis节点为【{}】", redisClusterNodes);
+            log.info("------------------------------------Redis加载配置节点START--------------------------------------------------");
             if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
                 RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
                 standaloneConfig.setHostName(redisClusterNodes.split(ApplicationConstants.COLON)[ZERO]);

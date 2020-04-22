@@ -52,6 +52,9 @@ public class AppFileSftpUtil {
     @Value("${app.file.upload.location}")
     private String uploadLocation;
 
+    @Value("${app.file.upload.path}")
+    private String uploadPath;
+
     @Setter
     @Value("${app.file.sftp.username}")
     private String username;
@@ -78,15 +81,17 @@ public class AppFileSftpUtil {
 
     @PostConstruct
     public void init() {
+        log.info("************************************FTP和SFTP配置START**************************************************");
         serverUploadLocation = Enum.valueOf(StoreLocation.class, uploadLocation);
         log.info("上传方式【{}】", serverUploadLocation);
+        log.info("上传路径【{}】", uploadPath);
         log.info("用户名【{}】", username);
         log.info("密码【{}】", password);
         log.info("主机【{}】", host);
         log.info("端口【{}】", port);
         log.info("私钥文件【{}】", keyFilePath);
         log.info("私钥密码【{}】", passphrase);
-        log.info("Congratulations------------------------------------------------SFTP配置加载完成");
+        log.info("************************************FTP和SFTP配置END**************************************************");
     }
 
     /**
@@ -166,15 +171,22 @@ public class AppFileSftpUtil {
                     directory = StringUtils.removeFirst(directory, SLASH);
                 }
                 String[] folders = directory.split( SLASH );
-                for ( String folder : folders ) {
-                    if ( folder.length() > 0 ) {
-                        try {
-                            sftpChannel.cd( folder );
-                        }
-                        catch ( SftpException se ) {
-                            sftpChannel.mkdir( folder );
-                            sftpChannel.cd( folder );
-                        }
+                try{
+                    //第一个提供的目录一定要有权限进入并且读写
+                    sftpChannel.cd(SLASH+folders[0]);
+                }
+                catch (Exception e1){
+                    throw new IllegalArgumentException(String.format("SFTP无法进入%s目录，路径%s提供错误，请检查路径或读写访问权限！", SLASH+folders[0], directory));
+                }
+                //第二个提供的目录开始，如果无法进入，那么创建目录
+                for (int i=1; i<folders.length; i++ ) {
+                    String folder = folders[i];
+                    try {
+                        sftpChannel.cd( folder );
+                    }
+                    catch ( SftpException e2 ) {
+                        sftpChannel.mkdir( folder );
+                        sftpChannel.cd( folder );
                     }
                 }
             }

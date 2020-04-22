@@ -3,12 +3,19 @@
  */
 package com.simbest.boot.config;
 
+import com.simbest.boot.base.enums.StoreLocation;
+import com.simbest.boot.base.exception.Exceptions;
+import com.simbest.boot.util.BootAppFileReader;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Properties;
 
 import static com.simbest.boot.constants.ApplicationConstants.SLASH;
 
@@ -120,9 +127,6 @@ public class AppConfig {
     @Value("${spring.session.cookie.path:}")
     private String cookiePath;
 
-    @Value("${app.swagger.address}")
-    private String swaggerUrl;
-
     // 是否开启验证码功能
     @Value("${app.captcha.enable}")
     private boolean isOpenValidateCode = true;
@@ -145,6 +149,9 @@ public class AppConfig {
 
     @Value("${app.file.upload.location}")
     private String uploadLocation;
+
+    @Value("${app.nginx.enable:false}")
+    private boolean ngEnable;
 
     @Value("${app.nginx.custom.upload.flag:false}")
     private String ngCustomUploadFlag;
@@ -177,14 +184,40 @@ public class AppConfig {
     @Value("${app.sms.templateId:408992008}")
     private String smsTemplateId;
 
+    @Value("${app.swagger.address}")
+    private String swaggerUrl;
+
     @PostConstruct
     public void init() {
+        log.info("************************************应用配置START**************************************************");
+        log.info("应用门户单点加密令牌【{}】", mochaPortalToken);
         log.info("应用注册代码【{}】", appcode);
+        log.info("应用访问地址【{}】", appHostPort);
         log.info("应用访问上下文【{}】", contextPath);
+        log.info("应用Cookie路径【{}】", cookiePath);
+        log.info("应用接口文档地址【{}】", String.format("%s%s/swagger-ui.html", appHostPort, contextPath));
+        log.info("应用登录验证码开启状态【{}】", isOpenValidateCode);
+        log.info("应用请求主数据地址【{}】", uumsAddress);
+        log.info("应用心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
+        uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
+        log.info("应用临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("应用获准访问白名单【{}】", whiteHostList);
+        log.info("************************************应用配置END**************************************************");
+        log.info("");
+        log.info("------------------------------------多线程配置START--------------------------------------------------");
+        log.info("多线程核心线程数【{}】", threadCorePoolSize);
+        log.info("多线程最大线程数【{}】", threadMaxPoolSize);
+        log.info("多线程缓冲队列【{}】", threadQueueCapacity);
+        log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
+        log.info("------------------------------------多线程配置END--------------------------------------------------");
+        log.info("");
+        log.info("====================================数据库配置START==================================================");
         log.info("数据库URL【{}】", datasourceUrl);
         log.info("数据库账号【{}】", datasourceUsername);
         log.info("数据库密码【{}】", datasourcePassword);
+        log.info("====================================数据库配置END==================================================");
+        log.info("");
+        log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^REDIS缓存配置START^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         log.info("Redis配置方式【{}】", redisConfigType);
         RedisConfiguration.RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfiguration.RedisConfigType.class, redisConfigType);
         if(RedisConfiguration.RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum) ) {
@@ -205,27 +238,33 @@ public class AppConfig {
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
         log.info("Redis缓存空间前缀【{}】", redisNamespace);
         log.info("Redis缓存Key键前缀【{}】", redisKeyPrefix);
+        log.info("Redis应用超时时间设置为【{}】秒", redisMaxInactiveIntervalInSeconds);
         log.info("Redis缓存默认等待加锁时间【{}】秒", redisLockWaitSeconds);
         log.info("Redis缓存默认加锁后释放时间【{}】秒", redisLockReleaseSeconds);
-        log.info("应用Cookie路径【{}】", cookiePath);
-        //log.info("API接口文档地址【{}】", swaggerUrl);
-        log.info("API接口文档地址【{}】", String.format("%s%s/swagger-ui.html", appHostPort, contextPath));
-        log.info("登录是否开启验证码【{}】", isOpenValidateCode);
-        log.info("主数据请求地址【{}】", uumsAddress);
-        log.info("门户单点加密令牌【{}】", mochaPortalToken);
-        log.info("应用访问地址【{}】", appHostPort);
+        log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^REDIS缓存配置END^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        log.info("");
+        log.info("####################################文件存储配置START##################################################");
         log.info("应用文件上传方式【{}】", uploadLocation);
-        log.info("应用文件上传路径【{}】", uploadPath);
-        log.info("多线程核心线程数【{}】", threadCorePoolSize);
-        log.info("多线程最大线程数【{}】", threadMaxPoolSize);
-        log.info("多线程缓冲队列【{}】", threadQueueCapacity);
-        log.info("多线程空闲时间【{}】", threadKeepAliveSeconds);
-        uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
-        log.info("临时文件上传目录为【{}】", uploadTmpFileLocation);
-        log.info("心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
-        log.info("Nginx代理暴露文件自定义上传位置启动状态【{}】", ngCustomUploadFlag);
-        log.info("Nginx代理暴露文件自定义上传位置路径地址【{}】", ngCustomUploadPath);
-        log.info("==========================基础核心配置加载完成，即将以【{}】方式读取Redis配置信息，请注意！！！==========================", redisConfigType);
+        StoreLocation serverUploadLocation = Enum.valueOf(StoreLocation.class, uploadLocation);
+        if(StoreLocation.fastdfs.equals(serverUploadLocation)){
+            try {
+                BufferedReader bufferedReader = BootAppFileReader.getClasspathFile("fastdfs-client.properties");
+                Properties props = new Properties();
+                props.load(bufferedReader);
+                log.info("FastDFS配置信息为【{}】", props.getProperty("fastdfs.tracker_servers"));
+                props.load(bufferedReader);
+            } catch (IOException e) {
+                Exceptions.printException(e);
+            }
+        }
+        log.info("应用上传文件路径【{}】", uploadPath);
+        log.info("应用下载文件启用Nginx映射状态【{}】", ngEnable);
+        if(ngEnable) {
+            log.info("Nginx代理暴露文件自定义上传位置启动状态【{}】", ngCustomUploadFlag);
+            log.info("Nginx代理暴露文件自定义上传位置路径地址【{}】", ngCustomUploadPath);
+        }
+        log.info("####################################文件存储配置END##################################################");
+        log.info("");
     }
 
 
