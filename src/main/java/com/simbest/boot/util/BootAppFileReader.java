@@ -9,6 +9,7 @@ import com.simbest.boot.base.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 import java.io.BufferedReader;
@@ -47,9 +48,7 @@ public class BootAppFileReader {
             } catch (FileNotFoundException e1) {
             }
         }
-        if(bufferedReader == null){
-            log.error("严重错误：请注意读取配置文件【{}】失败！", filepath);
-        }
+        Assert.notNull(bufferedReader, String.format("严重错误：请注意读取配置文件%s失败！", filepath));
         return bufferedReader;
     }
 

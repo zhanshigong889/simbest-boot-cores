@@ -52,6 +52,7 @@ public class FastDfsClient {
             BufferedReader bufferedReader = BootAppFileReader.getClasspathFile("fastdfs-client.properties");
             Properties props = new Properties();
             props.load(bufferedReader);
+            log.info("FastDFS配置信息为【{}】", props.getProperty("fastdfs.tracker_servers"));
             ClientGlobal.initByProperties(props);
             if (tracker == null) {
                 tracker = new TrackerClient();
@@ -62,9 +63,9 @@ public class FastDfsClient {
 //                ProtoCommon.activeTest(trackerServer.getSocket());
 //            }
 //            storageClient = new StorageClient(trackerServer, null);
-            log.info("FASTDFS StorageClient 客户端初始化成功!");
+            log.info("FastDFS StorageClient 客户端初始化成功!");
         } catch (Exception ex) {
-            log.error("FASTDFS StorageClient 客户端初始化失败!");
+            log.error("FastDFS StorageClient 客户端初始化失败!");
             Exceptions.printException(ex);
         }
     }

@@ -3,19 +3,12 @@
  */
 package com.simbest.boot.config;
 
-import com.simbest.boot.base.enums.StoreLocation;
-import com.simbest.boot.base.exception.Exceptions;
-import com.simbest.boot.util.BootAppFileReader;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Properties;
 
 import static com.simbest.boot.constants.ApplicationConstants.SLASH;
 
@@ -245,18 +238,6 @@ public class AppConfig {
         log.info("");
         log.info("####################################文件存储配置START##################################################");
         log.info("应用文件上传方式【{}】", uploadLocation);
-        StoreLocation serverUploadLocation = Enum.valueOf(StoreLocation.class, uploadLocation);
-        if(StoreLocation.fastdfs.equals(serverUploadLocation)){
-            try {
-                BufferedReader bufferedReader = BootAppFileReader.getClasspathFile("fastdfs-client.properties");
-                Properties props = new Properties();
-                props.load(bufferedReader);
-                log.info("FastDFS配置信息为【{}】", props.getProperty("fastdfs.tracker_servers"));
-                props.load(bufferedReader);
-            } catch (IOException e) {
-                Exceptions.printException(e);
-            }
-        }
         log.info("应用上传文件路径【{}】", uploadPath);
         log.info("应用下载文件启用Nginx映射状态【{}】", ngEnable);
         if(ngEnable) {
