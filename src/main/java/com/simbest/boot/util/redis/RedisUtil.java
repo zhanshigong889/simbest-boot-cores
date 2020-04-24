@@ -1,5 +1,6 @@
 package com.simbest.boot.util.redis;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.simbest.boot.config.AppConfig;
@@ -376,6 +377,22 @@ public class RedisUtil {
             return null;
         } else {
             return JacksonUtils.json2obj(value, clazz);
+        }
+    }
+
+    /**
+     * 取得复杂类型数据
+     * @param key
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> T getBean(String key, TypeReference<T> listType) {
+        String value = cacheUtils.redisTemplate.opsForValue().get(prefix + key);
+        if (null == value) {
+            return null;
+        } else {
+            return JacksonUtils.json2Type(value, listType);
         }
     }
 
