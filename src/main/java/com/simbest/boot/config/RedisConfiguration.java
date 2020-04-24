@@ -187,9 +187,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             }
             redisClusterNodes = StringUtils.trimAllWhitespace(redisClusterNodes);
             Assert.notNull(redisClusterNodes, "REDIS节点配置不能为空！");
-            log.info("------------------------------------Redis加载配置节点END--------------------------------------------------");
+            log.info("*************************Redis加载配置节点START******************************");
             log.info("Redis节点为【{}】", redisClusterNodes);
-            log.info("------------------------------------Redis加载配置节点START--------------------------------------------------");
+            log.info("*************************Redis加载配置节点END******************************");
             if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
                 RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
                 standaloneConfig.setHostName(redisClusterNodes.split(ApplicationConstants.COLON)[ZERO]);
