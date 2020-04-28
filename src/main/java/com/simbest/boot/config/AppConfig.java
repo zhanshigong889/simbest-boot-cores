@@ -54,6 +54,35 @@ public class AppConfig {
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
+    @Value("${app.oa.portal.token:SIMBEST_SSO}")
+    private String mochaPortalToken;
+
+    @Value("${app.host.port}")
+    private String appHostPort;
+
+    @Value("${spring.session.cookie.path:}")
+    private String cookiePath;
+
+    @Value("${app.uums.address}")
+    private String uumsAddress;
+
+    // 是否开启验证码功能
+    @Value("${app.captcha.enable}")
+    private boolean isOpenValidateCode = true;
+
+    // 是否开启心跳检测功能
+    @Value("${app.heart.check.enable:false}")
+    private boolean isOpenHeartCheck;
+
+    @Value("${app.record.web.log:false}")
+    private boolean isRecordWebLog;
+
+    public static final String uploadTmpFileDir = "springboottmp";
+    private String uploadTmpFileLocation;
+
+    @Value("${app.security.white.hosts}")
+    private String whiteHostList;
+
     @Value("${spring.datasource.url}")
     private String datasourceUrl;
 
@@ -117,25 +146,7 @@ public class AppConfig {
     @Value("${spring.cache.redis.lock.release.seconds:7200}")
     private int redisLockReleaseSeconds;
 
-    @Value("${spring.session.cookie.path:}")
-    private String cookiePath;
 
-    // 是否开启验证码功能
-    @Value("${app.captcha.enable}")
-    private boolean isOpenValidateCode = true;
-
-    // 是否开启心跳检测功能
-    @Value("${app.heart.check.enable:false}")
-    private boolean isOpenHeartCheck;
-
-    @Value("${app.uums.address}")
-    private String uumsAddress;
-
-    @Value("${app.oa.portal.token:SIMBEST_SSO}")
-    private String mochaPortalToken;
-
-    @Value("${app.host.port}")
-    private String appHostPort;
 
     @Value("${app.file.upload.path}")
     private String uploadPath;
@@ -152,9 +163,6 @@ public class AppConfig {
     @Value("${app.nginx.custom.upload.path:null}")
     private String ngCustomUploadPath;
 
-    @Value("${app.security.white.hosts}")
-    private String whiteHostList;
-
     @Value("${thread.core.pool.size:10}")
     private int threadCorePoolSize;
     @Value("${thread.max.pool.size:20}")
@@ -163,9 +171,6 @@ public class AppConfig {
     private int threadQueueCapacity;
     @Value("${thread.keep.alive.seconds:60}")
     private int threadKeepAliveSeconds;
-
-    public static final String uploadTmpFileDir = "springboottmp";
-    private String uploadTmpFileLocation;
 
     //简单实时短信接口配置
     @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
