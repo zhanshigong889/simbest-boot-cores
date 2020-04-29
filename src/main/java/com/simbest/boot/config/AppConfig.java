@@ -48,120 +48,33 @@ import static com.simbest.boot.constants.ApplicationConstants.SLASH;
 @Configuration
 public class AppConfig {
 
-    @Value("${logback.artifactId}")
-    private String appcode;
-
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-
     @Value("${app.oa.portal.token:SIMBEST_SSO}")
     private String mochaPortalToken;
-
+    @Value("${logback.artifactId}")
+    private String appcode;
     @Value("${app.host.port}")
     private String appHostPort;
-
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
     @Value("${spring.session.cookie.path:}")
     private String cookiePath;
-
-    @Value("${app.uums.address}")
-    private String uumsAddress;
-
     // 是否开启验证码功能
     @Value("${app.captcha.enable}")
     private boolean isOpenValidateCode = true;
-
+    @Value("${app.uums.address}")
+    private String uumsAddress;
     // 是否开启心跳检测功能
     @Value("${app.heart.check.enable:false}")
     private boolean isOpenHeartCheck;
-
     @Value("${app.record.web.log:false}")
     private boolean isRecordWebLog;
-
     public static final String uploadTmpFileDir = "springboottmp";
     private String uploadTmpFileLocation;
-
     @Value("${app.security.white.hosts}")
     private String whiteHostList;
+    @Value("${app.swagger.address}")
+    private String swaggerUrl;
 
-    @Value("${spring.datasource.url}")
-    private String datasourceUrl;
-
-    @Value("${spring.datasource.username}")
-    private String datasourceUsername;
-
-    @Value("${spring.datasource.password}")
-    private String datasourcePassword;
-
-    @Value("${spring.redis.config.type:propertiesRedis}")
-    private String redisConfigType;
-
-    @Value("${spring.redis.config.type.redis:}")
-    private String redisConfigTypeRedis;
-
-    @Value("${spring.redis.config.ftp.username:}")
-    private String redisFtpUsername;
-
-    @Value("${spring.redis.config.ftp.password:}")
-    private String redisFtpPassword;
-
-    @Value("${spring.redis.config.ftp.host:}")
-    private String redisFtpHost;
-
-    @Value("${spring.redis.config.ftp.port:22}")
-    private int redisFtpPort;
-
-    @Value("${spring.redis.config.ftp.keyFile:}")
-    private String redisFtpKeyFile;
-
-    @Value("${spring.redis.config.ftp.passphrase:}")
-    private String redisFtpPassphrase;
-
-    @Value("${spring.redis.config.ftp.node.config.directory:}")
-    private String redisFtpNodeConfigDirectory;
-
-    @Value("${spring.redis.config.ftp.node.config.file:}")
-    private String redisFtpNodeConfigFile;
-
-    @Value("${spring.redis.cluster.nodes}")
-    private String redisClusterNodes;
-
-    @Value("${spring.redis.cluster.password}")
-    private String redisPassword;
-
-    @Value("${spring.redis.cluster.max-redirects}")
-    private String redisMaxRedirects;
-
-    @Value("${server.servlet.session.timeout}")
-    private Integer redisMaxInactiveIntervalInSeconds;
-
-    @Value("${spring.session.redis.namespace}")
-    private String redisNamespace;
-
-    @Value("${spring.cache.redis.key-prefix}")
-    private String redisKeyPrefix;
-
-    @Value("${spring.cache.redis.lock.wait.seconds:3}")
-    private int redisLockWaitSeconds;
-
-    @Value("${spring.cache.redis.lock.release.seconds:7200}")
-    private int redisLockReleaseSeconds;
-
-
-
-    @Value("${app.file.upload.path}")
-    private String uploadPath;
-
-    @Value("${app.file.upload.location}")
-    private String uploadLocation;
-
-    @Value("${app.nginx.enable:false}")
-    private boolean ngEnable;
-
-    @Value("${app.nginx.custom.upload.flag:false}")
-    private String ngCustomUploadFlag;
-
-    @Value("${app.nginx.custom.upload.path:null}")
-    private String ngCustomUploadPath;
 
     @Value("${thread.core.pool.size:10}")
     private int threadCorePoolSize;
@@ -171,6 +84,65 @@ public class AppConfig {
     private int threadQueueCapacity;
     @Value("${thread.keep.alive.seconds:60}")
     private int threadKeepAliveSeconds;
+
+
+    @Value("${spring.datasource.url}")
+    private String datasourceUrl;
+    @Value("${spring.datasource.username}")
+    private String datasourceUsername;
+    @Value("${spring.datasource.password}")
+    private String datasourcePassword;
+
+    @Value("${spring.redis.config.type:propertiesRedis}")
+    private String redisConfigType;
+    @Value("${spring.redis.config.type.redis:}")
+    private String redisConfigTypeRedis;
+    @Value("${spring.redis.config.ftp.username:}")
+    private String redisFtpUsername;
+    @Value("${spring.redis.config.ftp.password:}")
+    private String redisFtpPassword;
+    @Value("${spring.redis.config.ftp.host:}")
+    private String redisFtpHost;
+    @Value("${spring.redis.config.ftp.port:22}")
+    private int redisFtpPort;
+    @Value("${spring.redis.config.ftp.keyFile:}")
+    private String redisFtpKeyFile;
+    @Value("${spring.redis.config.ftp.passphrase:}")
+    private String redisFtpPassphrase;
+    @Value("${spring.redis.config.ftp.node.config.directory:}")
+    private String redisFtpNodeConfigDirectory;
+    @Value("${spring.redis.config.ftp.node.config.file:}")
+    private String redisFtpNodeConfigFile;
+    @Value("${spring.redis.cluster.nodes}")
+    private String redisClusterNodes;
+    @Value("${spring.redis.cluster.password}")
+    private String redisPassword;
+    @Value("${spring.redis.cluster.max-redirects}")
+    private String redisMaxRedirects;
+    @Value("${server.servlet.session.timeout}")
+    private Integer redisMaxInactiveIntervalInSeconds;
+    @Value("${spring.session.redis.namespace}")
+    private String redisNamespace;
+    @Value("${spring.cache.redis.key-prefix}")
+    private String redisKeyPrefix;
+    @Value("${spring.cache.redis.lock.wait.seconds:3}")
+    private int redisLockWaitSeconds;
+    @Value("${spring.cache.redis.lock.release.seconds:7200}")
+    private int redisLockReleaseSeconds;
+
+
+    @Value("${app.file.upload.location}")
+    private String uploadLocation;
+    @Value("${app.file.upload.path}")
+    private String uploadPath;
+    @Value("${app.nginx.enable:false}")
+    private boolean ngEnable;
+    @Value("${app.nginx.custom.upload.flag:false}")
+    private String ngCustomUploadFlag;
+    @Value("${app.nginx.custom.upload.path:null}")
+    private String ngCustomUploadPath;
+
+
 
     //简单实时短信接口配置
     @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
@@ -182,8 +154,7 @@ public class AppConfig {
     @Value("${app.sms.templateId:408992008}")
     private String smsTemplateId;
 
-    @Value("${app.swagger.address}")
-    private String swaggerUrl;
+
 
     @PostConstruct
     public void init() {
@@ -193,10 +164,11 @@ public class AppConfig {
         log.info("应用访问地址【{}】", appHostPort);
         log.info("应用访问上下文【{}】", contextPath);
         log.info("应用Cookie路径【{}】", cookiePath);
+        log.info("应用请求主数据地址【{}】", uumsAddress);
         log.info("应用接口文档地址【{}】", String.format("%s%s/swagger-ui.html", appHostPort, contextPath));
         log.info("应用登录验证码开启状态【{}】", isOpenValidateCode);
-        log.info("应用请求主数据地址【{}】", uumsAddress);
         log.info("应用心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
+        log.info("记录Web请求日志状态【{}】", isRecordWebLog ? true : false);
         uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
         log.info("应用临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("应用获准访问白名单【{}】", whiteHostList);
