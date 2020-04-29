@@ -53,7 +53,8 @@ public class GlobalWebRequestLogger {
     private ThreadLocal<Long> startTime = new NamedThreadLocal<>("global-web-logger");
 
     private Set<String> notRecordController = ImmutableSet.of("com.simbest.boot.security.auth.controller.CaptchaController",
-            "com.simbest.boot.security.auth.controller.LoginController", "com.simbest.boot.security.auth.controller.IndexController");
+            "com.simbest.boot.security.auth.controller.LoginController", "com.simbest.boot.security.auth.controller.IndexController",
+            "com.simbest.boot.sys.web.SysHealthController");
 
 //    @Pointcut("execution(* *..web..*Controller.*(..))")
     @Pointcut("execution(* *..*Controller.*(..))")
