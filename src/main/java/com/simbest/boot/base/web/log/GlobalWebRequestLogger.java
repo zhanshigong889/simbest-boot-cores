@@ -122,7 +122,7 @@ public class GlobalWebRequestLogger {
         SysLogWeb logWeb = SysLogWeb.builder().url(request.getRequestURL().toString())
                 .ip(ip).controller(controller).methodname(methodname).failed(true)
                 .args(StringUtils.substring(args, 0, 1999))
-                .creator(SecurityUtils.getCurrentUserName()).build();
+                .build();
         try {
             Object response = pjp.proceed();
             logWeb.setFailed(false);
@@ -137,6 +137,7 @@ public class GlobalWebRequestLogger {
             logWeb.setDuration(duration);
             try{
                 if(appConfig.isRecordWebLog() && !notRecordController.contains(logWeb.getController())) {
+                    logWeb.setCreator(SecurityUtils.getCurrentUserName());
                     logWebService.insert(logWeb);
                 }
             }catch(Exception e){
