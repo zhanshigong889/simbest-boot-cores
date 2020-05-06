@@ -2,6 +2,7 @@ package com.simbest.boot.security.auth.controller;
 
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.security.IUser;
+import com.simbest.boot.security.SimpleUser;
 import com.simbest.boot.util.security.SecurityUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,8 +54,8 @@ public class IndexController {
     @PostMapping(value={"/getCurrentUser","/getCurrentUser/sso","/getCurrentUser/api"})
     @ResponseBody
     public JsonResponse getCurrentUser() {
-        IUser iuser = SecurityUtils.getCurrentUser();
-        return JsonResponse.success(iuser);
+        SimpleUser simpleUser = (SimpleUser)SecurityUtils.getCurrentUser();
+        return JsonResponse.success(simpleUser);
     }
 
 
