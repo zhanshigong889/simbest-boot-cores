@@ -54,8 +54,8 @@ public class IndexController {
     @PostMapping(value={"/getCurrentUser","/getCurrentUser/sso","/getCurrentUser/api"})
     @ResponseBody
     public JsonResponse getCurrentUser() {
-        SimpleUser simpleUser = (SimpleUser)SecurityUtils.getCurrentUser();
-        return JsonResponse.success(simpleUser);
+        IUser iuser = SecurityUtils.getCurrentUser();
+        return JsonResponse.success(iuser);
     }
 
 
