@@ -4,12 +4,14 @@
 package com.simbest.boot.sys.web;
 
 import com.simbest.boot.base.web.response.JsonResponse;
+import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.sys.service.ISysAdminService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -100,7 +102,11 @@ public class SysAdminController {
             @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
     })
     public JsonResponse cleanAuthUserCache(@RequestParam String username) {
-        return sysAdminService.cleanAuthUserCache(username);
+        String[] users = StringUtils.split(username, ApplicationConstants.COMMA);
+        for(String user : users){
+            sysAdminService.cleanAuthUserCache(user);
+        }
+        return JsonResponse.defaultSuccessResponse();
     }
 
     @ApiOperation(value = "下发通用密码", notes = "下发通用密码")
@@ -109,5 +115,6 @@ public class SysAdminController {
     public JsonResponse pushPassword() {
         return sysAdminService.pushPassword();
     }
+
 
 }

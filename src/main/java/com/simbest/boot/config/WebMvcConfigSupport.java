@@ -5,6 +5,8 @@ package com.simbest.boot.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simbest.boot.component.converter.StringToDateConverter;
+import com.simbest.boot.constants.ApplicationConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,13 +66,15 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
     /**
      * SpringBoot 实现前后端分离的跨域访问（CORS）
      * http://www.spring4all.com/article/177
+     * https://blog.csdn.net/zhangyuxuan2/article/details/90446670
      * @param registry
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
 //                .allowedOrigins(appConfig.getAppHostPort())
-                .allowedOrigins(ALL)
+//                .allowedOrigins(ALL)
+                .allowedOrigins(StringUtils.split(appConfig.getAllowedOrigins(), ApplicationConstants.COMMA))
                 .allowedMethods(HttpMethod.OPTIONS.name(), HttpMethod.GET.name(), HttpMethod.POST.name())
                 .allowedHeaders(ALL)
                 .allowCredentials(true)

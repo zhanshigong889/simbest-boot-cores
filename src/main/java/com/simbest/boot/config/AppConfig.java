@@ -68,6 +68,8 @@ public class AppConfig {
     private boolean isOpenHeartCheck;
     @Value("${app.record.web.log:false}")
     private boolean isRecordWebLog;
+    @Value("${app.allowed.origins:*}")
+    private String allowedOrigins;
     public static final String uploadTmpFileDir = "springboottmp";
     private String uploadTmpFileLocation;
     @Value("${app.security.white.hosts}")
@@ -169,6 +171,7 @@ public class AppConfig {
         log.info("应用登录验证码开启状态【{}】", isOpenValidateCode);
         log.info("应用心跳定时器开关打开状态【{}】", isOpenHeartCheck ? true : false);
         log.info("记录Web请求日志状态【{}】", isRecordWebLog ? true : false);
+        log.info("跨域访问列表【{}】", allowedOrigins);
         uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
         log.info("应用临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("应用获准访问白名单【{}】", whiteHostList);
