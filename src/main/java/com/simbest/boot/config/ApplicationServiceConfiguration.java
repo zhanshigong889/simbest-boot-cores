@@ -3,9 +3,12 @@
  */
 package com.simbest.boot.config;
 
+import com.simbest.boot.base.service.IGenericService;
 import com.simbest.boot.base.service.ISystemService;
+import com.simbest.boot.base.service.impl.GenericService;
 import com.simbest.boot.base.service.impl.SystemService;
 import com.simbest.boot.sys.repository.SysTaskExecutedLogRepository;
+import com.simbest.boot.util.distribution.id.repository.SysRedisIdKeyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,4 +26,11 @@ public class ApplicationServiceConfiguration {
     public ISystemService sysTaskExecutedLogService(SysTaskExecutedLogRepository repository) {
         return new SystemService(repository);
     }
+
+    @Bean(name = "sysRedisIdKeyService")
+    @Autowired
+    public IGenericService sysRedisIdKeyService(SysRedisIdKeyRepository repository) {
+        return new GenericService<>(repository);
+    }
+
 }

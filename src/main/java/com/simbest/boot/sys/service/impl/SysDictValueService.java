@@ -1,7 +1,6 @@
 package com.simbest.boot.sys.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.wenhao.jpa.Specifications;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.simbest.boot.base.service.impl.LogicService;
@@ -15,9 +14,7 @@ import com.simbest.boot.util.ObjectUtil;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -33,7 +30,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.simbest.boot.constants.ApplicationConstants.ONE;
 import static com.simbest.boot.constants.ApplicationConstants.ZERO;
-import static com.simbest.boot.constants.AuthoritiesConstants.*;
+import static com.simbest.boot.constants.AuthoritiesConstants.ACCESS_FORBIDDEN;
+import static com.simbest.boot.constants.AuthoritiesConstants.BUSINESS_FORBIDDEN;
+import static com.simbest.boot.constants.AuthoritiesConstants.ROLE_ADMIN;
+import static com.simbest.boot.constants.AuthoritiesConstants.SUPER_ADMIN;
+import static com.simbest.boot.constants.AuthoritiesConstants.USER;
 
 @Slf4j
 @Service
