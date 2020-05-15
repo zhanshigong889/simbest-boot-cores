@@ -7,7 +7,6 @@ import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 import org.redisson.RedissonShutdownException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -50,7 +49,7 @@ public class DistributedRedisLock {
     }
 
     /**
-     * 强制获取锁
+     * 强制获取锁，需要手动执行unlock解锁
      * @param lockName
      */
     public static void lock(String lockName){
@@ -60,29 +59,27 @@ public class DistributedRedisLock {
     }
 
     /**
-     * 强制获取锁
+     * 强制获取锁，加锁以后【timeoutSeconds】秒钟自动解锁，无需调用unlock方法手动解锁
      * @param lockName
      */
     public static void lock(String lockName, int timeoutSeconds){
         String key = redisKeyPrefix + lockName;
         RLock mylock = lockUtils.redisson.getFairLock(key);
-        //lock提供带timeout参数，timeout结束强制解锁，防止死锁
         try {
             mylock.lock(timeoutSeconds, ApplicationConstants.REDIS_LOCK_DEFAULT_TIME_UNIT);
         } catch (Exception e){
-            log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+            log.warn("【{}】尝试lock加锁失败，发生【{}】异常", lockName, e.getMessage());
         }
     }
 
     /**
-     * 强制获取锁
+     * 强制获取锁，加锁以后【timeoutSeconds】秒钟自动解锁，无需调用unlock方法手动解锁
      * @param lockName
      */
     public static <T> T lock(String lockName, int timeoutSeconds, DistributedLockCallback<T> callback){
         T returnObj = null;
         String key = redisKeyPrefix + lockName;
         RLock mylock = lockUtils.redisson.getFairLock(key);
-        //lock提供带timeout参数，timeout结束强制解锁，防止死锁
         try {
             mylock.lock(timeoutSeconds, ApplicationConstants.REDIS_LOCK_DEFAULT_TIME_UNIT);
             if (mylock != null && mylock.isLocked()) {
@@ -90,7 +87,7 @@ public class DistributedRedisLock {
             }
         }
         catch (RedissonShutdownException e) {
-            log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+            log.warn("【{}】尝试lock加锁失败，发生【{}】异常", lockName, e.getMessage());
         }
         finally {
             try{
@@ -98,8 +95,7 @@ public class DistributedRedisLock {
                     mylock.unlock();
                 }
             }catch (Exception e){
-                log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
-                Exceptions.printException(e);
+                log.warn("【{}】尝试unlock解锁失败，发生【{}】异常", lockName, e.getMessage());
             }
         }
         return returnObj;
@@ -117,8 +113,7 @@ public class DistributedRedisLock {
                 mylock.unlock();
             }
         }catch (Exception e){
-            log.warn("【{}】尝试解锁失败，发生【{}】异常", lockName, e.getMessage());
-            Exceptions.printException(e);
+            log.warn("【{}】尝试unlock解锁失败，发生【{}】异常", lockName, e.getMessage());
         }
     }
 
@@ -127,8 +122,8 @@ public class DistributedRedisLock {
     /**
      * 仅尝试获得锁， 需要获得锁的业务手动释放锁
      * @param lockName
-     * @param waitSeconds
-     * @param releaseSeconds
+     * @param waitSeconds 最多等待时间
+     * @param releaseSeconds 上锁以后自动解锁
      * @return
      */
     public static DistributedRedissonLock tryLock(String lockName, long waitSeconds, long releaseSeconds){
@@ -140,10 +135,10 @@ public class DistributedRedisLock {
             return DistributedRedissonLock.builder().rLock(mylock).isLocked(locked).build();
         }
         catch (RedissonShutdownException e) {
-            log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+            log.warn("【{}】尝试lock加锁失败，发生【{}】异常", lockName, e.getMessage());
         }
         catch (InterruptedException e) {
-            log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+            log.warn("【{}】尝试lock加锁失败，发生【{}】异常", lockName, e.getMessage());
         }
         return DistributedRedissonLock.builder().rLock(mylock).isLocked(false).build();
     }
@@ -181,17 +176,17 @@ public class DistributedRedisLock {
             }
         }
         catch (RedissonShutdownException e) {
-            log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+            log.warn("【{}】尝试lock加锁失败，发生【{}】异常", lockName, e.getMessage());
         }
         catch (InterruptedException e) {
-            log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+            log.warn("【{}】尝试lock加锁失败，发生【{}】异常", lockName, e.getMessage());
         } finally {
             try {
                 if (mylock != null && mylock.isLocked()) {
                     mylock.unlock();
                 }
             }catch (Exception e){
-                log.warn("【{}】尝试加锁失败，发生【{}】异常", lockName, e.getMessage());
+                log.warn("【{}】尝试unlock解锁失败，发生【{}】异常", lockName, e.getMessage());
                 Exceptions.printException(e);
             }
         }

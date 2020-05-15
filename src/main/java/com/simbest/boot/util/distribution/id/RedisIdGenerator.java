@@ -31,6 +31,12 @@ import static jodd.util.StringPool.ZERO;
  * Redis自增序号 （6位），总计13位， 支持一小时内近100w个订单号的生成和使用， 比如 1813217008249
  * 作者: lishuyi
  * 时间: 2018/5/12  17:06
+ *
+ * 分布式衍生阅读
+ * https://blog.csdn.net/wangyj1992/article/details/79446808
+ * https://dbaplus.cn/news-159-2469-1.html
+ * https://youzhixueyuan.com/3-implementations-of-distributed-locks.html
+ *
  */
 
 @Slf4j
@@ -40,7 +46,9 @@ public class RedisIdGenerator {
 
     public static int DEFAULT_FORMAT_ADD_LENGTH = 3;
 
-    public static int LOCK_WAIT_TIME_SECONDS = 5000;
+    public static int LOCK_WAIT_SECONDS = 2;
+
+    public static int LOCK_RELEASE_SECONDS = 3;
 
     @Autowired
     private AppConfig appConfig;
@@ -63,8 +71,8 @@ public class RedisIdGenerator {
     public String incrId(String cacheName, String prefix, int length) {
         //分布式加锁
         String rediskey = appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(cacheName).concat(ApplicationConstants.COLON).concat(prefix);
-        DistributedRedisLock.lock(rediskey, LOCK_WAIT_TIME_SECONDS);
-        log.info("【{}】已获得锁【{}】", Thread.currentThread().getName(), rediskey);
+        DistributedRedisLock.tryLock(rediskey, LOCK_WAIT_SECONDS, LOCK_RELEASE_SECONDS);
+        log.info("【{}】已获得RedisIdGenerator锁【{}】", Thread.currentThread().getName(), rediskey);
         Long currentIndex = RedisUtil.getBean(rediskey, Long.class);
         //缓存没有
         if(null == currentIndex){
@@ -107,6 +115,7 @@ public class RedisIdGenerator {
         String orderId = prefix.concat(String.format(formatter, incIndex));
         //分布式解锁
         DistributedRedisLock.unlock(rediskey);
+        log.info("【{}】已释放RedisIdGenerator锁【{}】", Thread.currentThread().getName(), rediskey);
         return Strings.isNullOrEmpty(orderId) ? null : orderId;
     }
 
