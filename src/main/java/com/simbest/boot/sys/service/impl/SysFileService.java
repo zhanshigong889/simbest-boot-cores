@@ -15,6 +15,7 @@ import com.simbest.boot.sys.service.ISysFileService;
 import com.simbest.boot.util.AppFileUtil;
 import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
+import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +81,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     public List<SysFile> uploadProcessFiles(Collection<MultipartFile> multipartFiles, String pmInsType, String pmInsId, String pmInsTypePart) {
         List<SysFile> sysFileList;
         try {
-            sysFileList = appFileUtil.uploadFiles(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, multipartFiles);
+            sysFileList = appFileUtil.uploadFiles(prepareDirectory(pmInsType, pmInsId, pmInsTypePart), multipartFiles);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, sysFileList);
         } catch (Exception e) {
             throw new AppRuntimeException(String.format(FILE_ERROR, e.getMessage()));
@@ -90,7 +91,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
 
     @Override
     public SysFile uploadProcessFile (MultipartFile multipartFile,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
-        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customFileName,customDirectory,pmInsType, pmInsId, pmInsTypePart);
+        List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile),customFileName, customDirectory, pmInsType, pmInsId, pmInsTypePart);
         return fileList.isEmpty() ? null : fileList.get(0);
     }
 
@@ -98,7 +99,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     public List<SysFile> uploadProcessFiles (Collection<MultipartFile> multipartFiles,String customFileName,String customDirectory,String pmInsType, String pmInsId, String pmInsTypePart ) {
         List<SysFile> sysFileList;
         try {
-            sysFileList = appFileUtil.customUploadFiles(prepareCustomDirectory(customDirectory, pmInsType, pmInsTypePart), multipartFiles, customFileName);
+            sysFileList = appFileUtil.customUploadFiles(prepareCustomDirectory(customDirectory, pmInsType, pmInsId, pmInsTypePart), multipartFiles, customFileName);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, sysFileList);
         }catch (Exception e) {
             Exceptions.printException(e);
@@ -111,7 +112,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     public SysFile uploadLocalProcessFile(File localFile, String pmInsType, String pmInsId, String pmInsTypePart) {
         SysFile sysFile = null;
         try {
-            sysFile = appFileUtil.uploadFromLocalAutoDirectory(pmInsType + ApplicationConstants.SLASH + pmInsTypePart, localFile, null);
+            sysFile = appFileUtil.uploadFromLocalAutoDirectory(prepareDirectory(pmInsType, pmInsId, pmInsTypePart), localFile, null);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, Arrays.asList(sysFile));
         } catch (Exception e) {
             Exceptions.printException(e);
@@ -136,7 +137,7 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     public SysFile uploadLocalProcessFile(File localFile, String customFileName, String customDirectory, String pmInsType, String pmInsId, String pmInsTypePart) {
         SysFile sysFile = null;
         try {
-            sysFile = appFileUtil.uploadFromLocalCustomDirectory(prepareCustomDirectory(customDirectory, pmInsType, pmInsTypePart), localFile, customFileName);
+            sysFile = appFileUtil.uploadFromLocalCustomDirectory(prepareCustomDirectory(customDirectory, pmInsType, pmInsId, pmInsTypePart), localFile, customFileName);
             saveSysFileList(pmInsType, pmInsId, pmInsTypePart, Arrays.asList(sysFile));
         } catch (Exception e) {
             Exceptions.printException(e);
@@ -157,10 +158,18 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         return sysFileList;
     }
 
-    private String prepareCustomDirectory(String customDirectory, String pmInsType, String pmInsTypePart){
+    private String prepareDirectory(String pmInsType, String pmInsId, String pmInsTypePart){
         String pmInsTypePath = StrUtil.isEmpty(pmInsType) ? "" : pmInsType.concat(ApplicationConstants.SLASH);
+        String pmInsIdPath = StrUtil.isEmpty(pmInsId) ? "" : pmInsId.concat(ApplicationConstants.SLASH);
         String pmInsTypePartPath = StrUtil.isEmpty(pmInsTypePart) ? "" : pmInsTypePart.concat(ApplicationConstants.SLASH);
-        customDirectory = customDirectory + ApplicationConstants.SLASH + pmInsTypePath + pmInsTypePartPath;
+        String username = SecurityUtils.getCurrentUserName();
+        String directory = StringUtils.removeEnd(pmInsTypePath + username + ApplicationConstants.SLASH + pmInsTypePartPath + pmInsIdPath , ApplicationConstants.SLASH);
+        log.debug("上传路径地址为【{}】", directory);
+        return directory;
+    }
+
+    private String prepareCustomDirectory(String customDirectory, String pmInsType, String pmInsId, String pmInsTypePart){
+        customDirectory = customDirectory + ApplicationConstants.SLASH + prepareDirectory(pmInsType, pmInsId, pmInsTypePart);
         customDirectory = StringUtils.removeEnd(customDirectory, ApplicationConstants.SLASH);
         log.debug("自定义上传路径地址为【{}】", customDirectory);
         return customDirectory;
