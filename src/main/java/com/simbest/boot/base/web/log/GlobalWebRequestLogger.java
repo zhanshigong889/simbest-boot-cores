@@ -54,10 +54,10 @@ public class GlobalWebRequestLogger {
 
     private Set<String> notRecordController = ImmutableSet.of("com.simbest.boot.security.auth.controller.CaptchaController",
             "com.simbest.boot.security.auth.controller.LoginController", "com.simbest.boot.security.auth.controller.IndexController",
-            "com.simbest.boot.sys.web.SysHealthController");
+            "com.simbest.boot.sys.web.SysHealthController","com.simbest.exclude.web.GlobalErrorController");
 
-//    @Pointcut("execution(* *..web..*Controller.*(..))")
-    @Pointcut("execution(* *..*Controller.*(..))")
+    @Pointcut("execution(* *..web..*Controller.*(..))")
+//    @Pointcut("execution(* *..*Controller.*(..))")  会影响websocket下的controller，导致websocket无法使用
     public void webLog() { }
 
     /**
