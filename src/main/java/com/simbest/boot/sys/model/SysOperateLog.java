@@ -2,6 +2,7 @@ package com.simbest.boot.sys.model;
 
 import com.simbest.boot.base.annotations.EntityIdPrefix;
 import com.simbest.boot.base.model.LogicModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -37,18 +38,27 @@ public class SysOperateLog extends LogicModel {
     private String id;
 
     @Column(length = 150)
-    private String bussinessKey;                    //业务操作主键
+    @ApiModelProperty(value = "业务操作主键")
+    private String bussinessKey;
 
     @Column(nullable = false,length = 500)
-    private String operateInterface;                //调用接口
+    @ApiModelProperty(value = "调用接口")
+    private String operateInterface;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    private String interfaceParam;                  //接口参数
+    @ApiModelProperty(value = "接口参数")
+    private String interfaceParam;
 
     @Column(nullable = false,length = 10)
-    private String operateFlag;                     //客户端操作标识
+    @ApiModelProperty(value = "客户端操作标识")
+    private String operateFlag;
 
     @Column(length = 1500)
-    private String errorMsg;                        //错误信息
+    @ApiModelProperty(value = "错误信息")
+    private String errorMsg;
+
+    @Column(length = 2000)
+    @ApiModelProperty(value = "接口返回结果信息")
+    private String resultMsg;
 }
