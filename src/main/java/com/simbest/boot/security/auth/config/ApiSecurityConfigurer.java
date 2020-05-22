@@ -57,10 +57,10 @@ import java.util.List;
  * 时间: 2018/1/20  11:24
  * <p>
  * 获取token请求（/oauth/token），请求所需参数：client_id、client_secret、grant_type
- * client模式：http://localhost:8080/uums/oauth/token?grant_type=client_credentials&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e
- * password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=111.com
- * rsa加密password模式：http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=nvXgA1H+5GLFVP9Fi4vFEZLRU8WzNC2XOAC2lOieB6T9B1rNPzWp1PNs5WptaX3ipQ8znbtn8RdIjDFkVhLx09hvAgWEjQFzYStMk8qAhQWUXa7bZOtC6RQDFJ0WEuDLPyF9CSjN5o3DrEVnNqzTRAHfeP2AYK+N0MsVCI5DkcQ=
- * uums认证password模式：http://10.92.80.72:8088/andhall/oauth/token?grant_type=uumspassword&scope=all&client_id=simbest_andhall&client_secret=338d6311c8efad8314b9212860adb12e&appcode=andhall&username=zhengxiaolei&password=pVOMsZTPznKFDU82BNN4BtaALbM4eQ/FphXo77BdSXnn+TTJU2yPqbVKhFoHCG5Kgcm7OuBBlhykzaRgUwGAn7xTXEKdU/uE3bBr4jRDKeOXJ8LxMyelqXFnPVOhF5/GqGCCbafp40BwMUDKdxqdqRVttZmjEST27DmX1U9Hqdc=
+ * client模式：         http://localhost:8080/uums/oauth/token?grant_type=client_credentials&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e
+ * password模式：       http://localhost:8080/uums/oauth/token?grant_type=password&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=111.com
+ * rsa加密password模式： http://localhost:8080/uums/oauth/token?grant_type=rsapassword&scope=all&client_id=password_changer&client_secret=338d6311c8efad8314b9212860adb12e&username=hadmin&password=nvXgA1H+5GLFVP9Fi4vFEZLRU8WzNC2XOAC2lOieB6T9B1rNPzWp1PNs5WptaX3ipQ8znbtn8RdIjDFkVhLx09hvAgWEjQFzYStMk8qAhQWUXa7bZOtC6RQDFJ0WEuDLPyF9CSjN5o3DrEVnNqzTRAHfeP2AYK+N0MsVCI5DkcQ=
+ * uums认证password模式：http://localhost:6001/andhall/oauth/token?grant_type=uumspassword&scope=all&client_id=simbest_andhall&client_secret=338d6311c8efad8314b9212860adb12e&appcode=andhall&username=zhengxiaolei&password=pVOMsZTPznKFDU82BNN4BtaALbM4eQ/FphXo77BdSXnn+TTJU2yPqbVKhFoHCG5Kgcm7OuBBlhykzaRgUwGAn7xTXEKdU/uE3bBr4jRDKeOXJ8LxMyelqXFnPVOhF5/GqGCCbafp40BwMUDKdxqdqRVttZmjEST27DmX1U9Hqdc=
  * 注意：
  *  1、client的password的有两种方式：1、BCryptPasswordEncoder加密前的MD5值  2、SecurityUtils万能密码的MD5值
  *  2、client_secret对Simbest_2018做MD5加密得：338d6311c8efad8314b9212860adb12e，而数据库中client_secret需要进行BCryptPasswordEncoder加密后存放，即 $2a$12$.s06wfoiyPGWRCH6xwfdlOt8h.eWQXz97ZQQ/RSFjeReArJy8Ymg2
