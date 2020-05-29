@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.util.http.client;
 
+import com.mzlion.core.lang.CollectionUtils;
 import com.simbest.boot.base.exception.Exceptions;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,23 @@ public class PostRequest {
     public PostRequest(String url) {
         this.url = url;
         this.formParams = new LinkedHashMap<>();
+    }
+
+    /**
+     * 设置提交的请求参数及其值
+     *
+     * @param parameters 键值对列表
+     * @return {@linkplain com.mzlion.easyokhttp.request.PostRequest}
+     */
+    public PostRequest param(Map<String, String> parameters) {
+        //Assert.notEmpty(parameters, "Parameters may not be null.");
+        if (CollectionUtils.isEmpty(parameters)) {
+            return this;
+        }
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            this.param(entry.getKey(), entry.getValue(), false);
+        }
+        return this;
     }
 
     /**
