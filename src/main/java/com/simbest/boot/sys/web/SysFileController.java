@@ -20,6 +20,7 @@ import com.simbest.boot.util.http.BrowserUtil;
 import com.simbest.boot.util.json.JacksonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     @Autowired
     private AppFileUtil appFileUtil;
 
+    @Setter
     @Autowired
     private AppConfig config;
 
@@ -313,5 +315,21 @@ public class SysFileController extends LogicController<SysFile, String> {
 //            return JsonResponse.defaultErrorResponse();
 //        }
 //    }
+
+    public static void main(String[] args) throws Exception {
+        WebOffice3Des webOffice3Des = new WebOffice3Des();
+        AppConfig config = new AppConfig();
+        config.setAppHostPort("http://211.138.31.210:8088");
+        SysFileController sysFileController = new SysFileController(null);
+        sysFileController.setConfig(config);
+        String url = "http://10.87.13.91:8888/20200525/WORD演示.doc";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+        url = "http://10.87.13.91:8888/20200525/JAVA各种系统框架图简介_IT168文库.pdf";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+        url = "http://10.87.13.91:8888/20200525/XXX科研成果申报模板.pptx";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+        url = "http://10.87.13.91:8888/20200525/XXX述职考核模板.doc";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+    }
 
 }
