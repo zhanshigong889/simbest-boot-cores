@@ -32,7 +32,7 @@ import javax.persistence.UniqueConstraint;
 @Builder
 @Entity
 @Table(name = "sys_redis_id_key", uniqueConstraints = {
-        @UniqueConstraint(name="sys_redis_id_key_name", columnNames = {"name"})
+        @UniqueConstraint(name="sys_redis_id_day_name", columnNames = {"day", "name"})
 })
 public class SysRedisIdKey extends GenericModel {
 
@@ -41,6 +41,10 @@ public class SysRedisIdKey extends GenericModel {
     @GeneratedValue(generator = "snowFlakeId")
     @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.boot.util.distribution.id.SnowflakeId")
     private String id;
+
+    @ApiModelProperty(value = "发生日期")
+    @Column
+    private String day;
 
     @NonNull
     @ApiModelProperty(value = "ID名称")

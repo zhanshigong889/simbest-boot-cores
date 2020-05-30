@@ -56,20 +56,11 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         log.debug("应用即将被关闭，销毁前清理工作".concat(SHUTDOWN_FLAG).concat("START"));
-        try {
-            IAppShutdownService appShutdownService = springContextUtil.getBean(IAppShutdownService.class);
-            appShutdownService.gracefulShutdown();
-
-            //程序销毁的时候， 删除应用临时上传的文件
-            log.debug("正在删除应用临时目录【{}】的文件".concat(SHUTDOWN_FLAG), appConfig.getUploadTmpFileLocation());
-            FileUtils.cleanDirectory(new File(appConfig.getUploadTmpFileLocation()));
-            //程序销毁的时候， 删除reids缓存中放的tmp开头的临时变量
-            log.debug("正在模糊删除Redis的Key键关键字包含【{}】的缓存".concat(SHUTDOWN_FLAG), ApplicationConstants.REDIS_TEMP_KEY);
-            RedisUtil.mulDelete(ApplicationConstants.REDIS_TEMP_KEY);
-        } catch (IOException e) {
-            Exceptions.printException(e);
-        }
-
+        IAppShutdownService appShutdownService = springContextUtil.getBean(IAppShutdownService.class);
+        appShutdownService.gracefulShutdown();
+        //程序销毁的时候， 删除reids缓存中放的tmp开头的临时变量
+        log.debug("正在模糊删除Redis的Key键关键字包含【{}】的缓存".concat(SHUTDOWN_FLAG), ApplicationConstants.REDIS_TEMP_KEY);
+        RedisUtil.mulDelete(ApplicationConstants.REDIS_TEMP_KEY);
         log.debug("清理异步定时任务".concat(SHUTDOWN_FLAG).concat("START"));
         Map<String, ThreadPoolTaskScheduler> schedulerMap = springContextUtil.getBeansOfType(ThreadPoolTaskScheduler.class);
         for (Map.Entry<String, ThreadPoolTaskScheduler> map : schedulerMap.entrySet()) {
@@ -108,6 +99,13 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
         }
         else{
             log.warn("executor非ThreadPoolExecutor，具体类型为【{}】", executor.getClass().getName());
+        }
+        //程序销毁的时候， 删除应用临时上传的文件
+        try{
+            log.debug("正在删除应用临时目录【{}】的文件".concat(SHUTDOWN_FLAG), appConfig.getUploadTmpFileLocation());
+            FileUtils.cleanDirectory(new File(appConfig.getUploadTmpFileLocation()));
+        } catch (IOException e) {
+            Exceptions.printException(e);
         }
         log.debug("应用即将被关闭，销毁前清理工作".concat(SHUTDOWN_FLAG).concat("END"));
     }

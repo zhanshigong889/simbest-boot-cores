@@ -5,6 +5,7 @@ package com.simbest.boot.util.distribution.id;
 
 import com.github.wenhao.jpa.Specifications;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.simbest.boot.base.service.IGenericService;
 import com.simbest.boot.component.distributed.lock.DistributedRedisLock;
 import com.simbest.boot.config.AppConfig;
@@ -18,9 +19,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.simbest.boot.config.MultiThreadConfiguration.MULTI_THREAD_BEAN;
 import static jodd.util.StringPool.ZERO;
@@ -57,8 +65,45 @@ public class RedisIdGenerator {
     @Qualifier("sysRedisIdKeyService")
     private IGenericService<SysRedisIdKey, String> sysRedisIdKeyService;
 
-//    @Autowired
-//    private SysRedisIdKeyRepository sysRedisIdKeyRepository;
+    // day-name-value
+    private Map<String, Map<String,Long>> rediskeyMap = Maps.newHashMap();
+
+    @PostConstruct
+    public void startup(){
+        log.debug("START***********************应用即将启动，从数据库提取当天REDIS ID保存至JVM Map***********************START");
+        String today = DateUtil.getCurrentStr();
+        Specification<SysRedisIdKey> specification = Specifications.<SysRedisIdKey>and().eq("day", today).build();
+        Iterable<SysRedisIdKey> currentDayKeys = sysRedisIdKeyService.findAllNoPage(specification);
+        Map<String,Long> todayRediskeyMap = StreamSupport.stream(currentDayKeys.spliterator(), false)
+                .collect(Collectors.toMap(SysRedisIdKey::getName, SysRedisIdKey::getValue));
+        todayRediskeyMap.entrySet().forEach(entry -> log.debug("Key键【{}】Value值【{}】", entry.getKey(), entry.getValue()));
+        rediskeyMap.put(today, todayRediskeyMap);
+        log.debug("END***********************应用即将启动，从数据库提取当天REDIS ID保存至JVM Map***********************END");
+    }
+
+    @PreDestroy
+    public void shutdown(){
+        log.debug("START***********************应用即将关闭，将当天留存在JVM Map中REDIS ID保存至数据库***********************START");
+        String today = DateUtil.getCurrentStr();
+        Map<String,Long> todayRediskeyMap = rediskeyMap.get(today);
+        if(null != todayRediskeyMap){
+            todayRediskeyMap.entrySet().forEach(entry -> {
+                SysRedisIdKey sysRedisIdKey = SysRedisIdKey.builder().day(today).name(entry.getKey()).value(entry.getValue()).build();
+                sysRedisIdKeyService.insert(sysRedisIdKey);
+            });
+        }
+        log.debug("END***********************应用即将关闭，将当天留存在JVM Map中REDIS ID保存至数据库***********************END");
+    }
+
+    /**
+     * 每天12：10重置rediskeyMap，确保隔天数据不堆积在JVM中
+     */
+    @Scheduled(cron = "0 10 0 * * ?")
+    public void doTask() {
+        Map<String,Long> todayRediskeyMap = Maps.newHashMap();
+        rediskeyMap = Maps.newHashMap();
+        rediskeyMap.put(DateUtil.getCurrentStr(), todayRediskeyMap);
+    }
 
     /**
      * 增加Id值(与数据字典绑定)
@@ -70,45 +115,44 @@ public class RedisIdGenerator {
     @Async(MULTI_THREAD_BEAN)
     public String incrId(String cacheName, String prefix, int length) {
         //分布式加锁
+        String today = DateUtil.getCurrentStr();
         String rediskey = appConfig.getAppcode().concat(ApplicationConstants.COLON).concat(cacheName).concat(ApplicationConstants.COLON).concat(prefix);
         DistributedRedisLock.tryLock(rediskey, LOCK_WAIT_SECONDS, LOCK_RELEASE_SECONDS);
         log.info("【{}】已获得RedisIdGenerator锁【{}】", Thread.currentThread().getName(), rediskey);
         Long currentIndex = RedisUtil.getBean(rediskey, Long.class);
         //缓存没有
         if(null == currentIndex){
-            log.debug("根据Redis的类型键值【{}】无法读取缓存", rediskey);
-            Specification<SysRedisIdKey> specification = Specifications.<SysRedisIdKey>and()
-                    .eq("name", rediskey)
-                    .build();
-            SysRedisIdKey sysRedisIdKey = sysRedisIdKeyService.findOne(specification);
-//            SysRedisIdKey sysRedisIdKey = sysRedisIdKeyRepository.findByName(rediskey);
-            //缓存没有，数据库也没有，缓存和数据库都初始为1
-            if (sysRedisIdKey == null) {
-                currentIndex = Long.parseLong(ZERO);
-                log.debug("Redis-null-Database-null，数据库通过Redis键值【{}】获取字典值为空，即将写入初始值", rediskey);
-                sysRedisIdKey = SysRedisIdKey.builder().name(rediskey).value(currentIndex).build();
-                sysRedisIdKeyService.insert(sysRedisIdKey);
-//                sysRedisIdKeyRepository.saveAndFlush(sysRedisIdKey);
-                RedisUtil.setBean(rediskey, currentIndex);
-                log.debug("数据库键值【{}】已完成数据库和缓存初始化，数据库初始化值为【{}】", rediskey, currentIndex);
+            log.debug("RedisNull-键值【{}】无法读取缓存", rediskey);
+            currentIndex = rediskeyMap.get(today).get(rediskey);
+            //缓存没有，JVM也没有，缓存和JVM都初始为0
+            if (null == currentIndex) {
+                Long initCurrentIndex = Long.parseLong(ZERO);
+                log.debug("RedisNull-JVMNull-键值【{}】无法读取缓存", rediskey);
+                Map<String,Long> todayRediskeyMap = new HashMap<String, Long>(){{
+                    put(rediskey, initCurrentIndex);
+                }};
+                rediskeyMap.put(today, todayRediskeyMap);
+                RedisUtil.setBean(rediskey, initCurrentIndex);
+                log.debug("JVM和Redis键值【{}】已初始化为【{}】", rediskey, currentIndex);
             }
             //缓存没有，数据库有，缓存以数据库为准
             else{
                 //将当前值集值作为起始编号
-                currentIndex = sysRedisIdKey.getValue();
-                log.debug("Redis-null-Database-notnull，数据库通过键值【{}】获取字典值不为空,即将写入值【{}】", rediskey, currentIndex);
+                log.debug("RedisNull-JVMNotNull，JVM通过键值【{}】获取字典值为【{}】", rediskey, currentIndex);
                 RedisUtil.setBean(rediskey, currentIndex);
                 log.debug("Redis键值【{}】已设置值为【{}】", rediskey, currentIndex);
             }
         }
         else{
-            log.debug("Redis-notnull，Redis键值【{}】值为【{}】", rediskey, currentIndex);
+            log.debug("RedisNotNull，Redis通过键值【{}】获取字典值为【{}】", rediskey, currentIndex);
         }
 
         //Redis递增
         Long incIndex = RedisUtil.incrBy(rediskey);
         log.debug("Redis键值【{}】的值已更新为【{}】", rediskey, incIndex);
-        saveRedisIndexToDatabase(rediskey, incIndex);
+        Map<String,Long> todayRediskeyMap = rediskeyMap.get(today);
+        todayRediskeyMap.put(rediskey, incIndex);
+        log.debug("JVM键值【{}】的值已更新为【{}】", rediskey, incIndex);
 
         // 字符串补位操作，length会通过format函数会自动加位数
         String formatter = "%1$0xd".replace("x", String.valueOf(length));
@@ -117,27 +161,6 @@ public class RedisIdGenerator {
         DistributedRedisLock.unlock(rediskey);
         log.info("【{}】已释放RedisIdGenerator锁【{}】", Thread.currentThread().getName(), rediskey);
         return Strings.isNullOrEmpty(orderId) ? null : orderId;
-    }
-
-    public void saveRedisIndexToDatabase(String rediskey, Long incIndex) {
-        Specification<SysRedisIdKey> specification = Specifications.<SysRedisIdKey>and()
-                .eq("name", rediskey)
-                .build();
-        SysRedisIdKey sysRedisIdKey = sysRedisIdKeyService.findOne(specification);
-//        SysRedisIdKey sysRedisIdKey = sysRedisIdKeyRepository.findByName(rediskey);
-        if(null == sysRedisIdKey){
-            log.debug("database-null，数据库键值【{}】", rediskey);
-            sysRedisIdKey = SysRedisIdKey.builder().name(rediskey).value(incIndex).build();
-            sysRedisIdKeyService.insert(sysRedisIdKey);
-//            sysRedisIdKeyRepository.saveAndFlush(sysRedisIdKey);
-        }
-        else {
-            log.debug("database-notnull，数据库键值【{}】更新值为【{}】", rediskey, incIndex);
-            sysRedisIdKey.setValue(incIndex);
-            sysRedisIdKeyService.update(sysRedisIdKey);
-//            sysRedisIdKeyRepository.saveAndFlush(sysRedisIdKey);
-        }
-        log.debug("数据库键值【{}】的值已更新为【{}】", rediskey, incIndex);
     }
 
 
@@ -211,5 +234,6 @@ public class RedisIdGenerator {
         // 转成数字类型，可排序
         return Long.parseLong(incrId(cacheName, DateUtil.getDatePrefix(new Date()), length));
     }
+
 
 }
