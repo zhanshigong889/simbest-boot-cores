@@ -532,6 +532,54 @@ public final class DateUtil {
 	    return cal.getTime();
 	}
 
+    /**
+     * 在当前时间增加时间
+     * @param seconds
+     * @return Date
+     */
+    public static Date addSeconds(int seconds) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, seconds);
+        return cal.getTime();
+    }
+
+    /**
+     * 在当前时间向后减少时间
+     * @param seconds
+     * @return Date
+     */
+    public static Date subSeconds(int seconds) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, seconds * -1);
+        return cal.getTime();
+    }
+
+    /**
+     * 指定时间增加时间
+     * @param date
+     * @param seconds
+     * @return Date
+     */
+    public static Date addSeconds(Date date, int seconds) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.SECOND, seconds);
+        return cal.getTime();
+    }
+
+    /**
+     * 在指定时间向后减少
+     * @param date
+     * @param seconds
+     * @return Date
+     */
+    public static Date subSeconds(Date date, int seconds) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.SECOND, seconds * -1);
+        return cal.getTime();
+    }
+
 	/**
 	 * 时间置零
 	 * @param date
