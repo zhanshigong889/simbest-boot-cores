@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.base.web.log;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.ImmutableSet;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.config.AppConfig;
@@ -129,7 +130,8 @@ public class GlobalWebRequestLogger {
             return response;
         } catch (Throwable e) {
             log.debug(LOGTAG + "异常信息: " + e.getMessage());
-            logWeb.setFailedReason(e.getMessage());
+            String failMsg = StrUtil.sub( e.getMessage(),1,2000 );
+            logWeb.setFailedReason(failMsg);
             throw e;
         } finally {
             long duration = System.currentTimeMillis() - startTime.get();
