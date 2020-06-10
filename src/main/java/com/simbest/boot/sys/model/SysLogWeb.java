@@ -65,7 +65,7 @@ public class SysLogWeb extends SystemModel {
     @Column(nullable = false)
     private Long duration;
 
-    @Column
+    @Column(length = 4000)
     private String failedReason;
 
     @Column(length = 40)
