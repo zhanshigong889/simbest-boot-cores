@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -70,14 +72,18 @@ public class MultiThreadConfiguration {
         @Override
         public Runnable decorate(Runnable runnable) {
             RequestAttributes context = RequestContextHolder.currentRequestAttributes();
+            SecurityContext securityContext = SecurityContextHolder.getContext();
             return () -> {
                 try {
                     RequestContextHolder.setRequestAttributes(context);
+                    SecurityContextHolder.setContext(securityContext);
                     runnable.run();
                 } finally {
+                    SecurityContextHolder.clearContext();
                     RequestContextHolder.resetRequestAttributes();
                 }
             };
+
         }
     }
 
