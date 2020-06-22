@@ -322,13 +322,13 @@ public class SysFileController extends LogicController<SysFile, String> {
         config.setAppHostPort("http://211.138.31.210:8088");
         SysFileController sysFileController = new SysFileController(null);
         sysFileController.setConfig(config);
-        String url = "http://10.87.13.91:8888/20200525/WORD演示.doc";
+        String url = "http://10.87.13.91:8888/20200525/DemoExcel.xlsx";
         System.out.println(sysFileController.getOfficeweb365Url(url));
-        url = "http://10.87.13.91:8888/20200525/JAVA各种系统框架图简介_IT168文库.pdf";
+        url = "http://10.87.13.91:8888/20200525/DemoPdf.pdf";
         System.out.println(sysFileController.getOfficeweb365Url(url));
-        url = "http://10.87.13.91:8888/20200525/XXX科研成果申报模板.pptx";
+        url = "http://10.87.13.91:8888/20200525/DemoPpt.pptx";
         System.out.println(sysFileController.getOfficeweb365Url(url));
-        url = "http://10.87.13.91:8888/20200525/XXX述职考核模板.doc";
+        url = "http://10.87.13.91:8888/20200525/DemoWord.doc";
         System.out.println(sysFileController.getOfficeweb365Url(url));
     }
 

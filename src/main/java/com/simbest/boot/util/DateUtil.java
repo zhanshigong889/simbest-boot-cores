@@ -95,6 +95,9 @@ public final class DateUtil {
         System.out.println(times[3]);
         System.out.println(dateToWeek(new Date()));
         System.out.println(dateToWeek(parseDate("2019-09-19")));
+
+        System.out.println(getLongTimestamp(nowTime1));
+        System.out.println(parseLongTimestamp(1388633575*1000L));
     }
 
     /**
@@ -192,6 +195,10 @@ public final class DateUtil {
         return dt.toString(pattern);
 	}
 
+    public static long getLongTimestamp(Date date) {
+        return date.getTime();
+    }
+
 	// ===========================字符串转换时间==================================
 	public static Date parseDate(String source){
 	    if(StringUtils.isEmpty(source))
@@ -203,6 +210,12 @@ public final class DateUtil {
 	public static Date parseTimestamp(String source){
         return fullDateTimeFormatter.parseDateTime(source).toDate();
 	}
+
+    public static Date parseLongTimestamp(long time){
+	    Date date = new Date();
+	    date.setTime(time);
+        return date;
+    }
 
 	public static Date parseCustomDate(String source, String pattern){
         DateTimeFormatter dtf = DateTimeFormat.forPattern(pattern);
