@@ -58,7 +58,10 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
      * @return Pageable
      */
     default Pageable getPageable(int page, int size){
-        return getPageable(page, size, null, null);
+        // 页码是从零开始的
+        int pagePage = page < 1 ? 0 : (page - 1);
+        int pageSize = size < 1 ? 1 : size;
+        return PageRequest.of(pagePage, pageSize);
     }
 
 	/**

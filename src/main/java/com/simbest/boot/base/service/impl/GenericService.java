@@ -61,7 +61,10 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
 
     @Override
     public Pageable getPageable(int page, int size) {
-        return genericRepository.getPageable(page, size);
+        // 页码是从零开始的
+        int pagePage = page < 1 ? 0 : (page - 1);
+        int pageSize = size < 1 ? 1 : size;
+        return PageRequest.of(pagePage, pageSize);
     }
 
     @Override
