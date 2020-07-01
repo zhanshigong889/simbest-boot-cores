@@ -13,6 +13,7 @@ import com.simbest.boot.sys.model.UploadFileResponse;
 import com.simbest.boot.sys.repository.SysFileRepository;
 import com.simbest.boot.sys.service.ISysFileService;
 import com.simbest.boot.util.AppFileUtil;
+import com.simbest.boot.util.CodeGenerator;
 import com.simbest.boot.util.SpringContextUtil;
 import com.simbest.boot.util.office.ExcelUtil;
 import com.simbest.boot.util.security.SecurityUtils;
@@ -163,7 +164,9 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
         String pmInsIdPath = StrUtil.isEmpty(pmInsId) ? "" : pmInsId.concat(ApplicationConstants.SLASH);
         String pmInsTypePartPath = StrUtil.isEmpty(pmInsTypePart) ? "" : pmInsTypePart.concat(ApplicationConstants.SLASH);
         String username = SecurityUtils.getCurrentUserName();
-        String directory = StringUtils.removeEnd(pmInsTypePath + username + ApplicationConstants.SLASH + pmInsTypePartPath + pmInsIdPath , ApplicationConstants.SLASH);
+        String directory = StringUtils.removeEnd(pmInsTypePath + username + ApplicationConstants.SLASH
+                + CodeGenerator.systemUUID() + ApplicationConstants.SLASH
+                + pmInsTypePartPath + pmInsIdPath , ApplicationConstants.SLASH);
         log.debug("上传路径地址为【{}】", directory);
         return directory;
     }

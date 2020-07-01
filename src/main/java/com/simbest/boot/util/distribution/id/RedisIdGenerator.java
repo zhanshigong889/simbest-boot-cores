@@ -96,7 +96,7 @@ public class RedisIdGenerator {
     }
 
     /**
-     * 每天12：10重置rediskeyMap，确保隔天数据不堆积在JVM中
+     * 每天凌晨00:10重置rediskeyMap，确保隔天数据不堆积在JVM中
      */
     @Scheduled(cron = "0 10 0 * * ?")
     public void doTask() {
@@ -135,7 +135,7 @@ public class RedisIdGenerator {
                 RedisUtil.setBean(rediskey, initCurrentIndex);
                 log.debug("JVM和Redis键值【{}】已初始化为【{}】", rediskey, currentIndex);
             }
-            //缓存没有，数据库有，缓存以数据库为准
+            //缓存没有，JVM有，缓存以JVM为准
             else{
                 //将当前值集值作为起始编号
                 log.debug("RedisNull-JVMNotNull，JVM通过键值【{}】获取字典值为【{}】", rediskey, currentIndex);
