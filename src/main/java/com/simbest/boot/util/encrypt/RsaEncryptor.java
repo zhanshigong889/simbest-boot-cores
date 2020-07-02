@@ -5,6 +5,8 @@ package com.simbest.boot.util.encrypt;
 
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.util.BootAppFileReader;
+import com.simbest.boot.util.DateUtil;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -336,6 +338,12 @@ public class RsaEncryptor extends AbstractEncryptor {
         System.out.println("###########################");
         System.out.println(code);
         System.out.println(rsaEncryptor.decryptCode(code));
+
+        Base64Encryptor base64Encryptor = new Base64Encryptor();
+        String date = "9999-12-30";
+        System.out.println(date);
+        String code1 = rsaEncryptor.encrypt(base64Encryptor.encrypt(date));
+        System.out.println(code1);
 
     }
 }

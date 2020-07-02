@@ -23,11 +23,18 @@
   </properties>
 
   <dependencies>
-      <dependency>
-          <groupId>com.simbest.boot</groupId>
-          <artifactId>simbest-boot-orguser</artifactId>
-          <version>${simbest.version}</version>
-      </dependency>
+	<dependency>
+		<groupId>com.simbest.boot</groupId>
+		<artifactId>simbest-boot-orguser</artifactId>
+		<version>${simbest.version}</version>
+	</dependency>
+
+	<!-- <dependency>
+		<groupId>de.schlichtherle.truelicense</groupId>
+		<artifactId>truelicense-core</artifactId>
+		<version>1.33</version>
+	</dependency> -->
+	
   </dependencies>
 
   <!-- 通过Github管理jar包-->
