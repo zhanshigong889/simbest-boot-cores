@@ -47,7 +47,7 @@ public class VerifyLicense {
 		try {
 			LocalDate keyDate = getLicenseDate();
 			if (StrUtil.isBlankIfStr(keyDate)){
-				return Boolean.FALSE;
+				return Boolean.TRUE;
 			}
 			flag = DateUtil.localDateIsBefore(keyDate,LocalDate.now()) || DateUtil.localDateIsEqual(keyDate,LocalDate.now());
 			return flag;
