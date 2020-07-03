@@ -76,8 +76,8 @@ public class VerifyLicense {
 	@SuppressWarnings("unused")
 	private String getKeyFromFile(String filePath) {
 		try {
-			String bufferedReader = BootAppFileReader.getClasspathFileToString(filePath);
-			/*BufferedReader bufferedReader = BootAppFileReader.getClasspathFile(filePath);
+			//String bufferedReader = BootAppFileReader.getClasspathFileToString(filePath);
+			BufferedReader bufferedReader = BootAppFileReader.getClasspathFileJar(filePath);
 			String line = null;
 			List<String> list = new ArrayList<String>();
 			while ((line = bufferedReader.readLine()) != null) {
@@ -85,8 +85,8 @@ public class VerifyLicense {
 			}
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.append(list.get(0));
-			return stringBuilder.toString();*/
-			return bufferedReader;
+			return stringBuilder.toString();
+			//return bufferedReader;
 		}catch (Exception e){
 		    Exceptions.printException( e );
 		    return null;

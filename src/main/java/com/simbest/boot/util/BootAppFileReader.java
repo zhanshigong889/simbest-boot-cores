@@ -87,4 +87,24 @@ public class BootAppFileReader {
         }
         return null;
     }
+
+    /**
+     * 读取jar包中的文件并转换为BufferedReader
+     * @param filepath
+     * @return BufferedReader
+     */
+    public static BufferedReader getClasspathFileJar(String filepath){
+        BufferedReader bufferedReader = null;
+        try {
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filepath);
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        } catch (Exception e){
+            try {
+                bufferedReader = new BufferedReader(new FileReader(ResourceUtils.getFile(filepath)));
+            } catch (FileNotFoundException e1) {
+            }
+        }
+        Assert.notNull(bufferedReader, String.format("严重错误：请注意读取配置文件%s失败！", filepath));
+        return bufferedReader;
+    }
 }
