@@ -2,11 +2,13 @@ package com.simbest.boot.security.license;
 
 import java.io.BufferedReader;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.hutool.core.util.StrUtil;
+import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.util.encrypt.Base64Encryptor;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,23 +44,48 @@ public class VerifyLicense {
 	@Autowired
 	private Base64Encryptor base64Encryptor;
 
+	@Autowired
+	private AppConfig appConfig;
+
 	public boolean vertify() {
 		boolean flag = Boolean.FALSE;
 		try {
-			LocalDate keyDate = getLicenseDate();
-			if (StrUtil.isBlankIfStr(keyDate)){
-				return Boolean.TRUE;
+			if (StrUtil.equals(appConfig.getLicenseKeyCon(),"H") ){
+				LocalDateTime keyDateTime = getLicenseDateTime();
+				if (StrUtil.isBlankIfStr(keyDateTime)){
+					return Boolean.TRUE;
+				}
+				flag = DateUtil.localDateTimeIsBefore(keyDateTime,LocalDateTime.now()) || DateUtil.localDateTimeIsEqual(keyDateTime,LocalDateTime.now());
+			}else {
+				LocalDate keyDate = getLicenseDate();
+				if (StrUtil.isBlankIfStr(keyDate)){
+					return Boolean.TRUE;
+				}
+				flag = DateUtil.localDateIsBefore(keyDate,LocalDate.now()) || DateUtil.localDateIsEqual(keyDate,LocalDate.now());
 			}
-			flag = DateUtil.localDateIsBefore(keyDate,LocalDate.now()) || DateUtil.localDateIsEqual(keyDate,LocalDate.now());
 			return flag;
 		} catch (Exception e) {
 			Exceptions.printException(e);
 			return flag;
 		}
 	}
-	
+
+	private LocalDateTime getLicenseDateTime(){
+		try {
+			String fileKeyStr = getKeyFromFile(ApplicationConstants.LICENSE_KEY_PATH);
+			if (StrUtil.isEmpty(fileKeyStr)){
+				return null;
+			}
+			String dateStr = rsaEncryptor.decrypt(base64Encryptor.decrypt(fileKeyStr));
+			LocalDateTime keyDateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern(ApplicationConstants.FORMAT_DATE_TIME));
+			return keyDateTime;
+		} catch (Exception e) {
+			Exceptions.printException(e);
+		}
+		return null;
+	}
+
 	private LocalDate getLicenseDate(){
-		LocalDate date = null; 
 		try {
 			String fileKeyStr = getKeyFromFile(ApplicationConstants.LICENSE_KEY_PATH);
 			if (StrUtil.isEmpty(fileKeyStr)){
@@ -92,4 +119,14 @@ public class VerifyLicense {
 		    return null;
 		}
     }
+
+	public static void main(String[] args) {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(ApplicationConstants.FORMAT_DATE_TIME);
+		LocalDateTime a = LocalDateTime.parse("9999-12-30 10:30:10", dateTimeFormatter);
+		LocalDateTime b = LocalDateTime.now();
+		System.out.println("a=====>" + a);
+		System.out.println("b=====>" + b);
+		boolean flag = DateUtil.localDateTimeIsBefore(a,b);
+		System.out.println( flag );
+	}
 }

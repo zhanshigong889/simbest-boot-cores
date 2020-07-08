@@ -903,7 +903,27 @@ public final class DateUtil {
     public static boolean localDateIsBefore(LocalDate firstDate, LocalDate secondDate) {
     	return firstDate.isBefore(secondDate);
     }
-    
+
+	/**
+	 * 比较第一个时间是否大于第二个时间
+	 * @param firstDateTime 第一个时间
+	 * @param secondDateTime 第二个时间
+	 * @return true-大于;false-不大于
+	 */
+	public static boolean localDateTimeIsBefore(LocalDateTime firstDateTime, LocalDateTime secondDateTime) {
+		return firstDateTime.isBefore(secondDateTime);
+	}
+
+	/**
+	 * 比较第一个时间是否小于第二个时间
+	 * @param firstDateTime 第一个时间
+	 * @param secondDateTime 第二个时间
+	 * @return true-小于;false-大于
+	 */
+	public static boolean localDateTimeIsAfter(LocalDateTime firstDateTime, LocalDateTime secondDateTime) {
+		return firstDateTime.isAfter(secondDateTime);
+	}
+
 	/**
 	 * 比较第一个日期是否小于第二个日期
 	 * @param firstDate 第一个日期
@@ -913,7 +933,17 @@ public final class DateUtil {
 	public static boolean localDateIsAfter(LocalDate firstDate, LocalDate secondDate) {
 		return firstDate.isAfter(secondDate);
 	}
-	 
+
+	/**
+	 * 比较两个时间是否相等
+	 * @param firstDateTime 第一个时间
+	 * @param secondDateTime 第二个时间
+	 * @return true-相等;false-不相等
+	 */
+	public static boolean localDateTimeIsEqual(LocalDateTime firstDateTime, LocalDateTime secondDateTime) {
+		return firstDateTime.isEqual(secondDateTime);
+	}
+
 	/**
 	 * 比较两个日期是否相等
 	 * @param firstDate 第一个日期

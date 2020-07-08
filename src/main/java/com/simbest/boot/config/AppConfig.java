@@ -156,6 +156,8 @@ public class AppConfig {
     @Value("${app.sms.templateId:408992008}")
     private String smsTemplateId;
 
+    @Value("${jar.encrypt.key.config:H}")
+    private String licenseKeyCon;
 
 
     @PostConstruct
