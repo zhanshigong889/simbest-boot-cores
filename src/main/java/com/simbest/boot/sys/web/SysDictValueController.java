@@ -208,7 +208,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @return JsonResponse
      */
     @ApiOperation (value = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
-    @PostMapping(value = {"/findDictValue", "/findDictValue/sso", "/findDictValue/api"})
+    @PostMapping(value = {"/findDictValue", "/findDictValue/sso", "/findDictValue/api", "/findDictValue/anonymous"})
     public JsonResponse findDictValue(@RequestBody(required = false) SysDictValue sysDictValue){
         return JsonResponse.success(sysDictValueService.findDictValue(sysDictValue));
     }
