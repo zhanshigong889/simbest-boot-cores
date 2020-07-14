@@ -7,6 +7,7 @@ import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.util.BootAppFileReader;
 import com.simbest.boot.util.DateUtil;
 
+import com.simbest.boot.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -342,13 +343,16 @@ public class RsaEncryptor extends AbstractEncryptor {
         //UEZzSlIxYzR6YXdZRjEzWG1CU0NqSFo3c0p6bDNtbEVIcEdxdFdtSm9FcUcwVzl1eU9XQ2lzSEZlVU1oQWJUYVo2RW9RSGdrVGcyNCtZVkxOTUQ2WjdMZTJ6UXlvNURubmVFalpVSHZKL2NEaW9jS2d1RWRZMlNCMEdvMG9UcU1zN2xPNmRDN1lpbE40VkNnWUEwUXdnTFRXckljbW0xa2QxWDAwdWFjUzdnPQ
         Base64Encryptor base64Encryptor = new Base64Encryptor();
         //String date = "9999-12-30";
-        String date = "9999-12-30 14:00:00";
+        String date = "2020-07-31 08:00:00";
         System.out.println(date);
         String code1 = base64Encryptor.encrypt(rsaEncryptor.encrypt(date));
         System.out.println("code1=======" + code1);
         //String code2 = rsaEncryptor.decrypt(base64Encryptor.decrypt("UEZzSlIxYzR6YXdZRjEzWG1CU0NqSFo3c0p6bDNtbEVIcEdxdFdtSm9FcUcwVzl1eU9XQ2lzSEZlVU1oQWJUYVo2RW9RSGdrVGcyNCtZVkxOTUQ2WjdMZTJ6UXlvNURubmVFalpVSHZKL2NEaW9jS2d1RWRZMlNCMEdvMG9UcU1zN2xPNmRDN1lpbE40VkNnWUEwUXdnTFRXckljbW0xa2QxWDAwdWFjUzdnPQ"));
         String code2 = rsaEncryptor.decrypt(base64Encryptor.decrypt(code1));
         System.out.println("code2=======" + code2);
+
+        FileUtils fileUtils = new FileUtils();
+        fileUtils.writeContentToFile("d:/simbest.pem",code1);
 
     }
 }

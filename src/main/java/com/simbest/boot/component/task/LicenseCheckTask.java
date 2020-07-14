@@ -54,7 +54,7 @@ public class LicenseCheckTask extends AbstractTaskSchedule {
         super(master, repository);
     }
 
-    @Scheduled(cron = "* 0/1 * * * ?")
+    @Scheduled(cron = "* 0/30 * * * ?")
     public void checkAndExecute() {
         super.checkAndExecute(true);
     }
