@@ -3,6 +3,8 @@
  */
 package com.simbest.boot.util.http.client;
 
+import com.mzlion.core.lang.Assert;
+import com.mzlion.core.lang.StringUtils;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.nio.charset.Charset;
 import java.util.Collections;
 
 /**
@@ -24,6 +27,8 @@ public class TextBodyRequest extends PostRequest {
     private String jsonStr;
 
     private static HttpHeaders headers;
+
+    private Charset charset;
 
     static {
         headers = new HttpHeaders();
@@ -41,13 +46,32 @@ public class TextBodyRequest extends PostRequest {
         return this;
     }
 
+
+    public TextBodyRequest header(String name, String value) {
+        if (StringUtils.hasLength(name) && null != value)
+            this.headers.add(name, value);
+        
+        return this;
+    }
+
+    /**
+     * 设置字符集
+     *
+     * @param charset 字符编码
+     * @return {@link com.mzlion.easyokhttp.request.TextBodyRequest}
+     */
+    public TextBodyRequest charset(String charset) {
+        Assert.hasLength(charset, "Charset may not be null.");
+        this.charset = Charset.forName(charset);
+        return this;
+    }
+
     /**
      * 将响应结果转为JavaBean对象
      *
      * @param targetClass 目标类型
      * @param <E>         泛型类型
      * @return JavaBean对象
-     * @throws HttpClientException 如果服务器返回非200则抛出此异常
      */
     @Override
     public <E> E asBean(Class<E> targetClass) {
