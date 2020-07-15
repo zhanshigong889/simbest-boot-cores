@@ -56,7 +56,7 @@ public class LicenseCheckTask extends AbstractTaskSchedule {
 
     @Scheduled(cron = "* 0/30 * * * ?")
     public void checkAndExecute() {
-        super.checkAndExecute(true);
+        super.checkAndExecute(false);
     }
 
     @Override
