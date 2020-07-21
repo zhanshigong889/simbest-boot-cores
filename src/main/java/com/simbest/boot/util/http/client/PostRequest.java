@@ -132,6 +132,15 @@ public class PostRequest {
         return response;
     }
 
+    public String asString2(String json) {
+        String response = null;
+        try {
+            response = restTemplate.getForObject(url,String.class,json);
+        } catch (Exception e){
+            printLog(e);
+        }
+        return response;
+    }
 
     private static MultiValueMap toValueMap(Map<String, List<String>> parameters){
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
