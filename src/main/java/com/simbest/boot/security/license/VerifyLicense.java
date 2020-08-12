@@ -56,6 +56,9 @@ public class VerifyLicense {
 					return Boolean.TRUE;
 				}
 				flag = DateUtil.localDateTimeIsBefore(keyDateTime,LocalDateTime.now()) || DateUtil.localDateTimeIsEqual(keyDateTime,LocalDateTime.now());
+				log.warn("VerifyLicense================1>>>>>>{}",keyDateTime.toString());
+				log.warn("VerifyLicense================2>>>>>>{}",LocalDateTime.now().toString());
+				log.warn("VerifyLicense================3>>>>>>{}",DateUtil.localDateTimeIsBefore(keyDateTime,LocalDateTime.now()));
 			}else {
 				LocalDate keyDate = getLicenseDate();
 				if (StrUtil.isBlankIfStr(keyDate)){
