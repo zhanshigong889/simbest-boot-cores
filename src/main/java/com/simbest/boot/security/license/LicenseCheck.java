@@ -37,6 +37,7 @@ public class LicenseCheck {
 	@PostConstruct
     public void init() {
         if (verifyLicense.vertify()) {
+			log.warn("使用许可到期，请联系管理员！");
             Runtime.getRuntime().halt(1);
         }
     }

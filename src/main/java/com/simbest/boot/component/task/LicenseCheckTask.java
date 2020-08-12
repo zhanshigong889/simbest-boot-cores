@@ -62,6 +62,7 @@ public class LicenseCheckTask extends AbstractTaskSchedule {
     @Override
     public String execute() {
         if (verifyLicense.vertify()) {
+            log.warn("使用许可到期，请联系管理员！");
             Runtime.getRuntime().halt(1);
         }
         return CHECK_SUCCESS;
