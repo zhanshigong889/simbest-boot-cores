@@ -37,6 +37,7 @@ public class LicenseCheck {
 	@PostConstruct
     public void init() {
         if (verifyLicense.vertify()) {
+			log.warn("License expired, please contact the administrator！");
             Runtime.getRuntime().halt(1);
         }
     }

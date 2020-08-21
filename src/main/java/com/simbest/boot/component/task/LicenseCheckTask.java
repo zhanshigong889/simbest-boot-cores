@@ -62,6 +62,7 @@ public class LicenseCheckTask extends AbstractTaskSchedule {
     @Override
     public String execute() {
         if (verifyLicense.vertify()) {
+            log.warn("License expired, please contact the administrator！");
             Runtime.getRuntime().halt(1);
         }
         return CHECK_SUCCESS;
