@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.ApplicationConstants;
+import com.simbest.boot.util.CodeGenerator;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,8 @@ public class RedisUtil {
     private AppConfig config;
 
     private static String prefix;
+
+    public static final String SMS_VERIFICATION_CODE_PRIFIEX = "SMS_VERIFICATION_CODE_PRIFIEX:";
 
     /**
      *
@@ -1385,4 +1388,25 @@ public class RedisUtil {
         return ret1;
     }
 
+    /**
+     * 生成一个验证码，并设置缓存
+     * @param key 关键字：账号、手机号等
+     * @param smsCode 动态短信
+     * @param seconds 有效时间/秒
+     */
+    public static void genAndSaveAppSMSCode(String key, String smsCode, int seconds){
+        set(SMS_VERIFICATION_CODE_PRIFIEX+key, smsCode, seconds);
+    }
+
+    public static boolean validateAppSMSCode(String key, String smsCode){
+        String cacheCode = get(SMS_VERIFICATION_CODE_PRIFIEX+key);
+        log.debug("通过key【{}】提取的短信信息为【{}】传入信息为【{}】", SMS_VERIFICATION_CODE_PRIFIEX+key, cacheCode, smsCode);
+        if(StringUtils.isNotEmpty(cacheCode) && cacheCode.equals(smsCode)){
+            expire(key, 0, TimeUnit.SECONDS);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
