@@ -8,6 +8,8 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.auth.oauth2.Oauth2RedisTokenStore;
 import com.simbest.boot.security.auth.oauth2.CustomWebResponseExceptionTranslator;
 import com.simbest.boot.security.auth.oauth2.OauthExceptionEntryPoint;
+import com.simbest.boot.security.auth.oauth2.PhoneCodeTokenGranter;
+import com.simbest.boot.security.auth.oauth2.PhoneTokenGranter;
 import com.simbest.boot.security.auth.oauth2.RsaPasswordTokenGranter;
 import com.simbest.boot.security.auth.oauth2.UumsTokenGranter;
 import com.simbest.boot.security.auth.oauth2.WxmaBindTokenGranter;
@@ -75,6 +77,9 @@ import java.util.List;
  * 检查token请求
  * http://localhost:8080/uums/oauth/check_token?token=d1034046-064d-4b5f-b9a6-c0f66abba28d
  *
+ * client service的grant_type调整时，redis清理前缀为OAUTH2_CLIENT_PREFIX:,因此执行下述命令：
+ * 127.0.0.1:6379> keys OAUTH2_CLIENT_PREFIX:*
+ * 127.0.0.1:6379> del OAUTH2_CLIENT_PREFIX:simbest_andhall
  */
 @Configuration
 @Order(20)
@@ -220,6 +225,12 @@ public class ApiSecurityConfigurer {
             //追加wxmamini方式的认证
             granters.add(new WxmaMiniTokenGranter(authenticationManager, endpoints.getTokenServices(),
                     endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+            //追加phone方式的认证
+            granters.add(new PhoneTokenGranter(authenticationManager, endpoints.getTokenServices(),
+                    endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory(), encryptor));
+            //追加phonecode方式的认证
+            granters.add(new PhoneCodeTokenGranter(authenticationManager, endpoints.getTokenServices(),
+                    endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory(), encryptor));
             return new CompositeTokenGranter(granters);
         }
 
