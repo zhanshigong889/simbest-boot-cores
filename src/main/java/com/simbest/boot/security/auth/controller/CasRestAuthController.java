@@ -7,6 +7,7 @@ import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.auth.authentication.CasUser;
 import com.simbest.boot.sys.model.SysLogLogin;
+import com.simbest.boot.sys.service.ISysAdminService;
 import com.simbest.boot.sys.service.ISysLogLoginService;
 import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.encrypt.Des3Encryptor;
@@ -52,9 +53,11 @@ public class CasRestAuthController {
     @Autowired
     private PasswordEncoder myBCryptPasswordEncoder;
 
-
     @Autowired
     private ISysLogLoginService logLoginService;
+
+    @Autowired
+    private ISysAdminService sysAdminService;
 
     @PostMapping("/auth")
     public void auth(@RequestHeader HttpHeaders httpHeaders, HttpServletRequest request, HttpServletResponse response){
@@ -65,7 +68,9 @@ public class CasRestAuthController {
             if(userWeb == null){
                 result = new ResponseEntity<CasUser>(HttpStatus.NOT_FOUND);
             }
-            //数据库查找
+            //先清理用户身份及密码，避免由其他应用通过Http接口加载过SimpleUser后，password被忽略
+            sysAdminService.cleanAuthUserCache(userWeb.getUsername());
+            //重新通过UUMS读取用户身份及密码
             IUser dbUser = this.authService.findByKey(userWeb.getUsername(), IAuthService.KeyType.username);
             if (dbUser != null) {
                 String rawPassword = des3Encryptor.decrypt(userWeb.getPassword());

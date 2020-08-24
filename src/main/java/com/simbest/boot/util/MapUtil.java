@@ -28,11 +28,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import static cn.hutool.core.util.CharUtil.UNDERLINE;
+import static com.simbest.boot.constants.ApplicationConstants.EMPTY;
 
 /**
  * 用途：Map工具类
@@ -298,6 +302,89 @@ public class MapUtil {
         }
         return StringUtils.removeEnd(pageUrl, "&");
     }
+
+    // 将map值全部转换为大写
+    public static Map<String, Object> transformUpperCase(Map<String, Object> orgMap) {
+        Map<String, Object> resultMap = new HashMap<>();
+        if (orgMap == null || orgMap.isEmpty()) {
+            return resultMap;
+        }
+        Set<String> keySet = orgMap.keySet();
+        for (String key : keySet) {
+            String newKey = key.toUpperCase();
+//            newKey = newKey.replace("_", "");
+            resultMap.put(newKey, orgMap.get(key));
+        }
+        return resultMap;
+    }
+
+    // 将map值全部转换为小写
+    public static Map<String, Object> transformLowerCase(Map<String, Object> orgMap) {
+        Map<String, Object> resultMap = new HashMap<>();
+        if (orgMap == null || orgMap.isEmpty()) {
+            return resultMap;
+        }
+        Set<String> keySet = orgMap.keySet();
+        for (String key : keySet) {
+            String newKey = key.toLowerCase();
+            resultMap.put(newKey, orgMap.get(key));
+        }
+        return resultMap;
+    }
+
+    /**
+     * 将List中map的key值命名方式格式化为驼峰
+     */
+    public static List<Map<String, Object>> formatHumpNameForList(List<Map<String, Object>> list) {
+        List<Map<String, Object>> newList = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> o : list) {
+            newList.add(formatHumpName(o));
+        }
+        return newList;
+    }
+
+    /**
+     * 将map的key值命名方式格式化为驼峰
+     */
+    public static Map<String, Object> formatHumpName(Map<String, Object> map) {
+        Map<String, Object> newMap = new HashMap<String, Object>();
+        Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Object> entry = it.next();
+            String key = entry.getKey();
+            String newKey = underlineToCamel(key);
+            newMap.put(newKey, entry.getValue());
+        }
+        return newMap;
+    }
+
+    public static String underlineToCamel(String param) {
+        if (StringUtils.isEmpty(param)) {
+            return EMPTY;
+        }
+        else if(StringUtils.contains(param, UNDERLINE)) {
+            int len = param.length();
+            StringBuilder sb = new StringBuilder(len);
+            for (int i = 0; i < len; i++) {
+                char c = param.charAt(i);
+                if (c == UNDERLINE) {
+                    if (++i < len) {
+                        sb.append(Character.toUpperCase(param.charAt(i)));
+                    }
+                } else {
+                    sb.append(Character.toLowerCase(param.charAt(i)));
+                }
+            }
+            return sb.toString();
+        }
+        else if(StringUtils.isAllUpperCase(param)){
+            return param.toLowerCase();
+        }
+        else{
+            return param;
+        }
+    }
+
 }
 
 class MapKeyComparator implements Comparator<String>{
