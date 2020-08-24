@@ -19,12 +19,14 @@ import com.simbest.boot.security.auth.provider.GenericAuthenticationChecker;
 import com.simbest.boot.security.auth.oauth2.Oauth2TokenServices;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
@@ -86,6 +88,7 @@ import java.util.List;
 public class ApiSecurityConfigurer {
 
     @Autowired
+    @Qualifier(BeanIds.AUTHENTICATION_MANAGER)
     private AuthenticationManager authenticationManager;
 
     @Autowired
