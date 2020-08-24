@@ -109,6 +109,16 @@ public class SysAdminController {
         return JsonResponse.defaultSuccessResponse();
     }
 
+    @ApiOperation(value = "获取用户密码", notes = "获取用户密码")
+    @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
+    @PostMapping("/getCacheUserPassword")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "登录标识username", dataType = "String", paramType = "query", required = true)
+    })
+    public JsonResponse getCacheUserPassword(@RequestParam String username) {
+        return sysAdminService.getCacheUserPassword(username);
+    }
+
     @ApiOperation(value = "下发通用密码", notes = "下发通用密码")
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @PostMapping("/pushPassword")
