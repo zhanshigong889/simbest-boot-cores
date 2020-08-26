@@ -22,6 +22,7 @@ import java.util.Collections;
  * 时间: 2020/1/9  18:20
  */
 @Slf4j
+@SuppressWarnings("ALL")
 public class TextBodyRequest extends PostRequest {
 
     private String jsonStr;

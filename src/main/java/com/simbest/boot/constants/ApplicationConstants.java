@@ -108,4 +108,6 @@ public class ApplicationConstants {
     public static final String MSG_SUCCESS = "操作成功";
     public static final String MSG_ERRO = "操作失败";
     public static final String MSG_FILE_CHECK = "fileOK";
+
+    public static final String REST_TEMPLATE_PARM_FILE = "file";
 }
