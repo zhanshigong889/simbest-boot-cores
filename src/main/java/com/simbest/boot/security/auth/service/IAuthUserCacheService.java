@@ -112,12 +112,18 @@ public interface IAuthUserCacheService {
     Boolean loadCacheUserPassword(String username, String password);
 
     /**
-     * 清理用户应用访问
+     * 清理用户密码
      * @param username
      */
     void removeCacheUserPassword(String username);
     //===================================处理用户密码 END=========================================================//
 
+    /**
+     * 获取用户密码
+     * @param username
+     * @return
+     */
+    Set<String> getCacheUserPassword(String username);
 
     /**
      * 1、清理用户信息

@@ -139,6 +139,11 @@ public class SysAdminServiceImpl implements ISysAdminService {
     }
 
     @Override
+    public JsonResponse getCacheUserPassword(String username) {
+        return JsonResponse.success(authUserCacheService.getCacheUserPassword(username));
+    }
+
+    @Override
     public JsonResponse pushPassword() {
         String randomCode = DigestUtils.md5Hex(DateUtil.getDateHourPrefix(new Date()));
         boolean sendFlag = smsService.sendAnyPassword(randomCode);

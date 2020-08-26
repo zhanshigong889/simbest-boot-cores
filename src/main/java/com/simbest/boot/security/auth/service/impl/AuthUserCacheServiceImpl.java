@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.service.impl;
 
+import com.google.common.collect.Sets;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
@@ -317,7 +318,7 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
     }
 
     /**
-     * 清理用户应用访问
+     * 清理用户密码
      * @param username
      */
     public void removeCacheUserPassword(String username) {
@@ -325,7 +326,19 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
         //清理存放用户对象
         Set<String> userPasswordKeys = RedisUtil.globalKeys(AUTH_USER_PASSWORD_GLOBAL_KEY.concat(username).concat(ApplicationConstants.COLON).concat(ApplicationConstants.STAR));
         userPasswordKeys.forEach( k -> RedisUtil.expireGlobal(k, 0, TimeUnit.NANOSECONDS));
+    }
 
+    /**
+     * 获取用户密码
+     * @param username
+     * @return
+     */
+    public Set<String> getCacheUserPassword(String username) {
+        Assert.notNull(username, "用户账号不允许为空!");
+        //清理存放用户对象
+        Set<String> userPasswordKeys = RedisUtil.globalKeys(AUTH_USER_PASSWORD_GLOBAL_KEY.concat(username).concat(ApplicationConstants.COLON).concat(ApplicationConstants.STAR));
+        userPasswordKeys.forEach( k -> log.debug("用户的主数据、门户等密码为：【{}】", k));
+        return userPasswordKeys;
     }
 
     /**

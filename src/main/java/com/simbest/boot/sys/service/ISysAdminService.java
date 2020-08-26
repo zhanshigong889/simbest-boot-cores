@@ -7,6 +7,7 @@ import com.simbest.boot.base.web.response.JsonResponse;
 import org.springframework.security.core.session.SessionInformation;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用途：系统管理维护服务层
@@ -30,6 +31,8 @@ public interface ISysAdminService {
     JsonResponse cleanRedisLock();
 
     JsonResponse cleanAuthUserCache(String username);
+
+    JsonResponse getCacheUserPassword(String username);
 
     JsonResponse pushPassword();
 }
