@@ -72,6 +72,7 @@ import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
  */
 @Slf4j
 @Component
+@SuppressWarnings("ALL")
 public class AppFileUtil {
 
     private static final String UPLOAD_FILE_PATTERN =
@@ -662,12 +663,16 @@ public class AppFileUtil {
      * 设置文件上传路径
      */
     public String createAutoUploadDirPath(String directory) {
-        String dir = config.getUploadPath() + SLASH
-                + DateUtil.getDateStr("yyyy")
-                + SLASH + DateUtil.getDateStr("MM")
-                + SLASH + config.getAppcode()
-                + SLASH + directory;
-        return replaceSlash(dir);
+        StringBuffer dir = new StringBuffer();
+        if (Boolean.getBoolean(config.getFileDirYmdFlag())){
+            dir.append(config.getUploadPath()).append(SLASH).append(DateUtil.getDateStr("yyyy"));
+            dir.append(SLASH).append(DateUtil.getDateStr("MM"));
+            dir.append(SLASH).append(config.getAppcode());
+            dir.append(SLASH).append(directory);
+        }else{
+            dir.append(directory);
+        }
+        return replaceSlash(dir.toString());
     }
 
     /**

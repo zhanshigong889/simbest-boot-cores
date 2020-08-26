@@ -132,7 +132,6 @@ public class AppConfig {
     @Value("${spring.cache.redis.lock.release.seconds:7200}")
     private int redisLockReleaseSeconds;
 
-
     @Value("${app.file.upload.location}")
     private String uploadLocation;
     @Value("${app.file.upload.path}")
@@ -143,8 +142,8 @@ public class AppConfig {
     private String ngCustomUploadFlag;
     @Value("${app.nginx.custom.upload.path:null}")
     private String ngCustomUploadPath;
-
-
+    @Value("${app.file.dir.ymd.flag:true}")
+    private String fileDirYmdFlag;
 
     //简单实时短信接口配置
     @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
