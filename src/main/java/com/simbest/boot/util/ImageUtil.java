@@ -192,7 +192,7 @@ public class ImageUtil {
      * @param multipartFile
      * @return
      */
-    private boolean checkImage(MultipartFile multipartFile){
+    public boolean checkImage(MultipartFile multipartFile){
         try {
             BufferedImage bi = ImageIO.read(multipartFile.getInputStream());
             if(bi == null){
