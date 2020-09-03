@@ -201,6 +201,7 @@ public class SysFileController extends LogicController<SysFile, String> {
         } else {
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         }
+        headers.setContentLength(sysFile.getFileSize());
         Resource resource = new InputStreamResource(new FileInputStream(realFile));
         return ResponseEntity.ok().headers(headers).body(resource);
     }
