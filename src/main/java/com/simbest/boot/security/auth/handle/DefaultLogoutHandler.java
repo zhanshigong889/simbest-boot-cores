@@ -44,9 +44,11 @@ public class DefaultLogoutHandler implements LogoutHandler {
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        if(authentication.getPrincipal() instanceof IUser) {
-            IUser iUser = (IUser) authentication.getPrincipal();
-            loginUtils.recordLogoutUsername(iUser.getUsername());
+        if(null != authentication) {
+            if (authentication.getPrincipal() instanceof IUser) {
+                IUser iUser = (IUser) authentication.getPrincipal();
+                loginUtils.recordLogoutUsername(iUser.getUsername());
+            }
         }
         handler.logout(request, response, authentication);
     }
