@@ -86,6 +86,12 @@ public class WebMvcConfigSupport extends WebMvcConfigurationSupport {
         VersionResourceResolver versionResourceResolver = new VersionResourceResolver()
                 .addVersionStrategy(new ContentVersionStrategy(), "/**");
 
+     /*   registry.addResourceHandler("doc.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+
+        registry.addResourceHandler("document.html")
+                .addResourceLocations("classpath:/META-INF/resources/");*/
+
         registry.addResourceHandler("swagger-ui.html")
                 .addResourceLocations("classpath:/META-INF/resources/");
 

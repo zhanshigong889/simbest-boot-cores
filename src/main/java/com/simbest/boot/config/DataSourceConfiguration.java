@@ -30,8 +30,8 @@ import java.util.List;
 @Configuration
 public class DataSourceConfiguration {
 
-    @Autowired
-    private WallFilter wallFilter;
+    /*@Autowired
+    private WallFilter wallFilter;*/
 
     @Bean
     @Primary
@@ -40,7 +40,7 @@ public class DataSourceConfiguration {
     public DataSource defaultDataSource() {
         DruidDataSource druidDataSource = DruidDataSourceBuilder.create().build();
         List<Filter> filters = new ArrayList<>();
-        filters.add(wallFilter);
+        //filters.add(wallFilter);
         druidDataSource.setProxyFilters(filters);
         return druidDataSource;
     }
@@ -65,13 +65,13 @@ public class DataSourceConfiguration {
         return wc;
     }
 
-    @Bean(name = "wallFilter")
+    /*@Bean(name = "wallFilter")
     @DependsOn ("wallConfig")
     WallFilter wallFilter(WallConfig wallConfig){
         WallFilter wfilter = new WallFilter();
         wfilter.setConfig(wallConfig);
         return wfilter;
-    }
+    }*/
 
     /**
      * 建议：
