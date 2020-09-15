@@ -44,8 +44,10 @@ public class ApplicationConstants {
     public static final String UUMS_LOGIN_PAGE = "/uumslogin";
     public static final String REST_UUMS_LOGIN_PAGE = "/restuumslogin";
     public static final String REST_UUMS_LOGOUT_PAGE = "/restuumslogout";
-    public static final String CAS_LOGIN_PAGE = "/caslogin/cas";
-    public static final String CAS_LOGOUT_PAGE = "/logout/cas";
+    public static final String CAS_LOGIN_PAGE = "/caslogin";
+    public static final String CAS_LOGIN_SUCCESS_PAGE = "/caslogin/cas";
+    public static final String CAS_LOGOUT_PAGE = "/caslogout";
+    public static final String CAS_LOGOUT_SUCCESS_PAGE = "/caslogout/cas";
     public static final String LOGIN_ERROR_PAGE = "/login?loginError";
     public static final String LOGIN_SESSION_CODE = "validateCode";
     public static final String LOGIN_VALIDATE_CODE = "verifyCode";

@@ -181,8 +181,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()//跨域请求会先进行一次options请求
-                .antMatchers(ROOT_PAGE, WELCOME_PAGE, ERROR_PAGE,
-                        LOGIN_PAGE, LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
+                .antMatchers(ROOT_PAGE, WELCOME_PAGE, ERROR_PAGE, LOGIN_PAGE, LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
                 .antMatchers("/h2-console/**", "/html/**").permitAll()  // 都可以访问
                 .antMatchers("/httpauth/**", "/**/anonymous/**", "/services/**", "/wx/**").permitAll()  // 都可以访问
                 .antMatchers("/action/**").hasRole("USER")   // 需要相应的角色才能访问
@@ -206,7 +205,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
         Map<String, CustomAbstractAuthenticationProcessingFilter> auths = appContext.getBeansOfType(CustomAbstractAuthenticationProcessingFilter.class);
         for(CustomAbstractAuthenticationProcessingFilter filter : auths.values()){
-            log.debug("System will registe custom filter {}", filter.getClass());
+            log.debug("系统将注册定义过滤器【{}】", filter.getClass());
             http.addFilterAfter(filter, UumsAuthenticationFilter.class);
         }
     }
@@ -269,25 +268,6 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 通过SSO单点的认证拦截器，拦截url请求中包含/sso的请求
-     * @return SsoAuthenticationFilter
-     * @throws Exception
-     */
-    @Bean
-    public SsoAuthenticationFilter ssoAuthenticationFilter() throws Exception {
-        SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
-        filter.setAuthenticationManager(authenticationManagerBean());
-        filter.setSsoAuthenticationRegister(ssoAuthenticationRegister);
-        // 不跳回首页
-        filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
-        //跳至登陆页，但不作任何提醒
-        //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_PAGE));
-        //记录失败登录次数
-        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
-        return filter;
-    }
-
-    /**
      * 通过UUMS认证的应用认证拦截器，拦截/restuumslogin请求（REST方式）
      * @return RestUumsAuthenticationFilter
      * @throws Exception
@@ -315,6 +295,26 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()),
                 new AntPathRequestMatcher(REST_LOGOUT_PAGE, RequestMethod.POST.name())
         ));
+        return filter;
+    }
+
+
+    /**
+     * 通过SSO单点的认证拦截器，拦截url请求中包含/sso的请求
+     * @return SsoAuthenticationFilter
+     * @throws Exception
+     */
+    @Bean
+    public SsoAuthenticationFilter ssoAuthenticationFilter() throws Exception {
+        SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        filter.setSsoAuthenticationRegister(ssoAuthenticationRegister);
+        // 不跳回首页
+        filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
+        //跳至登陆页，但不作任何提醒
+        //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_PAGE));
+        //记录失败登录次数
+        filter.setAuthenticationFailureHandler(failedAccessDeniedHandler);
         return filter;
     }
 
