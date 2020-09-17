@@ -37,17 +37,19 @@ public class SuccessLogoutHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
-        log.debug("Logout Sucessfull with Principal: " + authentication);
+        log.debug("【{}】即将通过【{}】登出", authentication, request.getRequestURI());
         request.logout();
         defaultLogoutHandler.logout(request, response, authentication);
         response.setStatus(HttpServletResponse.SC_OK);
-        if(StringUtils.isNotEmpty(env.getProperty("app.cas.server.address"))){
-            if(StringUtils.isNotEmpty(env.getProperty("server.servlet.context-path"))) {
-                response.sendRedirect(env.getProperty("server.servlet.context-path") + ApplicationConstants.CAS_LOGOUT_PAGE);
-            } else {
-                response.sendRedirect(request.getContextPath() + ApplicationConstants.CAS_LOGOUT_PAGE);
-            }
-        } else {
+        if(StringUtils.isNotEmpty(env.getProperty("spring.cas.cas-server-url-prefix"))){
+            log.warn("---------------------------------CAS LOGOUT START---------------------------------------------");
+            response.sendRedirect(request.getContextPath() + ApplicationConstants.CAS_LOGOUT_PAGE);
+            log.warn("---------------------------------CAS LOGOUT END---------------------------------------------");
+        }
+        else if(StringUtils.isNotEmpty(env.getProperty("server.servlet.context-path"))) {
+            response.sendRedirect(env.getProperty("server.servlet.context-path") + ApplicationConstants.CAS_LOGOUT_PAGE);
+        }
+        else {
             response.setStatus(HttpServletResponse.SC_OK);
             request.getRequestDispatcher(ApplicationConstants.LOGIN_PAGE).forward(request, response);
         }
