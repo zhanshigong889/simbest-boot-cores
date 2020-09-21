@@ -4,6 +4,7 @@
 package com.simbest.boot.util.encrypt;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.simbest.boot.base.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,20 +21,24 @@ import java.util.Base64;
  * 作者: lishuyi 
  * 时间: 2017/12/28  22:11 
  */
-@Component
 @Slf4j
+@Component
 public class Des3Encryptor extends AbstractEncryptor {
+
+    // 密钥
+    private static final String SECRETKEY = "2018#@SimBest$#soft0803#$@";
+    // 向量
+    private static final String VECTOR = "60880301";
+
+    private static final String SPACE = " ";
+
+    private static final String ADD = "+";
 
     public static void main(String[] args) throws Exception {
         Des3Encryptor encryptor = new Des3Encryptor();
         log.debug(encryptor.encrypt("koushaoguo"));
         log.debug(encryptor.decrypt(encryptor.encrypt("koushaoguo")));
     }
-
-    // 密钥
-    private static final String SECRETKEY = "2018#@SimBest$#soft0803#$@";
-    // 向量
-    private static final String VECTOR = "60880301";
 
     /**
      * 3DES加密
@@ -45,6 +50,9 @@ public class Des3Encryptor extends AbstractEncryptor {
     protected String encryptSource(String source) {
         String result = null;
         try {
+            if (StrUtil.contains(source,SPACE)){
+                source = StrUtil.replaceIgnoreCase(source,SPACE,ADD);
+            }
             Key deskey = null;
             DESedeKeySpec spec = new DESedeKeySpec(SECRETKEY.getBytes());
             SecretKeyFactory keyfactory = SecretKeyFactory.getInstance("desede");
@@ -71,6 +79,7 @@ public class Des3Encryptor extends AbstractEncryptor {
     protected String decryptCode(String code) {
         String result = null;
         try {
+
             Key deskey = null;
             DESedeKeySpec spec = new DESedeKeySpec(SECRETKEY.getBytes());
             SecretKeyFactory keyfactory = SecretKeyFactory.getInstance("desede");

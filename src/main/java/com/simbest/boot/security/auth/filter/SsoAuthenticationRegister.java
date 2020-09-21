@@ -3,6 +3,7 @@
  */
 package com.simbest.boot.security.auth.filter;
 
+import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Sets;
 import com.simbest.boot.security.IAuthService;
 import com.simbest.boot.security.IUser;
