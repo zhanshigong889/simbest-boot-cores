@@ -50,9 +50,6 @@ public class Des3Encryptor extends AbstractEncryptor {
     protected String encryptSource(String source) {
         String result = null;
         try {
-            if (StrUtil.contains(source,SPACE)){
-                source = StrUtil.replaceIgnoreCase(source,SPACE,ADD);
-            }
             Key deskey = null;
             DESedeKeySpec spec = new DESedeKeySpec(SECRETKEY.getBytes());
             SecretKeyFactory keyfactory = SecretKeyFactory.getInstance("desede");
@@ -79,7 +76,9 @@ public class Des3Encryptor extends AbstractEncryptor {
     protected String decryptCode(String code) {
         String result = null;
         try {
-
+            if (StrUtil.contains(code,SPACE)){
+                code = StrUtil.replaceIgnoreCase(code,SPACE,ADD);
+            }
             Key deskey = null;
             DESedeKeySpec spec = new DESedeKeySpec(SECRETKEY.getBytes());
             SecretKeyFactory keyfactory = SecretKeyFactory.getInstance("desede");
