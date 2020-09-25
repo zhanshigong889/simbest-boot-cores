@@ -76,7 +76,8 @@ import static com.simbest.boot.sys.web.SysFileController.DOWNLOAD_FULL_URL_API;
 public class AppFileUtil {
 
     private static final String UPLOAD_FILE_PATTERN =
-            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm|html|htm|mov|flv|mp4|mp3|amr|csv|bpmn|apk)$";
+            "(jpg|jpeg|png|gif|bmp|doc|docx|xls|xlsx|pdf|ppt|pptx|txt|rar|zip|7z|ogg|swf|webm" +
+                    "|html|htm|mov|flv|mp4|mp3|amr|csv|bpmn|apk|asf)$";
     private static Pattern pattern = Pattern.compile(UPLOAD_FILE_PATTERN);
 
     public static final String NGINX_STATIC_FILE_LOCATION = "/uploadFiles";
