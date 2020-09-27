@@ -66,7 +66,7 @@ public class AppConfig {
     // 是否开启心跳检测功能
     @Value("${app.heart.check.enable:false}")
     private boolean isOpenHeartCheck;
-    @Value("${app.record.web.log:false}")
+    @Value("${app.record.web.log:true}")
     private boolean isRecordWebLog;
     @Value("${app.allowed.origins:*}")
     private String allowedOrigins;
