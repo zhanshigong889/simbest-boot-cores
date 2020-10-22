@@ -343,10 +343,11 @@ public class AppFileUtil {
         Assert.notEmpty(multipartFiles, "上传文件不能为空");
         List<SysFile> fileModels = Lists.newArrayList();
         for (MultipartFile multipartFile : multipartFiles) {
+            long fileSize = multipartFile.getSize();
             if (multipartFile.isEmpty()) {
                 log.warn("上传文件流为空，继续循环处理上传文件");
                 continue;
-            } else if (multipartFile.getSize() == 0L){
+            } else if (fileSize == 0L){
                 log.warn("上传文件流大小为空，继续循环处理上传文件");
                 continue;
             }
@@ -356,21 +357,29 @@ public class AppFileUtil {
             uploadFileName = JacksonUtils.escapeString(uploadFileName);
             if(validateUploadFileType(uploadFileName)) {
                 log.debug("即将以【{}】方式上传【{}】文件", serverUploadLocation, uploadFileName);
+                File tempFile = File.createTempFile("tmp", null);
+                multipartFile.transferTo(tempFile);
+                //置为null是为了告诉gc此块内存可以回收
+                multipartFile = null;
                 switch (serverUploadLocation) {
                     case disk:
-                        uploadFilePath = diskUpload(multipartFile.getBytes(), createAutoUploadDirFile(directory), uploadFileName);
+                        //修改避免使用multipartFile.getBytes()  会产生2倍的文件大小
+                        //uploadFilePath = diskUpload(multipartFile.getBytes(), createAutoUploadDirFile(directory), uploadFileName);
+                        uploadFilePath = diskUpload(FileUtil.readBytes(tempFile), createAutoUploadDirFile(directory), uploadFileName);
                         break;
                     case fastdfs:
-                        uploadFilePath = fastDfsUpload(multipartFile.getBytes(), uploadFileName);
+                        //uploadFilePath = fastDfsUpload(multipartFile.getBytes(), uploadFileName);
+                        uploadFilePath = fastDfsUpload(FileUtil.readBytes(tempFile), uploadFileName);
                         break;
                     case ftp:
                         log.debug("基于ftp，方式同sftp");
                     case sftp:
-                        uploadFilePath = ftpSftpUpload(multipartFile.getBytes(), createAutoUploadDirPath(directory), uploadFileName);
+                        //uploadFilePath = ftpSftpUpload(multipartFile.getBytes(), createAutoUploadDirPath(directory), uploadFileName);
+                        uploadFilePath = ftpSftpUpload(FileUtil.readBytes(tempFile), createAutoUploadDirPath(directory), uploadFileName);
                         break;
                 }
                 Assert.notNull(uploadFilePath, String.format("文件以【%s】方式上传失败", serverUploadLocation));
-                SysFile sysFile = buildSysFile(uploadFilePath, uploadFileName, multipartFile.getSize());
+                SysFile sysFile = buildSysFile(uploadFilePath, uploadFileName, fileSize);
                 log.debug("【{}】上传成功，具体信息如下: 【{}】", uploadFileName, sysFile.toString());
                 fileModels.add(sysFile);
             } else {
@@ -665,7 +674,7 @@ public class AppFileUtil {
      */
     public String createAutoUploadDirPath(String directory) {
         StringBuffer dir = new StringBuffer();
-        if (Boolean.getBoolean(config.getFileDirYmdFlag())){
+        if (Boolean.valueOf(config.getFileDirYmdFlag())){
             dir.append(config.getUploadPath()).append(SLASH).append(DateUtil.getDateStr("yyyy"));
             dir.append(SLASH).append(DateUtil.getDateStr("MM"));
             dir.append(SLASH).append(config.getAppcode());
