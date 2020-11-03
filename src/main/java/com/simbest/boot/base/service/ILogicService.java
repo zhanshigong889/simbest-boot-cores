@@ -45,13 +45,12 @@ public interface ILogicService<T extends LogicModel,PK extends Serializable> ext
      */
     void scheduleLogicDelete(T entity, LocalDateTime localDateTime);
 
-
-
-
-
-
-
-
+    /**
+     * 修改-允许实体主键字段无值
+     * @param o
+     * @return T
+     */
+    T updateWithNull(T o);
 
     //================以下将GenericService的Iterable转换为LogicService的List============//
     List<T> findAllNoPage();

@@ -199,6 +199,22 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
 
     @Override
     @Transactional
+    public T updateWithNull ( T source) {
+        PK pk = (PK)ObjectUtil.getEntityIdVaue(source);
+        if(null != pk) {
+            T target = findById(pk);
+            wrapUpdateInfo( target );
+            T newTarget = logicRepository.save(target);
+            CustomBeanUtil.copyTransientProperties(target,newTarget);
+            log.debug("对象【{}】修改成功", newTarget);
+            return newTarget;
+        } else {
+            throw new UpdateNotExistObjectException();
+        }
+    }
+
+    @Override
+    @Transactional
     public List<T> saveAll(Iterable<T> entities) {
         List<T> list = Lists.newArrayList();
         for(T o : entities){
