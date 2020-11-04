@@ -12,6 +12,7 @@ import com.simbest.boot.util.DateUtil;
 import com.simbest.boot.util.ObjectUtil;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -203,6 +204,7 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
         PK pk = (PK)ObjectUtil.getEntityIdVaue(source);
         if(null != pk) {
             T target = findById(pk);
+            BeanUtils.copyProperties(source,target);
             wrapUpdateInfo( target );
             T newTarget = logicRepository.save(target);
             CustomBeanUtil.copyTransientProperties(target,newTarget);
