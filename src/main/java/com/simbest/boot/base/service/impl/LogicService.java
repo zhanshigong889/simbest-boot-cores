@@ -204,7 +204,8 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
         PK pk = (PK)ObjectUtil.getEntityIdVaue(source);
         if(null != pk) {
             T target = findById(pk);
-            BeanUtils.copyProperties(source,target);
+            String[] ignoreProperties = {"enabled","creator","modifier","createdTime","modifiedTime"};
+            BeanUtils.copyProperties(source,target,ignoreProperties);
             wrapUpdateInfo( target );
             T newTarget = logicRepository.save(target);
             CustomBeanUtil.copyTransientProperties(target,newTarget);
