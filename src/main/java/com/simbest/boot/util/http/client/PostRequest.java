@@ -4,12 +4,14 @@
 package com.simbest.boot.util.http.client;
 
 import cn.hutool.core.util.StrUtil;
+import com.google.common.collect.Maps;
 import com.mzlion.core.lang.CollectionUtils;
 import com.mzlion.core.lang.StringUtils;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -51,6 +53,7 @@ public class PostRequest {
         this.url = url;
         this.formParams = new LinkedHashMap<>();
         this.headers  = new HttpHeaders();
+        this.formParamsObject = Maps.newLinkedHashMap();
     }
 
     public PostRequest header(String name, String value) {
