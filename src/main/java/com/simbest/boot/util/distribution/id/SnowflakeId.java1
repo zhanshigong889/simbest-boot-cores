@@ -23,172 +23,104 @@ import java.util.Random;
  * 12位序列，毫秒内的计数，12位的计数顺序号支持每个节点每毫秒(同一机器，同一时间截)产生4096个ID序号<br>
  * 加起来刚好64位，为一个Long型。<br>
  * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
- * @author : lishuyi
- * 时间: 2018/8/10  22:25
+ * 参考： https://github.com/beyondfengyu/SnowFlake
  */
 public class SnowflakeId implements IdentifierGenerator {
 
-    // ==============================Fields===========================================
     /**
-     * 开始时间截 (2015-01-01)
+     * 起始的时间戳
      */
-    private static final long TWEPOCH = 1420041600000L;
+    private final static long START_STMP = 1480166465631L;
 
     /**
-     * 机器id所占的位数
+     * 每一部分占用的位数
      */
-    private static final long WORKER_ID_BITS = 5L;
+    private final static long SEQUENCE_BIT = 12; //序列号占用的位数
+    private final static long MACHINE_BIT = 5;   //机器标识占用的位数
+    private final static long DATACENTER_BIT = 5;//数据中心占用的位数
 
     /**
-     * 数据标识id所占的位数
+     * 每一部分的最大值
      */
-    private static final long DATA_CENTER_ID_BITS = 5L;
+    private final static long MAX_DATACENTER_NUM = -1L ^ (-1L << DATACENTER_BIT);
+    private final static long MAX_MACHINE_NUM = -1L ^ (-1L << MACHINE_BIT);
+    private final static long MAX_SEQUENCE = -1L ^ (-1L << SEQUENCE_BIT);
 
     /**
-     * 支持的最大机器id，结果是31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数)
+     * 每一部分向左的位移
      */
-    private static final long MAX_WORKER_ID = -1L ^ (-1L << WORKER_ID_BITS);
+    private final static long MACHINE_LEFT = SEQUENCE_BIT;
+    private final static long DATACENTER_LEFT = SEQUENCE_BIT + MACHINE_BIT;
+    private final static long TIMESTMP_LEFT = DATACENTER_LEFT + DATACENTER_BIT;
 
-    /**
-     * 支持的最大数据标识id，结果是31
-     */
-    private static final long MAX_DATA_CENTER_ID = -1L ^ (-1L << DATA_CENTER_ID_BITS);
+    private long datacenterId;  //数据中心
+    private long machineId;     //机器标识
+    private long sequence = 0L; //序列号
+    private long lastStmp = -1L;//上一次时间戳
 
-    /**
-     * 序列在id中占的位数
-     */
-    private static final long SEQUENCE_BITS = 12L;
-
-    /**
-     * 机器ID向左移12位
-     */
-    private static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
-
-    /**
-     * 数据标识id向左移17位(12+5)
-     */
-    private static final long DATA_CENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
-
-    /**
-     * 时间截向左移22位(5+5+12)
-     */
-    private static final long TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATA_CENTER_ID_BITS;
-
-    /**
-     * 生成序列的掩码，这里为4095 (0b111111111111=0xfff=4095)
-     */
-    private static final long SEQUENCE_MASK = -1L ^ (-1L << SEQUENCE_BITS);
-
-    /**
-     * 工作机器ID(0~31)
-     */
-    private static long workerId;
-
-    /**
-     * 数据中心ID(0~31)
-     */
-    private static long datacenterId;
-
-    /**
-     * 毫秒内序列(0~4095)
-     */
-    private static long sequence = 0L;
-
-    /**
-     * 上次生成ID的时间截
-     */
-    private static long lastTimestamp = -1L;
-
-    //==============================Constructors=====================================
+    private static SnowflakeId instance = null;
 
     public SnowflakeId() {
     }
 
-
     public static SnowflakeId getInstance(){
-        int workerId=new Random().nextInt(30);
-        int datacenterId=new Random().nextInt(30);
-        return new SnowflakeId(workerId,datacenterId);
+        if(null == instance) {
+            int workerId = new Random().nextInt(30);
+            int datacenterId = new Random().nextInt(30);
+            instance = new SnowflakeId(workerId, datacenterId);
+        }
+        return instance;
     }
 
-
-    /**
-     * 构造函数
-     *
-     * @param workerId     工作ID (0~31)
-     * @param datacenterId 数据中心ID (0~31)
-     */
-    private SnowflakeId(long workerId, long datacenterId) {
-        if (workerId > MAX_WORKER_ID || workerId < 0) {
-            throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", MAX_WORKER_ID));
+    public SnowflakeId(long datacenterId, long machineId) {
+        if (datacenterId > MAX_DATACENTER_NUM || datacenterId < 0) {
+            throw new IllegalArgumentException("datacenterId can't be greater than MAX_DATACENTER_NUM or less than 0");
         }
-        if (datacenterId > MAX_DATA_CENTER_ID || datacenterId < 0) {
-            throw new IllegalArgumentException(String.format("datacenter Id can't be greater than %d or less than 0", MAX_DATA_CENTER_ID));
+        if (machineId > MAX_MACHINE_NUM || machineId < 0) {
+            throw new IllegalArgumentException("machineId can't be greater than MAX_MACHINE_NUM or less than 0");
         }
-        SnowflakeId.workerId = workerId;
-        SnowflakeId.datacenterId = datacenterId;
+        this.datacenterId = datacenterId;
+        this.machineId = machineId;
     }
 
-    // ==============================Methods==========================================
-
     /**
-     * 获得下一个ID (该方法是线程安全的)
+     * 产生下一个ID
      *
-     * @return SnowflakeId
+     * @return
      */
-    public static synchronized long getId() {
-        long timestamp = timeGen();
-
-        //如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
-        if (timestamp < lastTimestamp) {
-            throw new RuntimeException(
-                    String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+    public synchronized long nextId() {
+        long currStmp = getNewstmp();
+        if (currStmp < lastStmp) {
+            throw new RuntimeException("Clock moved backwards.  Refusing to generate id");
         }
 
-        //如果是同一时间生成的，则进行毫秒内序列
-        if (lastTimestamp == timestamp) {
-            sequence = (sequence + 1) & SEQUENCE_MASK;
-            //毫秒内序列溢出
-            if (sequence == 0) {
-                //阻塞到下一个毫秒,获得新的时间戳
-                timestamp = tilNextMillis(lastTimestamp);
+        if (currStmp == lastStmp) {
+            //相同毫秒内，序列号自增
+            sequence = (sequence + 1) & MAX_SEQUENCE;
+            //同一毫秒的序列数已经达到最大
+            if (sequence == 0L) {
+                currStmp = getNextMill();
             }
-        }
-        //时间戳改变，毫秒内序列重置
-        else {
+        } else {
+            //不同毫秒内，序列号置为0
             sequence = 0L;
         }
-
-        //上次生成ID的时间截
-        lastTimestamp = timestamp;
-
-        //移位并通过或运算拼到一起组成64位的ID
-        return ((timestamp - TWEPOCH) << TIMESTAMP_LEFT_SHIFT)
-                | (datacenterId << DATA_CENTER_ID_SHIFT)
-                | (workerId << WORKER_ID_SHIFT)
-                | sequence;
+        lastStmp = currStmp;
+        return (currStmp - START_STMP) << TIMESTMP_LEFT //时间戳部分
+                | datacenterId << DATACENTER_LEFT       //数据中心部分
+                | machineId << MACHINE_LEFT             //机器标识部分
+                | sequence;                             //序列号部分
     }
 
-    /**
-     * 阻塞到下一个毫秒，直到获得新的时间戳
-     *
-     * @param lastTimestamp 上次生成ID的时间截
-     * @return 当前时间戳
-     */
-    protected static long tilNextMillis(long lastTimestamp) {
-        long timestamp = timeGen();
-        while (timestamp <= lastTimestamp) {
-            timestamp = timeGen();
+    private long getNextMill() {
+        long mill = getNewstmp();
+        while (mill <= lastStmp) {
+            mill = getNewstmp();
         }
-        return timestamp;
+        return mill;
     }
 
-    /**
-     * 返回以毫秒为单位的当前时间
-     *
-     * @return 当前时间(毫秒)
-     */
-    protected static long timeGen() {
+    private long getNewstmp() {
         return System.currentTimeMillis();
     }
 
@@ -196,10 +128,21 @@ public class SnowflakeId implements IdentifierGenerator {
     public Serializable generate(SharedSessionContractImplementor sharedSessionContractImplementor, Object o) throws HibernateException {
         String prefix = ObjectUtil.getEntityIdPrefixVaue(o);
         if(StringUtils.isNotEmpty(prefix)){
-            return prefix + getId();
+            return prefix + getInstance().nextId();
         }
         else {
-            return getId() + ""; //避免科学计数法显示数字
+            return getInstance().nextId() + ""; //避免科学计数法显示数字
         }
     }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < (1 << 12); i++) {
+            System.out.println(getInstance().nextId());
+            int workerId = new Random().nextInt(30);
+            int datacenterId = new Random().nextInt(30);
+            System.out.println(workerId);
+            System.out.println(datacenterId);
+        }
+    }
+
 }

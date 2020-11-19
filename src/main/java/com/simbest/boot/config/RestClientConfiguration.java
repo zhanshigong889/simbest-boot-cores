@@ -18,7 +18,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +46,7 @@ public class RestClientConfiguration {
 
         List<HttpMessageConverter<?>> messageConverters = Arrays.asList(
                 new ByteArrayHttpMessageConverter(),
-                new StringHttpMessageConverter(Charset.forName("utf-8")),
+                new StringHttpMessageConverter(StandardCharsets.UTF_8),
                 new ResourceHttpMessageConverter(),
                 new SourceHttpMessageConverter<>(),
                 new FormHttpMessageConverter(),
