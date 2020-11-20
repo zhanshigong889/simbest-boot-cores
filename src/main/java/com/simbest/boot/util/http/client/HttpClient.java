@@ -3,7 +3,6 @@
  */
 package com.simbest.boot.util.http.client;
 
-import com.simbest.boot.config.AppConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
@@ -18,7 +17,7 @@ import javax.annotation.PostConstruct;
  * 时间: 2020/1/9  15:39
  */
 @Slf4j
-@DependsOn({"appConfig", "restTemplate"})
+@DependsOn({"restTemplate"})
 @Component
 public class HttpClient {
 
@@ -29,9 +28,6 @@ public class HttpClient {
      */
     @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
-    private AppConfig appConfig;
 
     @PostConstruct
     public void init() {

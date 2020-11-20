@@ -4,8 +4,6 @@
 package com.simbest.boot.security.auth.provider;
 
 import com.google.gson.JsonSyntaxException;
-import com.mzlion.easyokhttp.HttpClient;
-import com.mzlion.easyokhttp.exception.HttpClientException;
 import com.simbest.boot.base.web.response.JsonResponse;
 import com.simbest.boot.config.AppConfig;
 import com.simbest.boot.constants.AuthoritiesConstants;
@@ -17,11 +15,14 @@ import com.simbest.boot.security.auth.authentication.UumsAuthentication;
 import com.simbest.boot.security.auth.authentication.UumsAuthenticationCredentials;
 import com.simbest.boot.security.auth.service.IAuthUserCacheService;
 import com.simbest.boot.util.encrypt.RsaEncryptor;
+import com.simbest.boot.util.http.client.HttpClient;
 import com.simbest.boot.util.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -88,12 +89,14 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                                 .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
                                 .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
                                 .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                                 .asBean(JsonResponse.class);
                     } catch (JsonSyntaxException jse ){
                         response = HttpClient.post(config.getUumsAddress() + UUMS_URL)
                                 .param(AuthoritiesConstants.SSO_UUMS_USERNAME, username)
                                 .param(AuthoritiesConstants.SSO_UUMS_PASSWORD, password)
                                 .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                                 .asBean(JsonResponse.class);
                     }
                     if (!response.getErrcode().equals(JsonResponse.SUCCESS_CODE)) {
@@ -130,11 +133,7 @@ public class UumsHttpValidationAuthenticationProvider implements AuthenticationP
                 throw new
                         AccesssAppDeniedException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
             }
-            catch (HttpClientException e){
-                log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
-                throw new
-                        BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
-            }catch (Exception e){
+            catch (Exception e){
                 log.warn(LOGTAG + "UUMS认证 【{}】 失败， 捕获【{}】异常!", principal, e.getMessage());
                 throw new
                         BadCredentialsException(principal + ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);

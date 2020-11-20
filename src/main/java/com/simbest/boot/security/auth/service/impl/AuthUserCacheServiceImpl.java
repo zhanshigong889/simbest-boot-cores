@@ -3,7 +3,6 @@
  */
 package com.simbest.boot.security.auth.service.impl;
 
-import com.google.common.collect.Sets;
 import com.simbest.boot.constants.ApplicationConstants;
 import com.simbest.boot.security.IPermission;
 import com.simbest.boot.security.IUser;
