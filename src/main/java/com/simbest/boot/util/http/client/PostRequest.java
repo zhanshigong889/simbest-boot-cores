@@ -5,19 +5,18 @@ package com.simbest.boot.util.http.client;
 
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.Maps;
-import com.mzlion.core.lang.CollectionUtils;
-import com.mzlion.core.lang.StringUtils;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.constants.ApplicationConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -67,7 +66,7 @@ public class PostRequest {
      * 设置提交的请求参数及其值
      *
      * @param parameters 键值对列表
-     * @return {@linkplain com.mzlion.easyokhttp.request.PostRequest}
+     * @return
      */
     public PostRequest param(Map<String, String> parameters) {
         //Assert.notEmpty(parameters, "Parameters may not be null.");

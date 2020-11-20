@@ -3,8 +3,6 @@
  */
 package com.simbest.boot.util.http.client;
 
-import com.mzlion.core.lang.Assert;
-import com.mzlion.core.lang.StringUtils;
 import com.simbest.boot.base.exception.Exceptions;
 import com.simbest.boot.util.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +10,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -59,7 +59,7 @@ public class TextBodyRequest extends PostRequest {
      * 设置字符集
      *
      * @param charset 字符编码
-     * @return {@link com.mzlion.easyokhttp.request.TextBodyRequest}
+     * @return
      */
     public TextBodyRequest charset(String charset) {
         Assert.hasLength(charset, "Charset may not be null.");
