@@ -60,9 +60,15 @@ public class UumsHttpValidationAuthenticationController {
     })
     @PostMapping("/validate")
     public JsonResponse validate(@RequestParam String username, @RequestParam String password, @RequestParam String appcode) {
+        String passwordDecode = null;
+        try{
+            passwordDecode = rsaEncryptor.decrypt(password);
+        }catch (Exception e1) {
+            log.error("解密【{}】发生异常", password);
+        }
+
         try {
-            if(StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password) && StringUtils.isNotEmpty(appcode)) {
-                String passwordDecode = rsaEncryptor.decrypt(password);
+            if(StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(passwordDecode) && StringUtils.isNotEmpty(appcode)) {
                 UsernamePasswordAuthenticationToken passwordToken = new UsernamePasswordAuthenticationToken(username, passwordDecode);
                 Authentication authentication = authenticationManager.authenticate(passwordToken);
                 if(authentication.isAuthenticated()) {
@@ -78,10 +84,12 @@ public class UumsHttpValidationAuthenticationController {
                 return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_INVALIDATE_USERNAME_PASSWORD);
             }
         } catch (AuthenticationException e){
-            log.error(LOGTAG + "认证用户账号关键字【{}】密码【{}】访问【{}】发生【{}】异常", username, password, appcode, e.getMessage());
+            log.error(LOGTAG + "认证用户账号关键字【{}】密码【{}】访问【{}】发生【{}】异常", username,
+                    StringUtils.isNotEmpty(passwordDecode) ? passwordDecode: password, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         } catch (Exception e){
-            log.error(LOGTAG + "认证用户账号关键字【{}】密码【{}】访问【{}】发生【{}】异常", username, password, appcode, e.getMessage());
+            log.error(LOGTAG + "认证用户账号关键字【{}】密码【{}】访问【{}】发生【{}】异常", username,
+                    StringUtils.isNotEmpty(passwordDecode) ? passwordDecode: password, appcode, e.getMessage());
             return JsonResponse.fail(ErrorCodeConstants.LOGIN_ERROR_BAD_CREDENTIALS);
         }
     }
