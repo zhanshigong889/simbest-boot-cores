@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -42,6 +44,8 @@ public class ExcelUtil<T> {
             field.set(entity, StringUtils.trim(c));
         } else if (StringUtils.isNotEmpty(c) && (Date.class == fieldType)) {
             field.set(entity, com.simbest.boot.util.DateUtil.parseDate(c));
+        } else if (StringUtils.isNotEmpty(c) && (LocalDate.class == fieldType)) {
+            field.set(entity, LocalDate.parse(c, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         } else if (StringUtils.isNotEmpty(c) && ((Integer.TYPE == fieldType) || (Integer.class == fieldType))) {
             field.set(entity, Integer.parseInt(c));
         } else if (StringUtils.isNotEmpty(c) && ((Long.TYPE == fieldType) || (Long.class == fieldType))) {
